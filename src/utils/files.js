@@ -3,10 +3,10 @@
  */
 
 import { mkdirSync, copyFileSync, existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
-import { join, dirname, fileURLToPath } from 'path';
-import { fileURLToPath as fu } from 'url';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-const __dirname = dirname(fu(import.meta.url));
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEMPLATES_DIR = join(__dirname, '../../src/templates');
 const AGENTS_DIR = '.claude/agents';
 const COMMANDS_DIR = '.claude/commands';

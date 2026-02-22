@@ -17,7 +17,7 @@
 
 import * as p from '@clack/prompts';
 import chalk from 'chalk';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, readdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { composeAgent } from '../utils/composer.js';
 import { updateProjectMdModes } from '../utils/generators.js';
@@ -129,15 +129,40 @@ function parseModeArgs(args) {
 }
 
 function getAvailableAgents() {
-  // TODO: leer .claude/agents/ y retornar lista
-  return ['advisor', 'tech-lead', 'product-owner', 'developer', 'dba', 'qa', 'bug-fixer', 'code-review'];
+  if (!existsSync(AGENTS_DIR)) return [];
+  return readdirSync(AGENTS_DIR, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name);
 }
 
 function getCurrentModes(agentName) {
-  // TODO: leer PROJECT.md y extraer modos del agente
-  return [];
+  if (!existsSync('PROJECT.md')) return [];
+
+  const content = readFileSync('PROJECT.md', 'utf8');
+  const regex = new RegExp(`\\*\\*${agentName}:\\*\\*\\s*(.+)`, 'i');
+  const match = content.match(regex);
+
+  if (!match) return [];
+
+  const modesStr = match[1].trim();
+  // Ignore placeholders, "base", "N/A", or annotation suffixes like "(hereda del developer)"
+  const cleaned = modesStr.replace(/\(.*?\)/g, '').trim();
+  if (cleaned.startsWith('_') || cleaned === 'base' || cleaned === 'N/A' || cleaned === '—') return [];
+
+  return cleaned.split(',').map(m => m.trim()).filter(Boolean);
 }
 
 async function addUpskillNote(agentName, expertises) {
-  // TODO: agregar nota en SESSION.md
+  if (!existsSync('SESSION.md')) return;
+
+  const content = readFileSync('SESSION.md', 'utf8');
+  const note = `- Expertises pendientes de crear para ${agentName}: ${expertises.join(', ')} — usar /guild-specialize`;
+
+  // Insert note at the end of "Contexto relevante" section
+  const updated = content.replace(
+    /(## Contexto relevante\n(?:- .+\n)*)/,
+    `$1${note}\n`
+  );
+
+  writeFileSync('SESSION.md', updated, 'utf8');
 }
