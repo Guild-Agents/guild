@@ -79,8 +79,8 @@ guild/
 │   └── CONTRIBUTING.md           ✅ Completo
 ├── package.json                  ✅ Completo
 ├── CHANGELOG.md                  ✅ Completo
-├── README.md                     ❌ Por crear
-└── LICENSE                       ❌ Por crear (MIT)
+├── README.md                     ✅ Completo
+└── LICENSE                       ✅ MIT
 ```
 
 ---

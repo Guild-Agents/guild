@@ -112,11 +112,28 @@ Start any session with `/session-start` — Claude reads the state files and res
 
 ```bash
 guild init                         # Interactive project onboarding
+guild status                       # Project overview
 guild mode <agent> [+mode -mode]   # Change active modes for an agent
 guild upskill <agent> <expertise>  # Add expertise to an existing agent
 guild new-agent <name>             # Create a new specialized agent
 guild sync                         # Sync task state with GitHub Issues
-guild status                       # Project overview
+```
+
+## Slash Commands (in Claude Code)
+
+```
+/advisor          Activate the Advisor — domain evaluation
+/tech-lead        Activate the Tech Lead — architecture direction
+/po               Activate the Product Owner — tasks and backlog
+/developer        Activate the Developer — implementation
+/dba              Activate the DBA — database design
+/qa               Activate QA — task validation
+/bug-fixer        Activate the Bug Fixer — investigate bugs
+/code-review      Activate Code Review — review before PR
+/feature          Start the full feature workflow (Advisor → ... → PR)
+/session-start    Resume work from where you left off
+/session-end      Save session state before closing
+/guild-specialize Generate deep expertise for all agents
 ```
 
 ---
