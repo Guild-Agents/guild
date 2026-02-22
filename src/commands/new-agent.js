@@ -166,7 +166,7 @@ ${role}
   writeFileSync(join(COMMANDS_DIR, `${agentName}.md`), content, 'utf8');
 }
 
-function addAgentToProjectMd(agentName, expertises) {
+function addAgentToProjectMd(agentName, expertises = []) {
   if (!existsSync('PROJECT.md')) return;
 
   const content = readFileSync('PROJECT.md', 'utf8');
@@ -184,7 +184,7 @@ function addAgentToProjectMd(agentName, expertises) {
   }
 }
 
-function addNewAgentNote(agentName, role, expertises) {
+function addNewAgentNote(agentName, role, _expertises) {
   const sessionPath = 'SESSION.md';
   if (!existsSync(sessionPath)) return;
 

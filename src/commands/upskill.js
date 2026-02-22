@@ -133,12 +133,12 @@ function getCurrentModes(agentName) {
 
   const modesStr = match[1].trim();
   const cleaned = modesStr.replace(/\(.*?\)/g, '').trim();
-  if (cleaned.startsWith('_') || cleaned === 'base' || cleaned === 'N/A' || cleaned === '—') return [];
+  if (cleaned.startsWith('_') || cleaned === 'base' || cleaned.startsWith('N/A') || cleaned === '—') return [];
 
   return cleaned.split(',').map(m => m.trim()).filter(Boolean);
 }
 
-function addUpskillNote(agentName, expertiseName, expertisePath) {
+function addUpskillNote(agentName, expertiseName, _expertisePath) {
   const sessionPath = 'SESSION.md';
   if (!existsSync(sessionPath)) return;
 

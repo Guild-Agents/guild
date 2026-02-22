@@ -58,7 +58,7 @@ ${github?.enabled ? `- **Labels:** backlog, in-progress, in-review, done, bug, b
 /**
  * Genera SESSION.md inicial.
  */
-export async function generateSessionMd(projectName) {
+export async function generateSessionMd(_projectData) {
   const date = new Date().toISOString().split('T')[0];
 
   const content = `# SESSION.md
@@ -87,7 +87,7 @@ export async function generateSessionMd(projectName) {
  * Genera CLAUDE.md del proyecto.
  */
 export async function generateClaudeMd(data) {
-  const { identity, stack } = data;
+  const { identity } = data;
 
   const content = `# ${identity.name}
 

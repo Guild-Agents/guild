@@ -17,7 +17,6 @@
 import * as p from '@clack/prompts';
 import chalk from 'chalk';
 import { existsSync } from 'fs';
-import { join } from 'path';
 import { generateProjectMd, generateSessionMd, generateClaudeMd } from '../utils/generators.js';
 import { copyAgentTemplates } from '../utils/files.js';
 import { setupGithubLabels } from '../utils/github.js';

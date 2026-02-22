@@ -6,7 +6,7 @@
  * Guild funciona normalmente sin integración GitHub.
  */
 
-import { execSync, execFileSync } from 'child_process';
+import { execSync } from 'child_process';
 
 const LABELS = [
   { name: 'backlog',      color: '8E8E8E', description: 'Tarea documentada, pendiente de iniciar' },
@@ -62,7 +62,7 @@ export function assignIssue(issueNumber, fromLabel, toLabel) {
   try {
     execSync(`gh issue assign ${issueNumber} --assignee @me`, { stdio: 'ignore' });
     execSync(`gh issue edit ${issueNumber} --add-label "${toLabel}" --remove-label "${fromLabel}"`, { stdio: 'ignore' });
-  } catch (e) {
+  } catch {
     // Non-critical
   }
 }

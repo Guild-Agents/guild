@@ -110,7 +110,7 @@ export async function runMode(agentName, modeArgs) {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
-function parseModeArgs(args) {
+export function parseModeArgs(args) {
   const toAdd = [];
   const toRemove = [];
   const exactSet = [];
@@ -128,14 +128,14 @@ function parseModeArgs(args) {
   return { toAdd, toRemove, exactSet };
 }
 
-function getAvailableAgents() {
+export function getAvailableAgents() {
   if (!existsSync(AGENTS_DIR)) return [];
   return readdirSync(AGENTS_DIR, { withFileTypes: true })
     .filter(d => d.isDirectory())
     .map(d => d.name);
 }
 
-function getCurrentModes(agentName) {
+export function getCurrentModes(agentName) {
   if (!existsSync('PROJECT.md')) return [];
 
   const content = readFileSync('PROJECT.md', 'utf8');
@@ -147,7 +147,7 @@ function getCurrentModes(agentName) {
   const modesStr = match[1].trim();
   // Ignore placeholders, "base", "N/A", or annotation suffixes like "(hereda del developer)"
   const cleaned = modesStr.replace(/\(.*?\)/g, '').trim();
-  if (cleaned.startsWith('_') || cleaned === 'base' || cleaned === 'N/A' || cleaned === '—') return [];
+  if (cleaned.startsWith('_') || cleaned === 'base' || cleaned.startsWith('N/A') || cleaned === '—') return [];
 
   return cleaned.split(',').map(m => m.trim()).filter(Boolean);
 }

@@ -16,7 +16,7 @@ const TASKS_DIRS = ['tasks/backlog', 'tasks/in-progress', 'tasks/in-review', 'ta
 /**
  * Crea la estructura de carpetas del proyecto y copia los templates de agentes.
  */
-export async function copyAgentTemplates(projectData) {
+export async function copyAgentTemplates(_projectData) {
   // Crear directorios base
   const dirs = [
     AGENTS_DIR,
@@ -84,7 +84,7 @@ async function copyHooks() {
     try {
       const { chmodSync } = await import('fs');
       chmodSync(dest, '755');
-    } catch (e) {
+    } catch {
       // Non-critical
     }
   }
