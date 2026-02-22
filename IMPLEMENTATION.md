@@ -34,10 +34,10 @@ guild/
 │   ├── commands/
 │   │   ├── init.js               ✅ Onboarding — esqueleto con flujo completo
 │   │   ├── mode.js               ✅ Cambio de modos — esqueleto completo
-│   │   ├── upskill.js            ❌ Por implementar
-│   │   ├── new-agent.js          ❌ Por implementar
-│   │   ├── sync.js               ❌ Por implementar
-│   │   └── status.js             ❌ Por implementar
+│   │   ├── upskill.js            ✅ Completo — busca templates, actualiza PROJECT.md, recompone
+│   │   ├── new-agent.js          ✅ Completo — valida nombre, crea slash command, actualiza PROJECT.md
+│   │   ├── sync.js               ✅ Completo — sincroniza tasks/ con GitHub Issues via gh CLI
+│   │   └── status.js             ✅ Completo — muestra proyecto, tareas, sesión, agentes
 │   ├── utils/
 │   │   ├── composer.js           ✅ Composición de active.md — esqueleto completo
 │   │   ├── files.js              ✅ Utilidades de archivos — esqueleto completo
@@ -57,17 +57,17 @@ guild/
 │       │   ├── guild-specialize.md       ✅ Completo
 │       │   ├── feature.md                ✅ Completo
 │       │   ├── session-start.md          ✅ Completo
-│       │   ├── session-end.md            ❌ Por crear
-│       │   ├── advisor.md                ❌ Por crear
-│       │   ├── tech-lead.md              ❌ Por crear
-│       │   ├── po.md                     ❌ Por crear
-│       │   ├── developer.md              ❌ Por crear
-│       │   ├── dba.md                    ❌ Por crear
-│       │   ├── qa.md                     ❌ Por crear
-│       │   ├── bug-fixer.md              ❌ Por crear
-│       │   └── code-review.md            ❌ Por crear
+│       │   ├── session-end.md            ✅ Completo
+│       │   ├── advisor.md                ✅ Completo
+│       │   ├── tech-lead.md              ✅ Completo
+│       │   ├── po.md                     ✅ Completo
+│       │   ├── developer.md              ✅ Completo
+│       │   ├── dba.md                    ✅ Completo
+│       │   ├── qa.md                     ✅ Completo
+│       │   ├── bug-fixer.md              ✅ Completo
+│       │   └── code-review.md            ✅ Completo
 │       └── hooks/
-│           └── on-mode-change.sh         ❌ Por crear
+│           └── on-mode-change.sh         ✅ Completo
 ├── .github/
 │   ├── workflows/
 │   │   └── ci.yml                ✅ Completo

@@ -4,8 +4,8 @@
 - **Fecha:** 2026-02-22
 - **Tarea en curso:** —
 - **GitHub Issue:** —
-- **Agente activo:** —
-- **Estado:** Fase 1 completada y mergeada en develop. Listo para iniciar Fase 2.
+- **Agente activo:** Developer
+- **Estado:** Fase 2 completada. Todos los comandos CLI implementados y verificados.
 
 ## Contexto relevante
 - **npm:** paquete `guild-agents` publicado (v0.0.1 placeholder)
@@ -14,19 +14,21 @@
 - **Comando CLI:** `guild` — paquete npm `guild-agents`, comando `guild`
 - **Permisos:** `.claude/settings.json` configurado — auto-approve dev, bloquea git push y rm -rf
 - **Fase 1 completada:** generators.js, files.js y mode.js sin TODOs. `guild init` corre end-to-end.
+- **Fase 2 completada:** status.js, upskill.js, new-agent.js, sync.js — todos implementados y verificados
+- **Fase 3 parcial:** todos los slash commands de agentes y session-end.md ya existen en templates/commands/. Hook on-mode-change.sh también existe.
+- **ESLint:** falta configuración (eslint.config.js no existe) — pendiente para Fase 4
 
 ## Decisiones tomadas
 - Org GitHub: `guild-agents` (guild-ai no disponible)
 - Paquete npm: `guild-agents`, comando CLI: `guild`
 - Permisos Claude Code: auto-approve para desarrollo, confirmación manual para git push
 - Guild se construye con sus propios agentes — dogfooding desde el día 1
+- status.js usa Clack (p.intro/p.outro/p.log) para output consistente con el resto del CLI
+- upskill.js busca templates en src/templates/ antes de crear placeholders
+- new-agent.js valida nombres (solo lowercase + guiones), crea slash command automáticamente
+- sync.js compara estado local (carpetas tasks/) con labels en GitHub Issues
 
 ## Próximos pasos
-1. **Fase 2** — comandos faltantes en este orden:
-   - `src/commands/status.js`
-   - `src/commands/upskill.js`
-   - `src/commands/new-agent.js`
-   - `src/commands/sync.js`
-2. **Fase 3** — verificar slash commands de agentes
-3. **Fase 4** — tests Vitest, 80% cobertura mínima (apaga el CI)
-4. **Fase 5** — README final para lanzamiento público
+1. **Fase 3** — verificar que todos los slash commands de agentes funcionan correctamente (ya están creados en templates/)
+2. **Fase 4** — tests Vitest + ESLint config, 80% cobertura mínima (apaga el CI)
+3. **Fase 5** — README final para lanzamiento público

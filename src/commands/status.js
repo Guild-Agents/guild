@@ -2,71 +2,86 @@
  * status.js — Muestra el estado actual del proyecto
  */
 
+import * as p from '@clack/prompts';
 import chalk from 'chalk';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 export async function runStatus() {
   if (!existsSync('PROJECT.md')) {
-    console.error(chalk.red('Guild no está instalado en este proyecto. Ejecuta: guild init'));
+    p.log.error('Guild no está instalado en este proyecto. Ejecuta: guild init');
     process.exit(1);
   }
 
-  console.log('');
-  console.log(chalk.bold.cyan('⚔️  Guild Status'));
-  console.log('');
+  const projectMd = readFileSync('PROJECT.md', 'utf8');
 
   // Proyecto
-  console.log(chalk.bold('Proyecto'));
-  const projectMd = readFileSync('PROJECT.md', 'utf8');
   const nameMatch = projectMd.match(/\*\*Nombre:\*\*\s*(.+)/);
   const domainMatch = projectMd.match(/\*\*Dominio:\*\*\s*(.+)/);
-  if (nameMatch) console.log(chalk.white(`  ${nameMatch[1].trim()}`));
-  if (domainMatch) console.log(chalk.gray(`  ${domainMatch[1].trim()}`));
-  console.log('');
+  const projectName = nameMatch ? nameMatch[1].trim() : 'Proyecto';
+
+  p.intro(chalk.bold.cyan(`⚔️  Guild — ${projectName}`));
+
+  if (domainMatch) {
+    p.log.info(chalk.gray(domainMatch[1].trim()));
+  }
 
   // Tareas
-  console.log(chalk.bold('Tareas'));
+  p.log.step('Tareas');
   const taskDirs = {
-    'backlog': 'tasks/backlog',
-    'in-progress': 'tasks/in-progress',
-    'in-review': 'tasks/in-review',
-    'done': 'tasks/done',
+    'backlog': join('tasks', 'backlog'),
+    'in-progress': join('tasks', 'in-progress'),
+    'in-review': join('tasks', 'in-review'),
+    'done': join('tasks', 'done'),
   };
 
   for (const [label, dir] of Object.entries(taskDirs)) {
     if (existsSync(dir)) {
       const files = readdirSync(dir).filter(f => f.endsWith('.md') && f !== '.gitkeep');
+      const count = files.length;
       const color = label === 'in-progress' ? chalk.blue
         : label === 'in-review' ? chalk.yellow
         : label === 'done' ? chalk.green
         : chalk.gray;
-      console.log(`  ${color(`${label}:`)} ${files.length > 0 ? files.join(', ') : chalk.gray('vacío')}`);
+
+      if (count > 0) {
+        p.log.info(`  ${color(label + ':')} ${count}  ${chalk.gray('→ ' + files.map(f => f.replace('.md', '')).join(', '))}`);
+      } else {
+        p.log.info(`  ${color(label + ':')} ${chalk.gray('vacío')}`);
+      }
     }
   }
-  console.log('');
 
   // Sesión activa
-  if (existsSync('SESSION.md')) {
-    console.log(chalk.bold('Sesión activa'));
-    const sessionMd = readFileSync('SESSION.md', 'utf8');
+  const sessionPath = 'SESSION.md';
+  if (existsSync(sessionPath)) {
+    p.log.step('Sesión activa');
+    const sessionMd = readFileSync(sessionPath, 'utf8');
     const taskMatch = sessionMd.match(/\*\*Tarea en curso:\*\*\s*(.+)/);
     const agentMatch = sessionMd.match(/\*\*Agente activo:\*\*\s*(.+)/);
     const stateMatch = sessionMd.match(/\*\*Estado:\*\*\s*(.+)/);
-    if (taskMatch) console.log(chalk.white(`  Tarea: ${taskMatch[1].trim()}`));
-    if (agentMatch) console.log(chalk.white(`  Agente: ${agentMatch[1].trim()}`));
-    if (stateMatch) console.log(chalk.gray(`  ${stateMatch[1].trim()}`));
-    console.log('');
+    if (taskMatch && taskMatch[1].trim() !== '—') p.log.info(`  Tarea: ${taskMatch[1].trim()}`);
+    if (agentMatch && agentMatch[1].trim() !== '—') p.log.info(`  Agente: ${agentMatch[1].trim()}`);
+    if (stateMatch) p.log.info(chalk.gray(`  ${stateMatch[1].trim()}`));
   }
 
   // Agentes y modos
-  console.log(chalk.bold('Agentes activos'));
+  p.log.step('Agentes activos');
   const modesSection = projectMd.match(/## Agentes activos y sus modos\n([\s\S]+?)(?=\n##|$)/);
   if (modesSection) {
     const lines = modesSection[1].trim().split('\n');
     for (const line of lines) {
-      console.log(chalk.gray('  ' + line.replace(/\*\*/g, '')));
+      const cleaned = line.replace(/^-\s*/, '  ').replace(/\*\*/g, '');
+      p.log.info(chalk.gray(cleaned));
     }
   }
-  console.log('');
+
+  // GitHub
+  const githubMatch = projectMd.match(/\*\*Habilitado:\*\*\s*(.+)/);
+  if (githubMatch) {
+    const enabled = githubMatch[1].trim() === 'Sí';
+    p.log.step(`GitHub Issues: ${enabled ? chalk.green('habilitado') : chalk.gray('deshabilitado')}`);
+  }
+
+  p.outro('');
 }
