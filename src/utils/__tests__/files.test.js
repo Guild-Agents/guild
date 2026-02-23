@@ -7,9 +7,9 @@ import { copyTemplates, getAgentNames, resolveProjectRoot } from '../files.js';
 const TEST_DIR = join(import.meta.dirname, '__tmp_files__');
 
 describe('getAgentNames', () => {
-  it('returns 8 v1 agent names', () => {
+  it('returns 9 v1 agent names', () => {
     const names = getAgentNames();
-    expect(names).toHaveLength(8);
+    expect(names).toHaveLength(9);
     expect(names).toContain('advisor');
     expect(names).toContain('product-owner');
     expect(names).toContain('tech-lead');
@@ -18,6 +18,7 @@ describe('getAgentNames', () => {
     expect(names).toContain('qa');
     expect(names).toContain('bugfix');
     expect(names).toContain('db-migration');
+    expect(names).toContain('platform-expert');
   });
 
   it('does not contain v0 agent names', () => {
@@ -42,13 +43,13 @@ describe('copyTemplates', () => {
     if (existsSync(TEST_DIR)) rmSync(TEST_DIR, { recursive: true });
   });
 
-  it('creates .claude/agents/ with 8 flat .md files', async () => {
+  it('creates .claude/agents/ with 9 flat .md files', async () => {
     await copyTemplates();
     const agentsDir = join('.claude', 'agents');
     expect(existsSync(agentsDir)).toBe(true);
 
     const files = readdirSync(agentsDir);
-    expect(files).toHaveLength(8);
+    expect(files).toHaveLength(9);
     for (const name of getAgentNames()) {
       expect(files).toContain(`${name}.md`);
     }

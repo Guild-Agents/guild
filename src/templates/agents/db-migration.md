@@ -1,6 +1,8 @@
 ---
 name: db-migration
 description: "Cambios de schema, migraciones seguras"
+tools: Read, Write, Edit, Bash, Glob, Grep
+permissionMode: bypassPermissions
 ---
 
 # DB Migration

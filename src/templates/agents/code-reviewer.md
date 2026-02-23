@@ -1,6 +1,8 @@
 ---
 name: code-reviewer
 description: "Revisa calidad, patterns, deuda tecnica"
+tools: Read, Glob, Grep
+permissionMode: plan
 ---
 
 # Code Reviewer

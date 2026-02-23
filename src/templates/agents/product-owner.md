@@ -1,6 +1,8 @@
 ---
 name: product-owner
 description: "Convierte ideas aprobadas en tareas concretas e implementables"
+tools: Read, Glob, Grep
+permissionMode: plan
 ---
 
 # Product Owner
