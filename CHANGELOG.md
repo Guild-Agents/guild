@@ -9,6 +9,27 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.8] - 2026-02-23
+
+### Added
+
+- Frontmatter validation test: ensures all 9 agent templates have `name`, `description`, `tools`, and `permissionMode`
+- `platform-expert` agent added to `guild-specialize` specialization list and `status` example
+
+### Fixed
+
+- `platform-expert.md` now has complete frontmatter (`tools`, `permissionMode: bypassPermissions`) — was missing since v0.2.0
+- Exclude all test files from npm package (`!src/**/__tests__/`) — 4 command test files were leaking
+- README.md: corrected agent count (9, not 8), added missing CLI commands (`doctor`, `list`), fixed Node.js badge (>= 20)
+- Translate remaining Spanish JSDoc comments in `files.js` to English
+- Remove unused `picocolors` production dependency
+- Fix stale header comment in `bin/guild.js` (listed 3 of 5 commands)
+- Fill empty `author` field in `package.json`
+
+### Changed
+
+- README.md rewritten: problem-first lead, "Why Guild?" section, ASCII pipeline diagram, enriched Quick Start
+
 ## [0.2.7] - 2026-02-23
 
 ### Changed
@@ -122,7 +143,8 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-[Unreleased]: https://github.com/Guild-Agents/guild/compare/v0.2.7...HEAD
+[Unreleased]: https://github.com/Guild-Agents/guild/compare/v0.2.8...HEAD
+[0.2.8]: https://github.com/Guild-Agents/guild/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/Guild-Agents/guild/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/Guild-Agents/guild/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/Guild-Agents/guild/compare/v0.2.4...v0.2.5

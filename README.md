@@ -3,62 +3,64 @@
 [![npm version](https://img.shields.io/npm/v/guild-agents)](https://www.npmjs.com/package/guild-agents)
 [![CI](https://github.com/guild-agents/guild/actions/workflows/ci.yml/badge.svg)](https://github.com/guild-agents/guild/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Node.js >= 18](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
+[![Node.js >= 20](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org)
 
-A multi-agent framework for Claude Code.
+Claude Code is powerful but chaotic. Guild gives it structure.
 
-Sets up 8 specialized agents and 10 skill-based workflows as `.claude/` files in any project.
+Guild is an npm CLI that sets up 9 specialized agents and 10 skill-based workflows as `.claude/` files in any project. Agents define **who** does the work. Skills define **how** it gets done. Everything is markdown, tracked by git, works offline.
 
-## Installation
+## Why Guild?
 
-```bash
-npm install -g guild-agents
+- **Structure over chaos.** Claude Code without guidance produces inconsistent results. Guild gives every task a clear owner and a repeatable process.
+- **Agents = WHO, Skills = HOW.** Agents are flat `.md` files with identity and expertise. Skills are workflow definitions invoked as slash commands. Clean separation, no magic.
+- **State that persists.** Context lives in `CLAUDE.md`, `PROJECT.md`, and `SESSION.md` -- tracked by git, readable by humans, never lost between sessions.
+- **Zero infrastructure.** No servers, no APIs, no config files. Just markdown files that Claude Code reads natively.
+
+## How It Works
+
+```
+You ──> /build-feature "Add JWT auth"
+         │
+         ▼
+    ┌─────────┐     ┌───────────────┐     ┌───────────────┐
+    │ Advisor  │────>│  Tech Lead    │────>│  Developer    │
+    │ evaluate │     │  plan         │     │  implement    │
+    └─────────┘     └───────────────┘     └───────┬───────┘
+                                                  │
+                                    ┌─────────────┼─────────────┐
+                                    ▼             ▼             ▼
+                              ┌──────────┐ ┌──────────┐ ┌──────────┐
+                              │ Reviewer │ │    QA    │ │  Bugfix  │
+                              │ review   │ │  test    │ │  fix     │
+                              └──────────┘ └──────────┘ └──────────┘
 ```
 
-Or run directly without installing:
-
-```bash
-npx guild-agents init
-```
+Skills orchestrate agents through structured pipelines. You invoke a skill as a slash command, and it coordinates the right agents in the right order.
 
 ## Quick Start
 
 ```bash
-npx guild-agents init
+npm install -g guild-agents
+guild init
 ```
 
-Interactive onboarding asks for project name, type, stack, and repo details, then generates the full agent and skill structure.
+The interactive onboarding asks for project name, type, stack, and repo details, then generates the full structure: 9 agents, 10 skills, and 3 state files.
 
-Open Claude Code in your project and run:
+Next, let Guild learn your codebase:
 
 ```
 /guild-specialize
 ```
 
-This explores your actual codebase and enriches CLAUDE.md with real conventions, patterns, and stack details.
+This explores your actual code and enriches `CLAUDE.md` with real conventions, patterns, and stack details. Every agent now understands your project.
 
-Then start building:
+Then build something:
 
 ```
 /build-feature Add user authentication with JWT
 ```
 
-This runs the full pipeline: evaluation, spec, implementation, review, and QA.
-
-`guild init` generates: CLAUDE.md, PROJECT.md, SESSION.md, `.claude/agents/` (8 agents), `.claude/skills/` (10 skills).
-
-## How It Works
-
-**Agents** are the WHO. Each agent is a flat `.md` file in `.claude/agents/` that defines identity, responsibilities, and process. Skills invoke agents via the Task tool when their expertise is needed.
-
-**Skills** are the HOW. Each skill is a workflow defined in `.claude/skills/*/SKILL.md` and invoked as a slash command. Skills orchestrate one or more agents through a structured process.
-
-**State** is maintained across sessions through three files:
-- `CLAUDE.md` — central enriched context (stack, conventions, rules)
-- `PROJECT.md` — project metadata (name, type, architecture)
-- `SESSION.md` — session continuity (current task, progress, next steps)
-
-After init, agents are generic. Running `/guild-specialize` reads the real codebase and tailors each agent to the project's specific stack and patterns.
+This runs the full pipeline -- advisor evaluation, tech lead planning, developer implementation, code review, and QA -- all coordinated automatically.
 
 ## Agents
 
@@ -72,6 +74,7 @@ After init, agents are generic. Running `/guild-specialize` reads the real codeb
 | qa | Testing, edge cases, regression validation |
 | bugfix | Bug diagnosis and resolution |
 | db-migration | Schema changes and safe migrations |
+| platform-expert | Diagnoses and resolves Claude Code integration issues |
 
 ## Skills
 
@@ -94,6 +97,8 @@ After init, agents are generic. Running `/guild-specialize` reads the real codeb
 guild init                  # Interactive project onboarding
 guild new-agent <name>      # Create a custom agent
 guild status                # Show project status
+guild doctor                # Diagnose installation state
+guild list                  # List installed agents and skills
 ```
 
 ## Generated Structure
@@ -114,6 +119,7 @@ SESSION.md
     qa.md
     bugfix.md
     db-migration.md
+    platform-expert.md
   skills/
     guild-specialize/SKILL.md
     build-feature/SKILL.md
@@ -129,9 +135,13 @@ SESSION.md
 
 All files are markdown, tracked by git, and work fully offline.
 
+## Guild Builds Itself
+
+This project uses its own agents and skills to develop itself. Every feature, review, and bugfix goes through the same pipelines that Guild installs in your project.
+
 ## Requirements
 
-- Node.js >= 18
+- Node.js >= 20
 - Claude Code
 - `gh` CLI (optional, for GitHub integration)
 
@@ -139,11 +149,11 @@ All files are markdown, tracked by git, and work fully offline.
 
 Two types of contributions:
 
-- **Agent and skill templates** (`src/templates/`) — improve agent definitions or skill workflows.
-- **CLI code** (`src/`, `bin/`) — bug fixes, new commands, onboarding improvements.
+- **Agent and skill templates** (`src/templates/`) -- improve agent definitions or skill workflows.
+- **CLI code** (`src/`, `bin/`) -- bug fixes, new commands, onboarding improvements.
 
 See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for details.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT -- see [LICENSE](LICENSE).

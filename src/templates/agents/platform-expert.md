@@ -1,6 +1,8 @@
 ---
 name: platform-expert
 description: "Diagnoses and resolves Claude Code integration issues -- permissions, subagents, hooks, settings"
+tools: Read, Write, Edit, Bash, Glob, Grep
+permissionMode: bypassPermissions
 ---
 
 # Platform Expert
