@@ -1,65 +1,58 @@
-# PROJECT.md — Guild AI
-> Configuración del proyecto para construir Guild usando Guild
+# PROJECT.md — Guild
 
-## Identidad
-- **Nombre:** guild
-- **Dominio:** Developer tooling — frameworks y herramientas para potenciar el workflow de desarrollo con IA
-- **Descripción:** CLI npm instalable que configura un equipo de agentes IA especializados en proyectos que usan Claude Code. Guild es el framework que estandariza cómo los developers trabajan con agentes IA: onboarding, especialización, flujo de features, gestión de estado entre sesiones.
-- **Alcance inicial:** CLI funcional con `guild init`, `guild mode`, `guild upskill`, `guild new-agent`, `guild sync`, `guild status`. Agentes base con expertise para el stack del proyecto. Slash commands para todos los agentes. Publicación en npm como `guild-agents`.
+> Project configuration for building Guild using Guild.
 
-## Stack tecnológico
-- **Runtime:** Node.js 20+ (ESModules nativos — `import`/`export`, sin CommonJS)
+## Identity
+- **Name:** guild
+- **Domain:** Developer tooling — frameworks and tools to enhance AI-assisted development workflows
+- **Description:** An installable npm CLI that sets up a team of specialized AI agents in projects using Claude Code. Guild standardizes how developers work with AI agents: onboarding, specialization, feature pipelines, and session state management.
+- **Scope:** Functional CLI with `guild init`, `guild new-agent`, `guild status`. 8 flat agent templates and 10 skill workflows. Published on npm as `guild-agents`.
+
+## Tech stack
+- **Runtime:** Node.js 20+ (native ESModules — `import`/`export`, no CommonJS)
 - **CLI prompts:** @clack/prompts ^0.9.0
 - **CLI framework:** commander ^12.0.0
-- **Colores terminal:** chalk ^5.3.0, picocolors ^1.0.0
+- **Terminal colors:** chalk ^5.3.0, picocolors ^1.0.0
 - **File utilities:** fs-extra ^11.2.0
 - **Testing:** Vitest
 - **Lint:** ESLint (flat config)
 - **Package manager:** npm
 - **Target:** Node.js >= 18, macOS + Linux + Windows
 
-## Decisiones arquitectónicas clave
-- ESModules en todo el proyecto — no CommonJS, no require()
-- Async/await en toda operación de I/O — nunca callbacks
-- Sin base de datos — todo el estado vive en archivos markdown en el proyecto del usuario
-- Sin servidor — Guild es un CLI puro, sin procesos en background
-- Separación estricta: `src/commands/` orquesta, `src/utils/` ejecuta, `src/templates/` son los archivos que se copian al proyecto del usuario
-- Los templates de agentes (base.md, expertise/*.md) son el producto principal — el CLI es el instalador
-- Commander para parsear comandos, Clack para interacción con el usuario — nunca mezclar responsabilidades
-- Errors con mensajes accionables: el usuario siempre debe saber qué hacer cuando algo falla
+## Key architectural decisions
+- ESModules throughout — no CommonJS, no require()
+- Async/await for all I/O — never callbacks
+- No database — all state lives in markdown files in the user's project
+- No server — Guild is a pure CLI, no background processes
+- Strict separation: `src/commands/` orchestrates, `src/utils/` executes, `src/templates/` contains files copied to the user's project
+- Agents are flat `.md` files (identity + responsibilities + process). Skills are `SKILL.md` workflows that orchestrate agents.
+- Commander for parsing commands, Clack for user interaction — never mix responsibilities
+- Errors with actionable messages: users must always know what to do when something fails
+- `path.join()` for building paths — never string concatenation
 
-## Reglas del dominio
-- Guild NUNCA modifica archivos del proyecto del usuario salvo los que él mismo creó (PROJECT.md, SESSION.md, CLAUDE.md, .claude/, tasks/)
-- `active.md` de cada agente NUNCA se edita manualmente — siempre se regenera vía composer
-- El nombre del paquete npm es `guild-agents`, el comando CLI es `guild`
-- Semantic Versioning estricto: breaking changes = major, features = minor, fixes = patch
-- Todo cambio de comportamiento público requiere actualización de CHANGELOG.md
-- Los archivos de expertise son el activo más valioso del proyecto — calidad sobre cantidad
-- Guild debe funcionar offline — sin dependencias de red en tiempo de ejecución salvo la integración opcional con GitHub CLI
+## Domain rules
+- Guild NEVER modifies user project files other than those it created (CLAUDE.md, PROJECT.md, SESSION.md, .claude/)
+- The npm package name is `guild-agents`, the CLI command is `guild`
+- Strict Semantic Versioning: breaking changes = major, features = minor, fixes = patch
+- Every public behavior change requires a CHANGELOG.md update
+- Agent and skill templates are the project's core asset — quality over quantity
+- Guild must work offline — no network dependencies at runtime except the optional GitHub CLI integration
 
-## Estrategia de testing
+## Testing strategy
 - **Framework:** Vitest
-- **TDD:** Sí — escribir tests antes de implementar en módulos de utils
-- **Cobertura mínima obligatoria:**
-  - Lógica de negocio / dominio (composer, generators): 90%
-  - Comandos CLI (commands/): 80%
-  - Utilidades (utils/): 80%
-  - Global mínimo: 80%
-- **Regla clave:** cada comportamiento documentado en IMPLEMENTATION.md debe tener al menos un test que lo valide
+- **TDD:** Yes — write tests before implementation in utils modules
+- **Minimum coverage:**
+  - Business logic / domain (generators): 90%
+  - CLI commands (commands/): 80%
+  - Utilities (utils/): 80%
+  - Global minimum: 80%
 
-## Agentes activos y sus modos
-- **advisor:** developer-tooling
-- **tech-lead:** nodejs-cli
-- **product-owner:** base
-- **developer:** nodejs, clack
-- **dba:** N/A — este proyecto no usa base de datos
-- **qa:** vitest
-- **bug-fixer:** nodejs, clack
-- **code-review:** nodejs, clack
+## Agents
+- advisor, product-owner, tech-lead, developer, code-reviewer, qa, bugfix, db-migration
 
-## Integración GitHub
-- **Habilitado:** Sí
+## GitHub integration
+- **Enabled:** Yes
 - **Repo:** https://github.com/guild-agents/guild
-- **Branches:** main (producción) + develop (integración)
-- **Labels:** backlog, in-progress, in-review, done, bug, blocked, expertise
-- **PR workflow:** feature/* y fix/* → develop → release → main
+- **Branches:** main (production) + develop (integration)
+- **Labels:** backlog, in-progress, in-review, done, bug, blocked, templates
+- **PR workflow:** feature/* and fix/* → develop → release → main

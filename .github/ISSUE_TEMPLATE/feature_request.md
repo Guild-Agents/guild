@@ -1,29 +1,29 @@
 ---
-name: ✨ Feature request
-about: Proponer una nueva feature o mejora
+name: Feature request
+about: Propose a new feature or improvement
 title: 'feat: '
 labels: enhancement
 assignees: ''
 ---
 
-## Problema que resuelve
-<!-- Qué problema tiene actualmente Guild que esta feature resolvería -->
-<!-- Ejemplo: "Cuando trabajo con monorepos, Guild no puede..." -->
+## Problem it solves
+<!-- What problem does Guild currently have that this feature would solve -->
+<!-- Example: "When working with monorepos, Guild can't..." -->
 
-## Solución propuesta
-<!-- Descripción clara de lo que quieres que Guild haga -->
-<!-- Incluye ejemplos de uso si puedes: guild [comando] [flags] -->
+## Proposed solution
+<!-- Clear description of what you want Guild to do -->
+<!-- Include usage examples if possible: guild [command] [flags] -->
 
 ```bash
-# Ejemplo de cómo se usaría
-guild [nuevo-comando]
+# Example of how it would be used
+guild [new-command]
 ```
 
-## Alternativas consideradas
-<!-- Otras formas de resolver el problema que consideraste y por qué no son suficientes -->
+## Alternatives considered
+<!-- Other ways to solve the problem you considered and why they're not enough -->
 
-## Contexto adicional
-<!-- Cualquier otro contexto, mockups, o ejemplos de otras herramientas que hacen algo similar -->
+## Additional context
+<!-- Any other context, mockups, or examples of similar tools -->
 
 ---
-<!-- ¿Estás dispuesto a implementar esta feature? Menciona si quieres trabajar en ella -->
+<!-- Are you willing to implement this feature? Mention if you'd like to work on it -->

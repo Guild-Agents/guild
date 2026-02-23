@@ -1,57 +1,51 @@
-## Descripción
-<!-- Qué hace este PR y por qué. Una línea si es simple, párrafo si necesita contexto. -->
+## Description
+<!-- What this PR does and why. One line if simple, a paragraph if it needs context. -->
 
-## Tipo de cambio
-- [ ] 🐛 Bug fix
-- [ ] ✨ Nueva feature
-- [ ] 💥 Breaking change
-- [ ] 📚 Documentación
-- [ ] 🧹 Chore / refactor
-- [ ] ⚔️ Nueva expertise de agente
-
----
-
-<!-- Completa la sección que corresponde a tu tipo de cambio y elimina la otra -->
+## Type of change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation
+- [ ] Chore / refactor
+- [ ] Agent or skill template improvement
 
 ---
 
-## CLI — Cambios en código
+<!-- Complete the section that matches your type of change and delete the other -->
+
+---
+
+## CLI — Code changes
 
 ### Checklist
-- [ ] Tests escritos y pasando (`npm test`)
-- [ ] Lint sin errores (`npm run lint`)
-- [ ] Documentación actualizada si el cambio afecta comportamiento público
-- [ ] `CHANGELOG.md` actualizado
-- [ ] El PR apunta a `develop`, no a `main`
+- [ ] Tests written and passing (`npm test`)
+- [ ] Lint clean (`npm run lint`)
+- [ ] Documentation updated if the change affects public behavior
+- [ ] `CHANGELOG.md` updated
+- [ ] PR targets `develop`, not `main`
 
-### Cómo probar
-<!-- Pasos concretos para verificar el cambio localmente -->
+### How to test
+<!-- Concrete steps to verify the change locally -->
 ```bash
 npm install -g .
-guild [comando]
+guild [command]
 ```
 
-### Contexto adicional
-<!-- Screenshots, logs, decisiones de diseño relevantes -->
+### Additional context
+<!-- Screenshots, logs, relevant design decisions -->
 
 ---
 
-## Expertise — Nuevo conocimiento de agente
+## Templates — Agent or skill changes
 
-### Agente y tecnología
-- **Agente:** <!-- ej: dba -->
-- **Expertise:** <!-- ej: redis -->
-- **Archivo:** `src/templates/agents/[agente]/expertise/[tecnología].md`
-
-### Experiencia con esta tecnología
-<!-- Cuánto tiempo llevas usándola, en qué contextos, proyectos reales si puedes mencionar -->
+### What changed
+- **File:** `src/templates/agents/[agent].md` or `src/templates/skills/[skill]/SKILL.md`
+- **Type:** <!-- new / improved / fixed -->
 
 ### Checklist
-- [ ] El archivo sigue la estructura del template de expertise (ver CONTRIBUTING.md)
-- [ ] Incluye patrones idiomáticos reales, no solo resumen de la documentación oficial
-- [ ] Incluye anti-patrones basados en experiencia real
-- [ ] Tiene ejemplos concretos en la sección correspondiente
-- [ ] El PR apunta a `develop`, no a `main`
+- [ ] Instructions are clear and actionable
+- [ ] Consistent with other agent/skill templates in tone and structure
+- [ ] PR targets `develop`, not `main`
 
-### Por qué esta expertise es valiosa
-<!-- Qué gap llena — qué puede hacer el agente ahora que no podía antes -->
+### Why this improvement matters
+<!-- What gap does it fill — what can the agent or skill do better now -->

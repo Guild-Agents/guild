@@ -1,44 +1,42 @@
 ---
-name: 🐛 Bug report
-about: Algo no funciona como debería
+name: Bug report
+about: Something isn't working as expected
 title: 'bug: '
 labels: bug
 assignees: ''
 ---
 
-## Descripción
-<!-- Descripción clara y concisa del bug -->
+## Description
+<!-- Clear and concise description of the bug -->
 
-## Pasos para reproducir
+## Steps to reproduce
 ```bash
-# Comandos exactos para reproducir el problema
+# Exact commands to reproduce the problem
 guild init
-guild mode developer +react
 ```
 
-1. Paso 1
-2. Paso 2
-3. Ver error
+1. Step 1
+2. Step 2
+3. See error
 
-## Comportamiento esperado
-<!-- Qué debería pasar -->
+## Expected behavior
+<!-- What should happen -->
 
-## Comportamiento actual
-<!-- Qué está pasando — incluye el error completo si aplica -->
+## Actual behavior
+<!-- What is happening — include the full error output if applicable -->
 
 ```
-Error output aquí
+Error output here
 ```
 
-## Entorno
+## Environment
 
 | | |
 |---|---|
 | Guild version | `guild --version` |
 | Node version | `node --version` |
-| OS | ej: macOS 14, Ubuntu 22.04 |
-| Shell | ej: zsh, bash |
+| OS | e.g. macOS 14, Ubuntu 22.04 |
+| Shell | e.g. zsh, bash |
 
-## Contexto adicional
-<!-- Algo más que pueda ayudar a entender el problema -->
-<!-- Si el bug ocurre solo en cierto tipo de proyecto, descríbelo -->
+## Additional context
+<!-- Anything else that might help understand the problem -->

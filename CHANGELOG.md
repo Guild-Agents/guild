@@ -1,45 +1,42 @@
 # Changelog
 
-Todos los cambios notables de Guild AI se documentan en este archivo.
+All notable changes to Guild are documented in this file.
 
-El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/)
-y el versionado sigue [Semantic Versioning](https://semver.org/lang/es/).
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
+and versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
 ## [Unreleased]
 
 ### Added
-- Estructura inicial del CLI con comandos: `init`, `mode`, `upskill`, `new-agent`, `sync`, `status`
-- Onboarding interactivo con Clack
-- 8 agentes base: Advisor, Tech Lead, Product Owner, Developer, DBA, QA, Bug Fixer, Code Review
-- Sistema de expertises composables por agente
-- Composición automática de `active.md` desde `base.md` + expertises
-- Integración con GitHub Issues via `gh` CLI
-- Slash commands: `/feature`, `/session-start`, `/session-end`, `/guild-specialize`
-- Templates de PROJECT.md, SESSION.md, CLAUDE.md y TASK-XXX.md
-- Gestión de estado entre sesiones via archivos markdown
-- Sincronización de estado de tareas con GitHub Issues
+- CLI with commands: `init`, `new-agent`, `status`
+- Interactive onboarding with Clack
+- 8 agents as flat `.md` files: advisor, product-owner, tech-lead, developer, code-reviewer, qa, bugfix, db-migration
+- 10 skill workflows: guild-specialize, build-feature, new-feature, council, qa-cycle, review, dev-flow, status, session-start, session-end
+- State files: CLAUDE.md, PROJECT.md, SESSION.md
+- Skills invoked as slash commands, orchestrating agents via Task tool
+- `/guild-specialize` to explore codebase and enrich CLAUDE.md
+- `/build-feature` full pipeline: evaluation, spec, implementation, review, QA
+- GitHub integration via `gh` CLI (optional)
 
 ---
 
-<!-- Ejemplo de formato para futuras releases:
+<!-- Example format for future releases:
 
 ## [0.2.0] - 2026-04-01
 
 ### Added
-- Comando `guild status` con vista resumen del proyecto
-- Expertise: developer/nextjs
-- Expertise: dba/redis
+- New skill: /deploy
 
 ### Fixed
-- Composición de active.md cuando el agente no tiene modos activos
+- Init command handling when .claude/ directory already exists
 
 ### Changed
-- El comando `guild mode` ahora acepta modos sin prefijo + para set exacto
+- Improved agent coordination in build-feature pipeline
 
 ## [0.1.0] - 2026-03-01
 
 ### Added
-- Primera release pública
+- First public release
 -->
