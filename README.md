@@ -1,51 +1,16 @@
-# Guild ⚔️
+# Guild
 
-**A multi-agent framework for Claude Code.**
+A multi-agent framework for Claude Code.
 
-Guild turns any software project into a team of specialized AI agents — each with a clear role, composable expertise, and a defined workflow from idea to PR.
-
-```bash
-npm install -g guild-agents
-guild init
-```
-
----
-
-## Why Guild
-
-Working with Claude Code without structure leads to inconsistent results. You forget to reload context, skip the planning phase, or end up with an AI that knows the codebase but not the business rules.
-
-Guild enforces discipline by default:
-
-- **Specialized agents** — Advisor, Tech Lead, Product Owner, Developer, DBA, QA, Bug Fixer, Code Review. Each with a clear role and boundaries.
-- **Persistent state** — Everything lives in markdown files. Any agent can pick up exactly where the last session left off.
-- **Composable expertise** — Agents learn new stacks. Add Redis expertise to your DBA, or React to your Developer, without losing what they already know.
-- **Full workflow** — From idea evaluation to PR, the entire development cycle is covered.
-
----
+Sets up 8 specialized agents and 10 skill-based workflows as `.claude/` files in any project.
 
 ## Quick Start
 
-### Install
-
 ```bash
-npm install -g guild-agents
+npx guild-agents init
 ```
 
-### Initialize a project
-
-```bash
-cd my-project
-guild init
-```
-
-Guild will ask about your project's domain, stack, and architecture, then:
-- Generate `PROJECT.md`, `SESSION.md`, and `CLAUDE.md`
-- Set up 8 specialized agents in `.claude/agents/`
-- Copy slash commands to `.claude/commands/`
-- Configure GitHub Issues integration (optional)
-
-### Specialize your agents
+Interactive onboarding asks for project name, type, stack, and repo details, then generates the full agent and skill structure.
 
 Open Claude Code in your project and run:
 
@@ -53,111 +18,117 @@ Open Claude Code in your project and run:
 /guild-specialize
 ```
 
-This makes Claude read `PROJECT.md` and generate deep expertise files for each agent tailored to your specific stack and domain.
+This explores your actual codebase and enriches CLAUDE.md with real conventions, patterns, and stack details.
 
-### Start building
-
-```
-/feature Build a user authentication system
-```
-
-The Advisor evaluates the idea, the Product Owner documents the tasks, the Tech Lead defines the technical approach, and the Developer implements with tests. QA validates, Bug Fixer investigates issues, and Code Review approves the PR.
-
----
-
-## How it works
-
-### Agent team
-
-| Agent | Role | Hands off to |
-|---|---|---|
-| **Advisor** | Domain coherence — is this the right thing to build? | Product Owner |
-| **Product Owner** | What & priority — clear acceptance criteria | Tech Lead |
-| **Tech Lead** | How — architecture, patterns, technical direction | Developer |
-| **Developer** | Implementation + unit tests | QA |
-| **DBA** | Database design, migrations, query optimization | Developer |
-| **QA** | Functional validation (black box) | Bug Fixer or Code Review |
-| **Bug Fixer** | Bug investigation from symptoms, not intent | QA |
-| **Code Review** | Code quality, security, test coverage | Developer or PR approval |
-
-### Composable expertise
-
-Each agent has a `base.md` (cross-project behavior) and can be enhanced with technology-specific expertise:
-
-```bash
-guild mode developer +react +vite    # add React and Vite expertise
-guild mode dba +redis                # add Redis expertise to DBA
-guild upskill tech-lead microservices # add microservices knowledge
-```
-
-Expertise files accumulate — adding PostgreSQL to a DBA that already knows Supabase doesn't erase Supabase knowledge. Git tracks the full history.
-
-### Persistent state between sessions
+Then start building:
 
 ```
-PROJECT.md     ← project config, active agent modes
-SESSION.md     ← current task, active agent, next steps
-tasks/
-  backlog/     ← TASK-001.md, TASK-002.md
-  in-progress/ ← TASK-003.md
-  in-review/   ← TASK-004.md
-  done/        ← TASK-005.md
+/build-feature Add user authentication with JWT
 ```
 
-Start any session with `/session-start` — Claude reads the state files and resumes exactly where you left off.
+This runs the full pipeline: evaluation, spec, implementation, review, and QA.
 
----
+`guild init` generates: CLAUDE.md, PROJECT.md, SESSION.md, `.claude/agents/` (8 agents), `.claude/skills/` (10 skills).
+
+## How It Works
+
+**Agents** are the WHO. Each agent is a flat `.md` file in `.claude/agents/` that defines identity, responsibilities, and process. Skills invoke agents via the Task tool when their expertise is needed.
+
+**Skills** are the HOW. Each skill is a workflow defined in `.claude/skills/*/SKILL.md` and invoked as a slash command. Skills orchestrate one or more agents through a structured process.
+
+**State** is maintained across sessions through three files:
+- `CLAUDE.md` — central enriched context (stack, conventions, rules)
+- `PROJECT.md` — project metadata (name, type, architecture)
+- `SESSION.md` — session continuity (current task, progress, next steps)
+
+After init, agents are generic. Running `/guild-specialize` reads the real codebase and tailors each agent to the project's specific stack and patterns.
+
+## Agents
+
+| Agent | Role |
+|---|---|
+| advisor | Evaluates ideas and provides strategic direction |
+| product-owner | Turns approved ideas into concrete tasks |
+| tech-lead | Defines technical approach and architecture |
+| developer | Implements features following project conventions |
+| code-reviewer | Reviews quality, patterns, and technical debt |
+| qa | Testing, edge cases, regression validation |
+| bugfix | Bug diagnosis and resolution |
+| db-migration | Schema changes and safe migrations |
+
+## Skills
+
+| Skill | Description |
+|---|---|
+| `/guild-specialize` | Explores codebase, enriches CLAUDE.md with real stack and conventions |
+| `/build-feature` | Full pipeline: evaluation, spec, implementation, review, QA |
+| `/new-feature` | Creates branch and scaffold for a new feature |
+| `/council` | Convenes multiple agents to debate a decision |
+| `/qa-cycle` | QA and bugfix loop until clean |
+| `/review` | Code review on the current diff |
+| `/dev-flow` | Shows current pipeline phase and next step |
+| `/status` | Project and session state overview |
+| `/session-start` | Loads context and resumes work |
+| `/session-end` | Saves state to SESSION.md |
 
 ## CLI Commands
 
 ```bash
-guild init                         # Interactive project onboarding
-guild status                       # Project overview
-guild mode <agent> [+mode -mode]   # Change active modes for an agent
-guild upskill <agent> <expertise>  # Add expertise to an existing agent
-guild new-agent <name>             # Create a new specialized agent
-guild sync                         # Sync task state with GitHub Issues
+guild init                  # Interactive project onboarding
+guild new-agent <name>      # Create a custom agent
+guild status                # Show project status
 ```
 
-## Slash Commands (in Claude Code)
+`npx guild-agents init` works without a global install.
+
+## Generated Structure
+
+Running `guild init` creates the following in your project root:
 
 ```
-/advisor          Activate the Advisor — domain evaluation
-/tech-lead        Activate the Tech Lead — architecture direction
-/po               Activate the Product Owner — tasks and backlog
-/developer        Activate the Developer — implementation
-/dba              Activate the DBA — database design
-/qa               Activate QA — task validation
-/bug-fixer        Activate the Bug Fixer — investigate bugs
-/code-review      Activate Code Review — review before PR
-/feature          Start the full feature workflow (Advisor → ... → PR)
-/session-start    Resume work from where you left off
-/session-end      Save session state before closing
-/guild-specialize Generate deep expertise for all agents
+CLAUDE.md
+PROJECT.md
+SESSION.md
+.claude/
+  agents/
+    advisor.md
+    product-owner.md
+    tech-lead.md
+    developer.md
+    code-reviewer.md
+    qa.md
+    bugfix.md
+    db-migration.md
+  skills/
+    guild-specialize/SKILL.md
+    build-feature/SKILL.md
+    new-feature/SKILL.md
+    council/SKILL.md
+    qa-cycle/SKILL.md
+    review/SKILL.md
+    dev-flow/SKILL.md
+    status/SKILL.md
+    session-start/SKILL.md
+    session-end/SKILL.md
 ```
 
----
-
-## Contributing
-
-Guild has two types of contributions — both are valuable:
-
-**Expertise files** (`src/templates/agents/*/expertise/`) — Share your real-world knowledge of a specific technology. If you're experienced with Redis, Django, Playwright, or any other stack, your expertise makes Guild's agents smarter for everyone. No JavaScript required.
-
-**CLI code** (`src/`, `bin/`) — Bug fixes, new commands, improvements to the onboarding flow. Requires Node.js knowledge and tests.
-
-See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for details.
-
----
+All files are markdown, tracked by git, and work fully offline.
 
 ## Requirements
 
 - Node.js >= 18
 - Claude Code
-- `gh` CLI (optional, for GitHub Issues integration)
+- `gh` CLI (optional, for GitHub integration)
 
----
+## Contributing
+
+Two types of contributions:
+
+- **Agent and skill templates** (`src/templates/`) — improve agent definitions or skill workflows.
+- **CLI code** (`src/`, `bin/`) — bug fixes, new commands, onboarding improvements.
+
+See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for details.
 
 ## License
 
-MIT — see [LICENSE](LICENSE)
+MIT — see [LICENSE](LICENSE).
