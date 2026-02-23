@@ -55,3 +55,7 @@ Presenta el resultado:
 - **Rechazado**: Hay bugs criticos que no se pudieron resolver — escalar al Tech Lead
 
 Actualiza SESSION.md con el resultado del ciclo QA.
+
+## Subagent Configuration
+
+When spawning QA or Bugfix agents via the Task tool, always use `subagent_type: "general-purpose"`. Guild agent role names are NOT valid Claude Code subagent_types.

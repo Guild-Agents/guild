@@ -17,6 +17,22 @@ Pipeline completo para construir una feature de punta a punta con todos los agen
 
 `/build-feature [descripcion de la feature]`
 
+## Parallel Execution: Worktree Isolation
+
+When multiple build-feature pipelines run in parallel, each MUST use its own git worktree to avoid branch conflicts:
+
+```bash
+git worktree add .claude/worktrees/[branch-name] -b [branch-name] develop
+```
+
+All file operations within the pipeline must use the worktree directory as the working directory. After the PR is merged, clean up with:
+
+```bash
+git worktree remove .claude/worktrees/[branch-name]
+```
+
+When running a single build-feature, a simple `git checkout -b` is sufficient.
+
 ## Pipeline de 6 fases
 
 ### Fase 1 — Evaluacion (Advisor)
@@ -98,6 +114,30 @@ Pipeline completo para construir una feature de punta a punta con todos los agen
 2. Vuelve a **Fase 5** (Review) para verificar el fix
 3. Maximo 2 ciclos de bugfix-review-QA
 
+## Checkpoint Commits
+
+After each phase completes, create a checkpoint commit to preserve progress. This ensures work survives session interruptions.
+
+```bash
+git add -A
+git commit -m "wip: [feature-name] phase N complete — [phase-name]"
+```
+
+Pattern for each phase:
+
+- After Phase 1: `wip: [feature] phase 1 — advisor approved`
+- After Phase 2: `wip: [feature] phase 2 — PO spec ready`
+- After Phase 3: `wip: [feature] phase 3 — tech approach defined`
+- After Phase 4: `wip: [feature] phase 4 — implementation done`
+- After Phase 5: `wip: [feature] phase 5 — review passed`
+- After Phase 6: `wip: [feature] phase 6 — QA passed`
+
+Also update SESSION.md at each phase transition:
+
+```
+- [timestamp] | build-feature | Phase N ([phase-name]) complete for [feature]
+```
+
 ## Finalizacion
 
 Al completar todas las fases exitosamente:
@@ -113,6 +153,30 @@ Al completar todas las fases exitosamente:
    - Feature completada
    - Decisiones tomadas durante el pipeline
    - Proximos pasos si los hay
+
+3. Close the GitHub Issue (if applicable):
+   - Do NOT use `Closes #N` in PR description (only works when merging to default branch)
+   - After the PR is merged, run: `gh issue close N --comment "Resolved in PR #X"`
+
+## Subagent Configuration
+
+When spawning agents via the Task tool, use these `subagent_type` values:
+
+| Guild Agent Role | subagent_type to use |
+|---|---|
+| advisor, product-owner, tech-lead | `"general-purpose"` |
+| developer, bugfix | `"general-purpose"` |
+| code-reviewer, qa | `"general-purpose"` |
+
+**IMPORTANT:** Guild agent role names (advisor, developer, etc.) are NOT valid Claude Code subagent_types. Always use `"general-purpose"` for agents that need full tool access (Read, Write, Edit, Bash, Grep, Glob, etc.). Never use `"Bash"` alone — it lacks file editing tools.
+
+Example Task invocation:
+
+```
+Task tool with:
+  subagent_type: "general-purpose"
+  prompt: "Read .claude/agents/developer.md and assume that role. Then: [task description]"
+```
 
 ## Notas
 
