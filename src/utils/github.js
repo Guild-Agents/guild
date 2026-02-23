@@ -1,9 +1,9 @@
 /**
- * github.js — Integración con GitHub CLI (gh)
+ * github.js — GitHub CLI (gh) integration
  *
- * Requiere que el usuario tenga gh instalado y autenticado.
- * Todas las operaciones son no-bloqueantes — si gh no está disponible,
- * Guild funciona normalmente sin integración GitHub.
+ * Requires the user to have gh installed and authenticated.
+ * All operations are non-blocking — if gh is not available,
+ * Guild works normally without GitHub integration.
  *
  * Uses execFileSync with array-based arguments to prevent shell injection
  * through user-controlled strings (issue titles, bodies, labels).
@@ -12,16 +12,16 @@
 import { execFileSync } from 'node:child_process';
 
 const LABELS = [
-  { name: 'backlog',      color: '8E8E8E', description: 'Tarea documentada, pendiente de iniciar' },
-  { name: 'in-progress',  color: '0075CA', description: 'En implementación' },
-  { name: 'in-review',    color: 'E4A800', description: 'En validación QA' },
-  { name: 'done',         color: '2EA44F', description: 'Completada y mergeada' },
-  { name: 'bug',          color: 'D73A4A', description: 'Bug reportado por QA' },
-  { name: 'blocked',      color: 'E99695', description: 'Bloqueada por dependencia' },
+  { name: 'backlog',      color: '8E8E8E', description: 'Documented task, pending start' },
+  { name: 'in-progress',  color: '0075CA', description: 'In implementation' },
+  { name: 'in-review',    color: 'E4A800', description: 'In QA validation' },
+  { name: 'done',         color: '2EA44F', description: 'Completed and merged' },
+  { name: 'bug',          color: 'D73A4A', description: 'Bug reported by QA' },
+  { name: 'blocked',      color: 'E99695', description: 'Blocked by dependency' },
 ];
 
 /**
- * Verifica si gh CLI está instalado y autenticado.
+ * Checks if gh CLI is installed and authenticated.
  */
 export function isGhAvailable() {
   try {
@@ -33,11 +33,11 @@ export function isGhAvailable() {
 }
 
 /**
- * Configura los labels de estado en el repositorio GitHub.
+ * Configures status labels in the GitHub repository.
  */
 export async function setupGithubLabels(repoUrl) {
   if (!isGhAvailable()) {
-    console.warn('gh CLI no disponible — saltando configuración de labels.');
+    console.warn('gh CLI not available — skipping label configuration.');
     return;
   }
 
@@ -54,13 +54,13 @@ export async function setupGithubLabels(repoUrl) {
         '--force',
       ], { stdio: 'ignore' });
     } catch {
-      // Label ya existe o error no crítico
+      // Label already exists or non-critical error
     }
   }
 }
 
 /**
- * Asigna un issue a @me y cambia su label de estado.
+ * Assigns an issue to @me and changes its status label.
  */
 export function assignIssue(issueNumber, fromLabel, toLabel) {
   if (!isGhAvailable()) return;
@@ -80,7 +80,7 @@ export function assignIssue(issueNumber, fromLabel, toLabel) {
 }
 
 /**
- * Agrega un comentario a un issue.
+ * Adds a comment to an issue.
  */
 export function commentIssue(issueNumber, body) {
   if (!isGhAvailable()) return;
@@ -95,7 +95,7 @@ export function commentIssue(issueNumber, body) {
 }
 
 /**
- * Cierra un issue con un comentario.
+ * Closes an issue with a comment.
  */
 export function closeIssue(issueNumber, comment) {
   if (!isGhAvailable()) return;
@@ -110,7 +110,7 @@ export function closeIssue(issueNumber, comment) {
 }
 
 /**
- * Crea un issue de bug referenciando una tarea padre.
+ * Creates a bug issue referencing a parent task.
  */
 export function createBugIssue(title, body, parentIssueNumber) {
   if (!isGhAvailable()) return null;
@@ -126,7 +126,7 @@ export function createBugIssue(title, body, parentIssueNumber) {
     const issueNumber = issueUrl.split('/').pop();
 
     if (parentIssueNumber) {
-      commentIssue(parentIssueNumber, `Bug encontrado: ${issueUrl}`);
+      commentIssue(parentIssueNumber, `Bug found: ${issueUrl}`);
     }
 
     return { number: issueNumber, url: issueUrl };
@@ -136,7 +136,7 @@ export function createBugIssue(title, body, parentIssueNumber) {
 }
 
 /**
- * Extrae "owner/repo" de una URL de GitHub.
+ * Extracts "owner/repo" from a GitHub URL.
  */
 function extractRepoFromUrl(url) {
   const match = url.match(/github\.com[/:]([^/]+\/[^/]+?)(?:\.git)?$/);

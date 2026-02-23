@@ -21,13 +21,13 @@ describe('runNewAgent', () => {
   it('should throw with invalid agent name', async () => {
     process.chdir(tempDir);
     const { runNewAgent } = await import('../new-agent.js');
-    await expect(runNewAgent('Invalid Name!')).rejects.toThrow('Nombre invalido');
+    await expect(runNewAgent('Invalid Name!')).rejects.toThrow('Invalid name');
   });
 
   it('should throw when .claude/agents/ does not exist', async () => {
     process.chdir(tempDir);
     const { runNewAgent } = await import('../new-agent.js');
-    await expect(runNewAgent('valid-name')).rejects.toThrow('Guild no esta instalado');
+    await expect(runNewAgent('valid-name')).rejects.toThrow('Guild is not installed');
   });
 
   it('should throw when agent already exists', async () => {
@@ -35,6 +35,6 @@ describe('runNewAgent', () => {
     mkdirSync(join(tempDir, '.claude', 'agents'), { recursive: true });
     writeFileSync(join(tempDir, '.claude', 'agents', 'existing.md'), '# existing');
     const { runNewAgent } = await import('../new-agent.js');
-    await expect(runNewAgent('existing')).rejects.toThrow('ya existe');
+    await expect(runNewAgent('existing')).rejects.toThrow('already exists');
   });
 });

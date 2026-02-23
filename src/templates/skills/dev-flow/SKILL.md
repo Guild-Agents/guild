@@ -1,60 +1,60 @@
 ---
 name: dev-flow
-description: "Muestra fase actual del pipeline y que sigue"
+description: "Shows current pipeline phase and what comes next"
 user-invocable: true
 ---
 
 # Dev Flow
 
-Muestra la fase actual del pipeline de desarrollo y sugiere el siguiente paso. Util para retomar trabajo cuando no recuerdas en que punto del flujo te quedaste.
+Shows the current phase of the development pipeline and suggests the next step. Useful for resuming work when you do not remember where you left off in the flow.
 
-## Cuando usarlo
+## When to use
 
-- Cuando retomas trabajo y no recuerdas la fase actual
-- Para ver el progreso del pipeline de build-feature
-- Para decidir que skill ejecutar a continuacion
+- When resuming work and you do not remember the current phase
+- To see the progress of the build-feature pipeline
+- To decide which skill to run next
 
-## Uso
+## Usage
 
 `/dev-flow`
 
-## Proceso
+## Process
 
-### Paso 1 — Leer estado
+### Step 1 — Read state
 
-Lee `SESSION.md` para determinar:
+Read `SESSION.md` to determine:
 
-- Si hay una feature en curso
-- En que fase del pipeline se encuentra
-- Que se completo y que falta
+- Whether there is a feature in progress
+- Which pipeline phase it is in
+- What has been completed and what remains
 
-### Paso 2 — Determinar fase actual
+### Step 2 — Determine current phase
 
-Las fases del pipeline son:
+The pipeline phases are:
 
-1. **Evaluacion** (Advisor) — go/no-go
-2. **Especificacion** (Product Owner) — criterios de aceptacion
-3. **Approach tecnico** (Tech Lead) — plan de implementacion
-4. **Implementacion** (Developer) — codigo y tests
-5. **Review** (Code Reviewer) — revision de calidad
-6. **QA** — validacion funcional
+1. **Evaluation** (Advisor) — go/no-go
+2. **Specification** (Product Owner) — acceptance criteria
+3. **Technical Approach** (Tech Lead) — implementation plan
+4. **Implementation** (Developer) — code and tests
+5. **Review** (Code Reviewer) — quality review
+6. **QA** — functional validation
 
-### Paso 3 — Presentar estado del flujo
+### Step 3 — Present flow state
 
 ```text
-Dev Flow — [nombre de la feature]
+Dev Flow — [feature name]
 
-[x] Fase 1 — Evaluacion (completada)
-[x] Fase 2 — Especificacion (completada)
-[ ] Fase 3 — Approach tecnico (pendiente) <-- estas aqui
-[ ] Fase 4 — Implementacion
-[ ] Fase 5 — Review
-[ ] Fase 6 — QA
+[x] Phase 1 — Evaluation (completed)
+[x] Phase 2 — Specification (completed)
+[ ] Phase 3 — Technical Approach (pending) <-- you are here
+[ ] Phase 4 — Implementation
+[ ] Phase 5 — Review
+[ ] Phase 6 — QA
 
-Siguiente paso: Ejecuta /build-feature para continuar desde la Fase 3.
+Next step: Run /build-feature to continue from Phase 3.
 ```
 
-Si no hay feature en curso, informa que no hay pipeline activo y sugiere `/new-feature` o `/build-feature`.
+If there is no feature in progress, report that there is no active pipeline and suggest `/new-feature` or `/build-feature`.
 
 ## Example Session
 

@@ -1,62 +1,62 @@
-# Guild AI — CLI Framework para agentes de Claude Code
+# Guild AI — CLI Framework for Claude Code Agents
 
 ## Framework
-Este proyecto usa Guild. Leer SESSION.md al inicio de cada sesion.
+This project uses Guild. Read SESSION.md at the start of each session.
 
-## Que es este proyecto
-Guild es un CLI npm (`npm install -g guild-agents`, comando `guild`) que configura un equipo de 9 agentes IA especializados y 10 skills en cualquier proyecto que use Claude Code. El comando principal es `guild init`, que lanza un onboarding interactivo y genera toda la estructura necesaria.
+## What is this project
+Guild is an npm CLI (`npm install -g guild-agents`, command `guild`) that sets up a team of 9 specialized AI agents and 10 skills in any project using Claude Code. The main command is `guild init`, which launches an interactive onboarding and generates the entire required structure.
 
-**Arquitectura v1:** Agentes = WHO (identidad plana en .md), Skills = HOW (workflows con SKILL.md). Composicion nativa de Claude Code — sin composer.js, sin active.md, sin expertise/.
+**Architecture v1:** Agents = WHO (flat identity in .md), Skills = HOW (workflows with SKILL.md). Native Claude Code composition — no composer.js, no active.md, no expertise/.
 
-**El proyecto usa sus propios agentes para construirse a si mismo.**
+**The project uses its own agents to build itself.**
 
-## Reglas globales
-- No implementar sin plan aprobado por Advisor y direccion tecnica del Tech Lead
-- El Developer escribe tests unitarios como parte de la implementacion
-- Actualizar SESSION.md al cerrar cada sesion
-- ESModules en todo el codigo — no CommonJS, no require()
-- path.join() siempre para construir paths — nunca concatenar strings
+## Global rules
+- Do not implement without a plan approved by Advisor and technical direction from the Tech Lead
+- The Developer writes unit tests as part of the implementation
+- Update SESSION.md at the end of each session
+- ESModules throughout the codebase — no CommonJS, no require()
+- Always use path.join() to build paths — never concatenate strings
 
-## Comandos CLI
+## CLI commands
 ```bash
 npm test                    # tests (Vitest)
-npm run lint                # lint completo (ESLint + markdownlint)
-npm run lint:js             # solo ESLint (codigo JS)
-npm run lint:md             # solo markdownlint (templates .md)
-node bin/guild.js --help    # verificar CLI
-node bin/guild.js init      # probar onboarding v1
+npm run lint                # full lint (ESLint + markdownlint)
+npm run lint:js             # ESLint only (JS code)
+npm run lint:md             # markdownlint only (.md templates)
+node bin/guild.js --help    # verify CLI
+node bin/guild.js init      # test onboarding v1
 ```
 
 ## CLI commands
-- `guild init`       — onboarding interactivo, genera estructura v1
-- `guild new-agent`  — crear agente personalizado (.md plano)
-- `guild status`     — ver estado del proyecto
-- `guild doctor`     — diagnosticar estado de la instalacion
-- `guild list`       — listar agentes y skills instalados
+- `guild init`       — interactive onboarding, generates v1 structure
+- `guild new-agent`  — create custom agent (flat .md)
+- `guild status`     — view project status
+- `guild doctor`     — diagnose installation state
+- `guild list`       — list installed agents and skills
 
-## Skills del equipo
-- /guild-specialize  — enriquecer CLAUDE.md explorando el proyecto real
-- /build-feature     — pipeline completo de desarrollo
-- /new-feature       — crear branch y scaffold para feature
-- /council           — debatir decisiones con multiples agentes
-- /review            — code review sobre el diff actual
-- /qa-cycle          — ciclo QA + bugfix
-- /status            — ver estado del proyecto
-- /dev-flow          — ver fase actual del pipeline
-- /session-start     — cargar contexto y retomar trabajo
-- /session-end       — guardar estado en SESSION.md
+## Team skills
+- /guild-specialize  — enrich CLAUDE.md by exploring the actual project
+- /build-feature     — full development pipeline
+- /new-feature       — create branch and scaffold for a feature
+- /council           — debate decisions with multiple agents
+- /review            — code review on the current diff
+- /qa-cycle          — QA + bugfix cycle
+- /status            — view project status
+- /dev-flow          — view current pipeline phase
+- /session-start     — load context and resume work
+- /session-end       — save state to SESSION.md
 
 ## Stack
 Node.js 20+, ESModules, Commander.js, @clack/prompts, Vitest, ESLint
 
-## Estructura del proyecto
+## Project structure
 ```
 src/
   commands/       — init.js, new-agent.js, status.js, doctor.js, list.js
   utils/          — generators.js, files.js, github.js
   templates/
-    agents/       — 9 archivos .md (advisor, developer, platform-expert, etc.)
-    skills/       — 10 directorios con SKILL.md
+    agents/       — 9 .md files (advisor, developer, platform-expert, etc.)
+    skills/       — 10 directories with SKILL.md
 bin/
   guild.js        — entry point CLI (Commander)
 ```

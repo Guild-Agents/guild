@@ -21,12 +21,12 @@ describe('runStatus', () => {
   it('should throw when PROJECT.md does not exist', async () => {
     process.chdir(tempDir);
     const { runStatus } = await import('../status.js');
-    await expect(runStatus()).rejects.toThrow('Guild no esta instalado');
+    await expect(runStatus()).rejects.toThrow('Guild is not installed');
   });
 
   it('should not throw when PROJECT.md exists', async () => {
     process.chdir(tempDir);
-    writeFileSync(join(tempDir, 'PROJECT.md'), '**Nombre:** TestProject\n**Stack:** Node.js');
+    writeFileSync(join(tempDir, 'PROJECT.md'), '**Name:** TestProject\n**Stack:** Node.js');
     mkdirSync(join(tempDir, '.claude', 'agents'), { recursive: true });
     mkdirSync(join(tempDir, '.claude', 'skills'), { recursive: true });
     const { runStatus } = await import('../status.js');

@@ -37,41 +37,41 @@ describe('generateProjectMd', () => {
   it('generates PROJECT.md with project identity', async () => {
     await generateProjectMd(makeProjectData());
     const content = readFileSync('PROJECT.md', 'utf8');
-    expect(content).toContain('**Nombre:** test-project');
-    expect(content).toContain('**Tipo:** fullstack');
+    expect(content).toContain('**Name:** test-project');
+    expect(content).toContain('**Type:** fullstack');
     expect(content).toContain('**Stack:** React + Vite, Node.js + Express, postgres, redis');
   });
 
   it('generates PROJECT.md with GitHub repo when provided', async () => {
     await generateProjectMd(makeProjectData());
     const content = readFileSync('PROJECT.md', 'utf8');
-    expect(content).toContain('**Repositorio:** https://github.com/test/repo');
+    expect(content).toContain('**Repository:** https://github.com/test/repo');
   });
 
   it('handles project with no repo', async () => {
     await generateProjectMd(makeProjectData({ github: null }));
     const content = readFileSync('PROJECT.md', 'utf8');
-    expect(content).not.toContain('**Repositorio:**');
+    expect(content).not.toContain('**Repository:**');
   });
 
   it('marks existing code status correctly', async () => {
     await generateProjectMd(makeProjectData({ hasExistingCode: true }));
     const content = readFileSync('PROJECT.md', 'utf8');
-    expect(content).toContain('**Codigo existente:** Si');
+    expect(content).toContain('**Existing code:** Yes');
   });
 
   it('marks new project status correctly', async () => {
     await generateProjectMd(makeProjectData({ hasExistingCode: false }));
     const content = readFileSync('PROJECT.md', 'utf8');
-    expect(content).toContain('**Codigo existente:** No');
+    expect(content).toContain('**Existing code:** No');
   });
 
   it('does not contain v0 concepts', async () => {
     await generateProjectMd(makeProjectData());
     const content = readFileSync('PROJECT.md', 'utf8');
-    expect(content).not.toContain('Agentes activos');
-    expect(content).not.toContain('Estrategia de testing');
-    expect(content).not.toContain('Decisiones arquitectonicas');
+    expect(content).not.toContain('Active agents');
+    expect(content).not.toContain('Testing strategy');
+    expect(content).not.toContain('Architectural decisions');
   });
 });
 
@@ -105,7 +105,7 @@ describe('generateClaudeMd', () => {
   it('includes PENDIENTE placeholders for guild-specialize', async () => {
     await generateClaudeMd(makeProjectData());
     const content = readFileSync('CLAUDE.md', 'utf8');
-    expect(content).toContain('[PENDIENTE: guild-specialize]');
+    expect(content).toContain('[PENDING: guild-specialize]');
   });
 
   it('lists skills instead of slash commands', async () => {
@@ -152,15 +152,15 @@ describe('generateSessionMd', () => {
     await generateSessionMd();
     const content = readFileSync('SESSION.md', 'utf8');
     expect(content).toContain('# SESSION.md');
-    expect(content).toContain('## Sesion activa');
-    expect(content).toContain('**Tarea en curso:**');
+    expect(content).toContain('## Active session');
+    expect(content).toContain('**Current task:**');
   });
 
   it('includes current date', async () => {
     await generateSessionMd();
     const content = readFileSync('SESSION.md', 'utf8');
     const today = new Date().toISOString().split('T')[0];
-    expect(content).toContain(`**Fecha:** ${today}`);
+    expect(content).toContain(`**Date:** ${today}`);
   });
 
   it('references guild-specialize as next step', async () => {

@@ -1,5 +1,5 @@
 /**
- * status.js — Muestra el estado actual del proyecto v1
+ * status.js — Shows the current project status v1
  */
 
 import * as p from '@clack/prompts';
@@ -9,13 +9,13 @@ import { join } from 'path';
 
 export async function runStatus() {
   if (!existsSync('PROJECT.md')) {
-    throw new Error('Guild no esta instalado. Ejecuta: guild init');
+    throw new Error('Guild is not installed. Run: guild init');
   }
 
   const projectMd = readFileSync('PROJECT.md', 'utf8');
-  const nameMatch = projectMd.match(/\*\*Nombre:\*\*\s*(.+)/);
+  const nameMatch = projectMd.match(/\*\*Name:\*\*\s*(.+)/);
   const stackMatch = projectMd.match(/\*\*Stack:\*\*\s*(.+)/);
-  const projectName = nameMatch ? nameMatch[1].trim() : 'Proyecto';
+  const projectName = nameMatch ? nameMatch[1].trim() : 'Project';
 
   p.intro(chalk.bold.cyan(`Guild — ${projectName}`));
 
@@ -23,20 +23,20 @@ export async function runStatus() {
     p.log.info(chalk.gray(`Stack: ${stackMatch[1].trim()}`));
   }
 
-  // Sesion activa
+  // Active session
   if (existsSync('SESSION.md')) {
-    p.log.step('Sesion activa');
+    p.log.step('Active session');
     const sessionMd = readFileSync('SESSION.md', 'utf8');
-    const taskMatch = sessionMd.match(/\*\*Tarea en curso:\*\*\s*(.+)/);
-    const stateMatch = sessionMd.match(/\*\*Estado:\*\*\s*(.+)/);
-    if (taskMatch && taskMatch[1].trim() !== '—') p.log.info(`  Tarea: ${taskMatch[1].trim()}`);
+    const taskMatch = sessionMd.match(/\*\*Current task:\*\*\s*(.+)/);
+    const stateMatch = sessionMd.match(/\*\*Status:\*\*\s*(.+)/);
+    if (taskMatch && taskMatch[1].trim() !== '—') p.log.info(`  Task: ${taskMatch[1].trim()}`);
     if (stateMatch) p.log.info(chalk.gray(`  ${stateMatch[1].trim()}`));
   }
 
-  // Agentes
+  // Agents
   const agentsDir = join('.claude', 'agents');
   if (existsSync(agentsDir)) {
-    p.log.step('Agentes');
+    p.log.step('Agents');
     const agents = readdirSync(agentsDir)
       .filter(f => f.endsWith('.md'))
       .map(f => f.replace('.md', ''));

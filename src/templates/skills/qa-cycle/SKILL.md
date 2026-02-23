@@ -1,70 +1,70 @@
 ---
 name: qa-cycle
-description: "Ciclo QA + bugfix hasta que pase"
+description: "QA + bugfix cycle until it passes"
 user-invocable: true
 ---
 
 # QA Cycle
 
-Ejecuta un ciclo de validacion QA seguido de bugfix hasta que todos los criterios pasen limpio. Util para validar implementaciones sin el pipeline completo de build-feature.
+Runs a QA validation cycle followed by bugfix until all criteria pass clean. Useful for validating implementations without the full build-feature pipeline.
 
-## Cuando usarlo
+## When to use
 
-- Despues de implementar cambios que necesitan validacion
-- Para verificar que una correccion de bug no introdujo regresiones
-- Como ciclo final antes de crear un PR
+- After implementing changes that need validation
+- To verify that a bug fix did not introduce regressions
+- As a final cycle before creating a PR
 
-## Uso
+## Usage
 
 `/qa-cycle`
 
-## Proceso
+## Process
 
-### Paso 1 — Verificacion automatizada (obligatorio)
+### Step 1 — Automated verification (mandatory)
 
-Antes de invocar al agente QA, ejecutar los comandos de verificacion del proyecto. Los comandos concretos estan en la seccion "Comandos CLI" de CLAUDE.md:
+Before invoking the QA agent, run the project verification commands. The specific commands are in the "CLI commands" section of CLAUDE.md:
 
-1. Ejecuta tests del proyecto (ej: `npm test`) — registra resultado y output
-2. Ejecuta lint del proyecto (ej: `npm run lint`) — registra resultado y output
-3. Si alguno falla, esto se convierte en input para el reporte QA como bug automatico de tipo Blocker
+1. Run project tests (e.g., `npm test`) — record result and output
+2. Run project lint (e.g., `npm run lint`) — record result and output
+3. If any fail, this becomes input for the QA report as an automatic Blocker bug
 
-### Paso 2 — Validacion QA
+### Step 2 — QA Validation
 
-Invoca el agente QA usando Task tool:
+Invoke the QA agent using Task tool:
 
-1. Lee `.claude/agents/qa.md` para asumir el rol de QA
-2. Lee CLAUDE.md y SESSION.md para contexto
-3. Recibe los resultados de tests y lint del Paso 1
-4. Si tests o lint fallaron, incluirlos como bugs Blocker en el reporte
-5. Revisa los criterios de aceptacion de la tarea en curso (si existen en SESSION.md)
-6. Valida edge cases y escenarios de error
-7. Reporta resultados
+1. Read `.claude/agents/qa.md` to assume the QA role
+2. Read CLAUDE.md and SESSION.md for context
+3. Receive the test and lint results from Step 1
+4. If tests or lint failed, include them as Blocker bugs in the report
+5. Review the acceptance criteria for the current task (if they exist in SESSION.md)
+6. Validate edge cases and error scenarios
+7. Report results
 
-### Paso 3 — Bugfix (si hay bugs)
+### Step 3 — Bugfix (if there are bugs)
 
-Si QA reporta bugs (incluyendo fallos de tests/lint), invoca el agente Bugfix usando Task tool:
+If QA reports bugs (including test/lint failures), invoke the Bugfix agent using Task tool:
 
-1. Lee `.claude/agents/bugfix.md` para asumir el rol de Bugfix
-2. Recibe el reporte de bugs de QA como input
-3. Diagnostica la causa raiz de cada bug
-4. Implementa la correccion minima
-5. Verifica que el fix resuelve el problema
-6. Ejecuta tests y lint para confirmar que no introdujo regresiones
+1. Read `.claude/agents/bugfix.md` to assume the Bugfix role
+2. Receive the QA bug report as input
+3. Diagnose the root cause of each bug
+4. Implement the minimal fix
+5. Verify that the fix resolves the issue
+6. Run tests and lint to confirm no regressions were introduced
 
-### Paso 4 — Re-validacion
+### Step 4 — Re-validation
 
-Vuelve al Paso 1 (verificacion automatizada) para re-validar despues del bugfix.
-Maximo 3 ciclos de verificacion-QA-bugfix para evitar loops infinitos.
+Return to Step 1 (automated verification) to re-validate after the bugfix.
+Maximum 3 verification-QA-bugfix cycles to prevent infinite loops.
 
-### Paso 5 — Resultado final
+### Step 5 — Final result
 
-Presenta el resultado:
+Present the result:
 
-- **Aprobado**: Todos los criterios pasan, no hay bugs pendientes
-- **Con advertencias**: Pasa pero hay warnings menores
-- **Rechazado**: Hay bugs criticos que no se pudieron resolver — escalar al Tech Lead
+- **Approved**: All criteria pass, no pending bugs
+- **With warnings**: Passes but there are minor warnings
+- **Rejected**: There are critical bugs that could not be resolved — escalate to the Tech Lead
 
-Actualiza SESSION.md con el resultado del ciclo QA.
+Update SESSION.md with the QA cycle result.
 
 ## Example Session
 

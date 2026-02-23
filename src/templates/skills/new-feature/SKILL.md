@@ -1,60 +1,60 @@
 ---
 name: new-feature
-description: "Crea branch y scaffold para una nueva feature"
+description: "Creates branch and scaffold for a new feature"
 user-invocable: true
 ---
 
 # New Feature
 
-Prepara el entorno para trabajar en una nueva feature: crea branch, actualiza SESSION.md y opcionalmente crea un GitHub Issue.
+Prepares the environment for working on a new feature: creates a branch, updates SESSION.md, and optionally creates a GitHub Issue.
 
-## Cuando usarlo
+## When to use
 
-- Al iniciar una feature nueva antes de escribir codigo
-- Cuando quieres dejar registrado el contexto de la feature en SESSION.md
+- When starting a new feature before writing code
+- When you want to record the feature context in SESSION.md
 
-## Uso
+## Usage
 
-`/new-feature [nombre-de-la-feature]`
+`/new-feature [feature-name]`
 
-## Proceso
+## Process
 
-### Paso 1 — Obtener nombre
+### Step 1 — Get name
 
-Si el usuario no proporciono nombre, preguntale:
+If the user did not provide a name, ask for:
 
-- Nombre corto para la feature (se usara en el nombre del branch)
-- Descripcion breve (1-2 oraciones)
+- Short name for the feature (will be used in the branch name)
+- Brief description (1-2 sentences)
 
-### Paso 2 — Crear branch con worktree isolation
+### Step 2 — Create branch with worktree isolation
 
 When running in parallel with other agents, use git worktrees for isolation. When running standalone, a simple branch is sufficient.
 
 **For parallel execution (multiple build-features at once):**
 
 ```bash
-git worktree add .claude/worktrees/feature-[nombre] -b feature/[nombre-de-la-feature] develop
+git worktree add .claude/worktrees/feature-[name] -b feature/[feature-name] develop
 ```
 
-All subsequent operations should use `.claude/worktrees/feature-[nombre]` as the working directory.
+All subsequent operations should use `.claude/worktrees/feature-[name]` as the working directory.
 
 **For standalone execution:**
 
 ```bash
-git checkout -b feature/[nombre-de-la-feature]
+git checkout -b feature/[feature-name]
 ```
 
-Si el branch ya existe, pregunta si quiere cambiarse a el o crear uno nuevo.
+If the branch already exists, ask whether to switch to it or create a new one.
 
-**Cleanup:** At skill exit, if using worktrees, the caller is responsible for cleanup via `git worktree remove .claude/worktrees/feature-[nombre]` after the PR is merged.
+**Cleanup:** At skill exit, if using worktrees, the caller is responsible for cleanup via `git worktree remove .claude/worktrees/feature-[name]` after the PR is merged.
 
-### Paso 3 — Actualizar SESSION.md
+### Step 3 — Update SESSION.md
 
-Actualiza SESSION.md con el contexto de la nueva feature:
+Update SESSION.md with the new feature context:
 
-- **Fecha:** fecha actual
-- **Tarea en curso:** nombre de la feature
-- **Estado:** Feature iniciada — pendiente de implementacion
+- **Date:** current date
+- **Task in progress:** feature name
+- **State:** Feature started — pending implementation
 
 ## Example Session
 
@@ -68,19 +68,19 @@ GitHub Issue #42 created.
 Next: Run /build-feature to implement.
 ```
 
-### Paso 4 — GitHub Issue (opcional)
+### Step 4 — GitHub Issue (optional)
 
-Si el proyecto tiene integracion GitHub configurada en PROJECT.md:
+If the project has GitHub integration configured in PROJECT.md:
 
-1. Pregunta si quiere crear un GitHub Issue para la feature
-2. Si acepta, crea el issue con `gh issue create`
-3. Registra la URL del issue en SESSION.md
+1. Ask whether to create a GitHub Issue for the feature
+2. If accepted, create the issue with `gh issue create`
+3. Record the issue URL in SESSION.md
 
-### Paso 5 — Confirmar
+### Step 5 — Confirm
 
-Confirma al usuario:
+Confirm to the user:
 
-- Branch creado: `feature/[nombre]`
-- SESSION.md actualizado
-- GitHub Issue creado (si aplica)
-- Sugiere: "Ejecuta /build-feature para implementar la feature completa"
+- Branch created: `feature/[name]`
+- SESSION.md updated
+- GitHub Issue created (if applicable)
+- Suggest: "Run /build-feature to implement the full feature"

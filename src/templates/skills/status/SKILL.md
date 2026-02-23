@@ -1,67 +1,67 @@
 ---
 name: status
-description: "Muestra estado actual del proyecto y sesion"
+description: "Shows current project and session state"
 user-invocable: true
 ---
 
 # Status
 
-Muestra un resumen completo del estado actual del proyecto, la sesion activa y los recursos disponibles de Guild.
+Shows a complete summary of the current project state, the active session, and the available Guild resources.
 
-## Cuando usarlo
+## When to use
 
-- Al inicio de una sesion para orientarte
-- Para verificar que Guild esta correctamente configurado
-- Para ver que agentes y skills estan disponibles
+- At the start of a session to get oriented
+- To verify that Guild is correctly configured
+- To see which agents and skills are available
 
-## Uso
+## Usage
 
 `/status`
 
-## Proceso
+## Process
 
-### Paso 1 — Leer archivos de estado
+### Step 1 — Read state files
 
-Lee los archivos de configuracion de Guild:
+Read the Guild configuration files:
 
-- `CLAUDE.md` — instrucciones y convenciones del proyecto
-- `PROJECT.md` — identidad, stack y agentes configurados
-- `SESSION.md` — estado de la sesion actual
+- `CLAUDE.md` — project instructions and conventions
+- `PROJECT.md` — identity, stack, and configured agents
+- `SESSION.md` — current session state
 
-### Paso 2 — Presentar estado
+### Step 2 — Present state
 
-Muestra el resumen con el siguiente formato:
+Show the summary in the following format:
 
 ```text
-Guild v1 — [nombre del proyecto]
+Guild v1 — [project name]
 
-Sesion actual:
-- Fecha: [fecha de SESSION.md]
-- Tarea en curso: [tarea o "ninguna"]
-- Estado: [estado actual]
+Current session:
+- Date: [date from SESSION.md]
+- Task in progress: [task or "none"]
+- State: [current state]
 
 Stack:
-- [tecnologias listadas en PROJECT.md]
+- [technologies listed in PROJECT.md]
 
-Agentes disponibles:
-- [lista de archivos .md en .claude/agents/]
+Available agents:
+- [list of .md files in .claude/agents/]
 
-Skills disponibles:
-- [lista de directorios en .claude/skills/]
+Available skills:
+- [list of directories in .claude/skills/]
 
-Proximos pasos:
-- [extraidos de SESSION.md]
+Next steps:
+- [extracted from SESSION.md]
 ```
 
-### Paso 3 — Sugerir acciones
+### Step 3 — Suggest actions
 
-Si no hay tarea en curso, sugiere:
+If there is no task in progress, suggest:
 
-- `/build-feature` para implementar algo nuevo
-- `/new-feature` para preparar el entorno de una feature
-- `/council` para debatir una decision
+- `/build-feature` to implement something new
+- `/new-feature` to prepare the environment for a feature
+- `/council` to debate a decision
 
-Si hay tarea en curso, sugiere continuar con el skill apropiado segun el estado.
+If there is a task in progress, suggest continuing with the appropriate skill based on the state.
 
 ## Example Session
 
