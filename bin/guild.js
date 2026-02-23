@@ -64,4 +64,18 @@ program
     }
   });
 
+// guild doctor
+program
+  .command('doctor')
+  .description('Verify Guild setup and report issues')
+  .action(async () => {
+    try {
+      const { runDoctor } = await import('../src/commands/doctor.js');
+      await runDoctor();
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  });
+
 program.parse();
