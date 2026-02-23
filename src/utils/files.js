@@ -3,7 +3,7 @@
  */
 
 import { mkdirSync, copyFileSync, existsSync, readdirSync, readFileSync } from 'fs';
-import { join, dirname } from 'path';
+import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -12,7 +12,7 @@ const AGENTS_DIR = join('.claude', 'agents');
 const SKILLS_DIR = join('.claude', 'skills');
 
 /**
- * Lista los nombres de los 8 agentes v1.
+ * Lista los nombres de los 9 agentes v1.
  */
 export function getAgentNames() {
   return [
@@ -24,6 +24,7 @@ export function getAgentNames() {
     'qa',
     'bugfix',
     'db-migration',
+    'platform-expert',
   ];
 }
 
@@ -79,4 +80,24 @@ export function readSessionMd() {
   const path = 'SESSION.md';
   if (!existsSync(path)) return null;
   return readFileSync(path, 'utf8');
+}
+
+/**
+ * Resuelve la raiz del proyecto Guild caminando hacia arriba desde startDir.
+ * Busca .claude/ o PROJECT.md como marcadores de un proyecto Guild.
+ * Retorna la ruta absoluta del proyecto o null si no se encuentra.
+ */
+export function resolveProjectRoot(startDir = process.cwd()) {
+  let dir = resolve(startDir);
+  while (true) {
+    if (existsSync(join(dir, '.claude')) || existsSync(join(dir, 'PROJECT.md'))) {
+      return dir;
+    }
+    const parent = dirname(dir);
+    if (parent === dir) {
+      // Reached filesystem root without finding a project
+      return null;
+    }
+    dir = parent;
+  }
 }

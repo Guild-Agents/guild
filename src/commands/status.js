@@ -9,8 +9,7 @@ import { join } from 'path';
 
 export async function runStatus() {
   if (!existsSync('PROJECT.md')) {
-    p.log.error('Guild no esta instalado. Ejecuta: guild init');
-    process.exit(1);
+    throw new Error('Guild no esta instalado. Ejecuta: guild init');
   }
 
   const projectMd = readFileSync('PROJECT.md', 'utf8');

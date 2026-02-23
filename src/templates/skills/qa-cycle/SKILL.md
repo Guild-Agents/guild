@@ -23,6 +23,7 @@ Ejecuta un ciclo de validacion QA seguido de bugfix hasta que todos los criterio
 ### Paso 1 — Validacion QA
 
 Invoca el agente QA usando Task tool:
+
 1. Lee `.claude/agents/qa.md` para asumir el rol de QA
 2. Lee CLAUDE.md y SESSION.md para contexto
 3. Revisa los criterios de aceptacion de la tarea en curso (si existen en SESSION.md)
@@ -33,6 +34,7 @@ Invoca el agente QA usando Task tool:
 ### Paso 2 — Bugfix (si hay bugs)
 
 Si QA reporta bugs, invoca el agente Bugfix usando Task tool:
+
 1. Lee `.claude/agents/bugfix.md` para asumir el rol de Bugfix
 2. Recibe el reporte de bugs de QA como input
 3. Diagnostica la causa raiz de cada bug
@@ -47,8 +49,25 @@ Maximo 3 ciclos de QA-bugfix para evitar loops infinitos.
 ### Paso 4 — Resultado final
 
 Presenta el resultado:
+
 - **Aprobado**: Todos los criterios pasan, no hay bugs pendientes
 - **Con advertencias**: Pasa pero hay warnings menores
 - **Rechazado**: Hay bugs criticos que no se pudieron resolver — escalar al Tech Lead
 
 Actualiza SESSION.md con el resultado del ciclo QA.
+
+## Example Session
+
+```text
+User: /qa-cycle
+
+QA Cycle 1: 2 of 5 criteria pass. Bug: form validation missing on email field.
+Bugfix: Added email regex validation to UserForm component.
+QA Cycle 2: 5 of 5 criteria pass. 0 bugs.
+
+Result: Approved.
+```
+
+## Subagent Configuration
+
+When spawning QA or Bugfix agents via the Task tool, always use `subagent_type: "general-purpose"`. Guild agent role names are NOT valid Claude Code subagent_types.

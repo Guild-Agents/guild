@@ -4,7 +4,7 @@
 Este proyecto usa Guild. Leer SESSION.md al inicio de cada sesion.
 
 ## Que es este proyecto
-Guild es un CLI npm (`npm install -g guild-agents`, comando `guild`) que configura un equipo de 8 agentes IA especializados y 10 skills en cualquier proyecto que use Claude Code. El comando principal es `guild init`, que lanza un onboarding interactivo y genera toda la estructura necesaria.
+Guild es un CLI npm (`npm install -g guild-agents`, comando `guild`) que configura un equipo de 9 agentes IA especializados y 10 skills en cualquier proyecto que use Claude Code. El comando principal es `guild init`, que lanza un onboarding interactivo y genera toda la estructura necesaria.
 
 **Arquitectura v1:** Agentes = WHO (identidad plana en .md), Skills = HOW (workflows con SKILL.md). Composicion nativa de Claude Code — sin composer.js, sin active.md, sin expertise/.
 
@@ -29,6 +29,8 @@ node bin/guild.js init      # probar onboarding v1
 - `guild init`       — onboarding interactivo, genera estructura v1
 - `guild new-agent`  — crear agente personalizado (.md plano)
 - `guild status`     — ver estado del proyecto
+- `guild doctor`     — diagnosticar estado de la instalacion
+- `guild list`       — listar agentes y skills instalados
 
 ## Skills del equipo
 - /guild-specialize  — enriquecer CLAUDE.md explorando el proyecto real
@@ -48,10 +50,10 @@ Node.js 20+, ESModules, Commander.js, @clack/prompts, Vitest, ESLint
 ## Estructura del proyecto
 ```
 src/
-  commands/       — init.js, new-agent.js, status.js
+  commands/       — init.js, new-agent.js, status.js, doctor.js, list.js
   utils/          — generators.js, files.js, github.js
   templates/
-    agents/       — 8 archivos .md (advisor, developer, etc.)
+    agents/       — 9 archivos .md (advisor, developer, platform-expert, etc.)
     skills/       — 10 directorios con SKILL.md
 bin/
   guild.js        — entry point CLI (Commander)

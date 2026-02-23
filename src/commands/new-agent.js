@@ -21,22 +21,18 @@ export async function runNewAgent(agentName) {
 
   // Validar nombre
   if (!isValidAgentName(agentName)) {
-    p.log.error(`Nombre invalido: "${agentName}". Solo lowercase, numeros y guiones.`);
-    p.log.info('Ejemplo: guild new-agent security-auditor');
-    process.exit(1);
+    throw new Error(`Nombre invalido: "${agentName}". Solo lowercase, numeros y guiones. Ejemplo: guild new-agent security-auditor`);
   }
 
   // Verificar Guild instalado
   if (!existsSync(AGENTS_DIR)) {
-    p.log.error('Guild no esta instalado. Ejecuta: guild init');
-    process.exit(1);
+    throw new Error('Guild no esta instalado. Ejecuta: guild init');
   }
 
   // Verificar que el agente NO existe
   const agentPath = join(AGENTS_DIR, `${agentName}.md`);
   if (existsSync(agentPath)) {
-    p.log.error(`El agente "${agentName}" ya existe.`);
-    process.exit(1);
+    throw new Error(`El agente "${agentName}" ya existe.`);
   }
 
   // Pedir descripcion
@@ -45,7 +41,7 @@ export async function runNewAgent(agentName) {
     placeholder: 'ej: Evalua oportunidades de trading basado en analisis tecnico',
     validate: (val) => !val ? 'La descripcion es requerida' : undefined,
   });
-  if (p.isCancel(description)) { p.cancel('Cancelado.'); process.exit(0); }
+  if (p.isCancel(description)) { p.cancel('Cancelado.'); return; }
 
   // Crear agente
   const spinner = p.spinner();
@@ -87,8 +83,7 @@ Eres ${agentName} de [PROYECTO].
     p.outro(chalk.bold.cyan(`Agente ${agentName} listo.`));
   } catch (error) {
     spinner.stop('Error al crear agente.');
-    p.log.error(error.message);
-    process.exit(1);
+    throw error;
   }
 }
 

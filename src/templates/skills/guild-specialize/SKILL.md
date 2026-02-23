@@ -31,6 +31,7 @@ Lee los archivos de configuracion de Guild:
 Investiga la estructura real del proyecto buscando:
 
 **Dependencias y versiones:**
+
 - `package.json` (Node.js/frontend)
 - `pom.xml` o `build.gradle` (Java)
 - `requirements.txt` o `pyproject.toml` (Python)
@@ -39,22 +40,26 @@ Investiga la estructura real del proyecto buscando:
 - `Cargo.toml` (Rust)
 
 **Arquitectura y estructura:**
+
 - Carpetas `src/`, `app/`, `lib/`, `pkg/`, `internal/`
 - Patron de organizacion: por capas, por features, por dominio
 - Entry points del proyecto
 
 **Configuracion y convenciones:**
+
 - `tsconfig.json`, `eslint.config.*`, `.prettierrc`
 - `.env.example`, `.env.local` (variables de entorno — NO leer `.env` real)
 - `Dockerfile`, `docker-compose.yml`
 - CI/CD: `.github/workflows/`, `.gitlab-ci.yml`
 
 **Base de datos y migraciones:**
+
 - Carpeta `migrations/`, `db/`, `prisma/`, `drizzle/`
 - ORM o query builder configurado
 - Schema existente
 
 **Documentacion existente:**
+
 - `README.md` — vision general del proyecto
 - Documentacion interna en `docs/`
 
@@ -89,7 +94,7 @@ Usa el tool `Task` para invocar cada agente leyendo su `.claude/agents/[nombre].
 
 Presenta un resumen de lo detectado:
 
-```
+```text
 Guild v1 especializado para [nombre-proyecto]
 
 Stack detectado:
@@ -105,9 +110,47 @@ Agentes actualizados:
 Ejecuta /status para ver el estado completo.
 ```
 
+### Paso 6 — Commit enrichment immediately
+
+**CRITICAL:** After enriching CLAUDE.md and agent files, commit the changes immediately as their own atomic commit. Do NOT leave them as unstaged changes — they are vulnerable to `git stash` and other operations.
+
+```bash
+git add CLAUDE.md .claude/agents/*.md
+git commit -m "chore: enrich CLAUDE.md and agents via guild-specialize"
+```
+
+This ensures enrichment survives any subsequent git operations (stash, checkout, rebase).
+
+## Example Session
+
+```text
+User: /guild-specialize
+
+Guild Specialize analyzing project...
+
+Stack detected:
+- Node.js 20.11.0, TypeScript 5.3.3
+- React 18.2.0, Next.js 14.1.0
+- PostgreSQL via Prisma 5.9.0
+
+Architecture:
+- Next.js App Router (src/app/)
+- API routes in src/app/api/
+- Shared components in src/components/
+
+Agents updated:
+- developer.md: Specialized for Next.js + TypeScript
+- qa.md: Configured for Vitest + Playwright
+- db-migration.md: Configured for Prisma
+
+Run /status to see the full state.
+```
+
 ## Notas importantes
 
 - NUNCA leas archivos `.env` reales — solo `.env.example` o `.env.local`
 - Si no puedes detectar algo con certeza, pregunta al usuario en vez de asumir
 - Prioriza precision sobre completitud — es mejor decir "no detectado" que inventar
 - Los agentes deben quedar especializados al stack real, no generico
+- NEVER use `git stash` in automated pipelines — use `wip:` commits instead
+- CLAUDE.md changes must always be committed separately from feature code

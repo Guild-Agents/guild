@@ -61,6 +61,13 @@ ${data.stack}
 - ESModules en todo el codigo
 - path.join() siempre para construir paths
 
+## Subagent rules
+- Guild agent roles (advisor, developer, tech-lead, etc.) are NOT Claude Code subagent_types
+- Always use \`subagent_type: "general-purpose"\` when spawning agents via Task tool
+- CLAUDE.md and SESSION.md changes must be committed separately from feature code
+- No \`git stash\` in automated pipelines — use \`wip:\` commits instead
+- Parallel agents must use git worktrees for isolation
+
 ## Skills disponibles
 - /guild-specialize  — enriquecer CLAUDE.md explorando el proyecto real
 - /build-feature     — pipeline completo de desarrollo

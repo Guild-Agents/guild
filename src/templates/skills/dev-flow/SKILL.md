@@ -23,6 +23,7 @@ Muestra la fase actual del pipeline de desarrollo y sugiere el siguiente paso. U
 ### Paso 1 — Leer estado
 
 Lee `SESSION.md` para determinar:
+
 - Si hay una feature en curso
 - En que fase del pipeline se encuentra
 - Que se completo y que falta
@@ -30,6 +31,7 @@ Lee `SESSION.md` para determinar:
 ### Paso 2 — Determinar fase actual
 
 Las fases del pipeline son:
+
 1. **Evaluacion** (Advisor) — go/no-go
 2. **Especificacion** (Product Owner) — criterios de aceptacion
 3. **Approach tecnico** (Tech Lead) — plan de implementacion
@@ -39,7 +41,7 @@ Las fases del pipeline son:
 
 ### Paso 3 — Presentar estado del flujo
 
-```
+```text
 Dev Flow — [nombre de la feature]
 
 [x] Fase 1 — Evaluacion (completada)
@@ -53,3 +55,15 @@ Siguiente paso: Ejecuta /build-feature para continuar desde la Fase 3.
 ```
 
 Si no hay feature en curso, informa que no hay pipeline activo y sugiere `/new-feature` o `/build-feature`.
+
+## Example Session
+
+```text
+User: /dev-flow
+
+Current pipeline: build-feature "add user preferences"
+Phase: 4 of 6 — Implementation
+Developer agent active.
+
+Next: Phase 5 — Code Review
+```
