@@ -9,6 +9,14 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.7] - 2026-02-23
+
+### Changed
+
+- Translate entire codebase from Spanish to English for the open source community (#34)
+- All 9 agent templates, 10 skill templates, CLI strings, and generated content now in English
+- Vitest config excludes worktree directories from test execution
+
 ## [0.2.6] - 2026-02-23
 
 ### Added
@@ -114,7 +122,8 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-[Unreleased]: https://github.com/Guild-Agents/guild/compare/v0.2.6...HEAD
+[Unreleased]: https://github.com/Guild-Agents/guild/compare/v0.2.7...HEAD
+[0.2.7]: https://github.com/Guild-Agents/guild/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/Guild-Agents/guild/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/Guild-Agents/guild/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/Guild-Agents/guild/compare/v0.2.3...v0.2.4
