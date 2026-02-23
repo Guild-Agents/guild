@@ -1,209 +1,155 @@
-# Contributing to Guild AI ⚔️
+# Contributing to Guild
 
-¡Gracias por querer contribuir a Guild! Este documento explica cómo hacerlo dependiendo del tipo de contribución.
+Thanks for your interest in contributing. This document explains the process depending on the type of contribution.
 
-## Tipos de contribución
+## Types of Contribution
 
-Guild acepta dos tipos de contribuciones con procesos distintos — porque no es lo mismo aportar una nueva command del CLI que compartir tu conocimiento de Redis:
-
-| Tipo | Qué incluye | Proceso |
+| Type | What it covers | Process |
 |---|---|---|
-| **CLI** | `src/`, `bin/`, `package.json`, tests | Completo — requiere tests y review técnico |
-| **Expertise** | `src/templates/agents/*/expertise/` | Liviano — foco en calidad de contenido |
+| **Templates** | `src/templates/agents/`, `src/templates/skills/` | Content-focused — improve agent definitions or skill workflows |
+| **CLI** | `src/`, `bin/`, `package.json`, tests | Full process — requires tests and technical review |
 
-Si eres nuevo en open source o nunca has contribuido a Guild antes, **las expertises son el mejor punto de entrada**. Si tienes experiencia real con PostgreSQL, Redis, Vitest, Spring Boot, o cualquier tecnología que un agente de Guild podría necesitar, tu conocimiento es exactamente lo que la comunidad necesita.
+If you're new to the project, **templates are the best starting point**. Improving an agent's identity or refining a skill workflow directly impacts every project that uses Guild.
 
----
+## Setup
 
-## Antes de empezar
+### Requirements
 
-### Requisitos
 - Node.js >= 18
 - npm >= 9
 - Git
 
-### Setup local
+### Local development
+
 ```bash
-# Fork el repo en GitHub, luego:
-git clone https://github.com/TU_USUARIO/guild.git
+# Fork the repo on GitHub, then:
+git clone https://github.com/YOUR_USER/guild.git
 cd guild
 npm install
 
-# Verificar que todo funciona
+# Verify everything works
 npm test
 node bin/guild.js --version
 ```
 
 ### Branches
-Guild usa GitFlow simplificado:
+
+Guild uses simplified GitFlow:
 
 ```
-main      ← producción, siempre estable, tagged con versiones npm
-develop   ← integración, aquí llegan todos los PRs
+main      ← production, always stable, tagged with npm versions
+develop   ← integration, all PRs target this branch
 ```
 
-**Siempre crea tu branch desde `develop`, nunca desde `main`:**
+Always create your branch from `develop`:
+
 ```bash
 git checkout develop
 git pull origin develop
-git checkout -b feature/nombre-descriptivo   # nueva feature
-git checkout -b fix/nombre-del-bug           # bugfix
+git checkout -b feature/descriptive-name   # new feature
+git checkout -b fix/bug-name               # bugfix
 ```
 
----
+## Template Contributions
 
-## Tipo A — Contribuciones al CLI
+For files in `src/templates/agents/` and `src/templates/skills/`.
 
-Para cambios en `src/`, `bin/`, `package.json` o la infraestructura del proyecto.
+### Agents
 
-### 1. Abre un issue primero
+Each agent is a flat `.md` file that defines identity, responsibilities, and process. The 8 agents live in `src/templates/agents/`:
 
-Para features nuevas o cambios significativos, abre un issue antes de escribir código. Describe qué quieres hacer y por qué. Esto evita que trabajes en algo que no va en la dirección del proyecto.
+```
+advisor.md, product-owner.md, tech-lead.md, developer.md,
+code-reviewer.md, qa.md, bugfix.md, db-migration.md
+```
 
-Para bugfixes pequeños, puedes ir directo al PR.
+When improving an agent, focus on making instructions clear and actionable. Agents should define what they do, when they act, and how they interact with other agents.
 
-### 2. Implementa con tests
+### Skills
 
-Guild usa [Vitest](https://vitest.dev/). Cada cambio de comportamiento debe tener tests correspondientes.
+Each skill is a `SKILL.md` file inside `src/templates/skills/<skill-name>/`. Skills define workflows that orchestrate agents through structured processes.
+
+The 10 skills:
+
+```
+guild-specialize, build-feature, new-feature, council, qa-cycle,
+review, dev-flow, status, session-start, session-end
+```
+
+When improving a skill, focus on the workflow steps, agent coordination, and clear exit criteria.
+
+### Process
+
+1. Check that the improvement doesn't conflict with existing behavior
+2. Edit the relevant `.md` file
+3. Open a PR targeting `develop`
+
+No tests are required for template changes. The CI verifies basic markdown formatting.
+
+## CLI Contributions
+
+For changes in `src/`, `bin/`, `package.json`, or project infrastructure.
+
+### 1. Open an issue first
+
+For new features or significant changes, open an issue before writing code. Describe what you want to do and why. This avoids working on something that doesn't align with the project direction.
+
+For small bugfixes, you can go straight to a PR.
+
+### 2. Implement with tests
+
+Guild uses [Vitest](https://vitest.dev/). Every behavior change must have corresponding tests.
 
 ```bash
-npm test              # corre todos los tests
-npm run test:watch    # modo watch durante desarrollo
-npm run lint          # verificar estilo de código
+npm test              # run all tests
+npm run test:watch    # watch mode during development
+npm run lint          # check code style
 ```
 
-Cobertura mínima requerida: **80% global**.
-
-### 3. Convenciones de código
+### 3. Code conventions
 
 - ESModules (`import`/`export`), no CommonJS
+- `path.join()` for building paths, never string concatenation
 - Async/await, no callbacks
-- Nombres descriptivos — el código debe leerse como prosa
-- Sin comentarios innecesarios — si el código necesita un comentario para entenderse, refactorizar primero
-- Errors con mensajes útiles — el usuario tiene que saber qué hacer cuando algo falla
+- Descriptive names — code should read as prose
+- No unnecessary comments — if code needs a comment to be understood, refactor first
+- Errors with helpful messages — users need to know what to do when something fails
 
-### 4. Abre el PR
+### 4. Open the PR
 
-Usa el template de PR para CLI. Target: branch `develop`.
+Target branch: `develop`. CI must pass (lint + tests) before review.
 
 ```bash
-git push origin feature/nombre-descriptivo
-# Luego abre el PR en GitHub apuntando a develop
+git push origin feature/descriptive-name
+# Then open the PR on GitHub targeting develop
 ```
-
-El CI debe pasar (lint + tests) antes del review.
-
----
-
-## Tipo B — Contribuciones de Expertise
-
-Para archivos en `src/templates/agents/*/expertise/`.
-
-Este es el tipo de contribución más valioso para la comunidad porque convierte el conocimiento real de developers como tú en agentes IA más inteligentes.
-
-### Qué es un archivo de expertise
-
-Cada archivo enseña a un agente cómo trabajar con una tecnología específica en el contexto de un proyecto real. No es un tutorial ni un resumen de la documentación oficial — es el conocimiento destilado de alguien que ha usado esa tecnología en producción.
-
-**La prueba de calidad:** si un developer senior especialista en esa tecnología leyera tu expertise, ¿aprendería algo? ¿Reconocería los patrones como reales y no superficiales?
-
-### Estructura del archivo
-
-```
-src/templates/agents/[agente]/expertise/[tecnología].md
-```
-
-Ejemplo: `src/templates/agents/dba/expertise/redis.md`
-
-### Template de expertise
-
-```markdown
-# Expertise: [Nombre de la tecnología]
-
-## Contexto de esta expertise
-[Cuándo aplica este conocimiento — en qué tipo de tareas usa el agente esta expertise]
-
-## Patrones idiomáticos
-[Los patrones que caracterizan el buen uso de esta tecnología.
-No lo que dice la documentación — lo que hacen los developers experimentados.]
-
-## Reglas de este agente con [tecnología]
-
-### Siempre
-- [lo que el agente SIEMPRE debe hacer con esta tecnología]
-
-### Nunca
-- [lo que el agente NUNCA debe hacer con esta tecnología]
-
-## Anti-patrones comunes
-[Errores que cometen los developers que conocen la tecnología pero no la dominan.
-Con ejemplos concretos cuando sea posible.]
-
-## Ejemplos de referencia
-[Snippets o patrones de código concretos que el agente puede usar como referencia]
-
-## Decisiones frecuentes
-[Decisiones de diseño comunes en esta tecnología con el razonamiento detrás de cada opción.
-Formato: "Cuando X, usar Y en lugar de Z porque..."]
-```
-
-### Proceso
-
-1. Verifica que la expertise no existe ya en el repo
-2. Si la expertise existe pero está incompleta o desactualizada, mejórala
-3. Crea el archivo siguiendo el template
-4. Abre el PR con el template de expertise
-
-No necesitas tests para una expertise. El CI verifica formato básico de Markdown.
-
----
 
 ## Conventional Commits
 
-Guild usa [Conventional Commits](https://www.conventionalcommits.org/) para mantener el historial limpio y generar el CHANGELOG automáticamente.
+Guild uses [Conventional Commits](https://www.conventionalcommits.org/) for a clean history and automatic changelog generation.
 
 ```
 feat: add guild status command
-fix: resolve active.md composition when no modes are set
-docs: update CONTRIBUTING with expertise template
+fix: handle missing git config gracefully in init
+docs: rewrite README for v1 architecture
 chore: upgrade @clack/prompts to 0.9.1
-feat(expertise): add redis expertise for dba agent
-fix(init): handle missing git config gracefully
+refactor: simplify skill template generation
 ```
 
-Prefijos válidos: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `ci`
+Valid prefixes: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `ci`
 
-**Breaking changes:**
-```
-feat!: rename guild mode flags syntax
+## Release Process
 
-BREAKING CHANGE: el prefijo + ya no es necesario para activar modos.
-Antes: guild mode developer +react
-Ahora: guild mode developer react
-```
-
----
-
-## Proceso de release
-
-Las releases las maneja el mantenedor. Si tu PR está mergeado en `develop`, será incluido en la próxima release. El versionado sigue [Semantic Versioning](https://semver.org/):
+Releases are managed by the maintainer. If your PR is merged into `develop`, it will be included in the next release. Versioning follows [Semantic Versioning](https://semver.org/):
 
 - **Patch** `0.x.X` — bugfixes
-- **Minor** `0.X.0` — features nuevas sin breaking changes
+- **Minor** `0.X.0` — new features without breaking changes
 - **Major** `X.0.0` — breaking changes
 
----
+## Questions
 
-## ¿Tienes dudas?
+Open a [Discussion](https://github.com/guild-agents/guild/discussions) on GitHub. Issues are for bugs and concrete feature requests — discussions are for questions, ideas, and general feedback.
 
-Abre un [Discussion](https://github.com/guild-ai/guild/discussions) en GitHub. Los issues son para bugs y feature requests concretos — las discusiones son para preguntas, ideas y feedback general.
+## Code of Conduct
 
----
-
-## Código de conducta
-
-Guild sigue el [Contributor Covenant](https://www.contributor-covenant.org/). En resumen: sé respetuoso, constructivo y asume buena fe.
-
----
-
-*¿Primera vez contribuyendo a open source? Los issues marcados con `good first issue` son un buen punto de entrada. No dudes en preguntar en las Discussions.*
+Guild follows the [Contributor Covenant](https://www.contributor-covenant.org/). Be respectful, constructive, and assume good faith.
