@@ -13,7 +13,7 @@ import * as p from '@clack/prompts';
 import chalk from 'chalk';
 import { existsSync } from 'fs';
 import { generateProjectMd, generateSessionMd, generateClaudeMd } from '../utils/generators.js';
-import { copyTemplates } from '../utils/files.js';
+import { copyTemplates, getAgentNames } from '../utils/files.js';
 
 export async function runInit() {
   console.log('');
@@ -125,7 +125,7 @@ export async function runInit() {
   p.log.success('CLAUDE.md');
   p.log.success('PROJECT.md');
   p.log.success('SESSION.md');
-  p.log.success('.claude/agents/    (8 base agents)');
+  p.log.success(`.claude/agents/    (${getAgentNames().length} base agents)`);
   p.log.success('.claude/skills/    (10 skills)');
 
   p.note(
