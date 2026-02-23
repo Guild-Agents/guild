@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- SEO -->
+  <title>Guild — Multi-Agent Framework for Claude Code</title>
+  <meta name="description" content="Guild installs 9 specialized AI agents and 10 skill workflows in any project. Structure for Claude Code — without the chaos.">
+  <meta property="og:title" content="Guild — Multi-Agent Framework for Claude Code">
+  <meta property="og:description" content="9 specialized agents. 10 skill workflows. One command to set it all up.">
+  <meta property="og:url" content="https://guildagents.dev">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://guildagents.dev">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Guild",
+    "description": "Multi-agent framework for Claude Code",
+    "applicationCategory": "DeveloperApplication",
+    "codeRepository": "https://github.com/Guild-Agents/guild",
+    "offers": { "@type": "Offer", "price": "0" }
+  }
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* =========================================================
+       RESET & BASE
+       ========================================================= */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-deep: #0a0a0f;
+      --bg-card: #1a1a2e;
+      --bg-card-hover: #22223a;
+      --text-primary: #e8e6e3;
+      --text-secondary: #9d9b97;
+      --text-muted: #5a5856;
+      --gold: #c9a84c;
+      --gold-dim: rgba(201, 168, 76, 0.15);
+      --gold-glow: rgba(201, 168, 76, 0.3);
+      --green: #4ade80;
+      --green-dim: rgba(74, 222, 128, 0.1);
+      --border-subtle: rgba(201, 168, 76, 0.12);
+      --border-gold: rgba(201, 168, 76, 0.35);
+      --font-display: 'Cinzel', serif;
+      --font-body: 'Inter', sans-serif;
+      --font-code: 'JetBrains Mono', monospace;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-deep);
+      color: var(--text-primary);
+      line-height: 1.7;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 9999;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 256px 256px;
+    }
+
+    /* =========================================================
+       LAYOUT
+       ========================================================= */
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    section {
+      padding: 100px 0;
+    }
+
+    /* =========================================================
+       NAVIGATION
+       ========================================================= */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      padding: 18px 0;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: padding 0.3s ease;
+    }
+
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-logo svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      transition: color 0.2s;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-links a:hover {
+      color: var(--gold);
+    }
+
+    .nav-github {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-github svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+
+    /* =========================================================
+       ANIMATIONS — Scroll Reveal
+       ========================================================= */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+    .reveal-delay-5 { transition-delay: 0.5s; }
+    .reveal-delay-6 { transition-delay: 0.6s; }
+    .reveal-delay-7 { transition-delay: 0.7s; }
+    .reveal-delay-8 { transition-delay: 0.8s; }
+    .reveal-delay-9 { transition-delay: 0.9s; }
+
+    /* =========================================================
+       SECTION HEADERS
+       ========================================================= */
+    .section-label {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      line-height: 1.25;
+    }
+
+    .section-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      line-height: 1.7;
+    }
+
+    /* =========================================================
+       HERO
+       ========================================================= */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding-top: 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Radial glow behind hero */
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(201, 168, 76, 0.06) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+    }
+
+    .hero-shield {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 32px;
+      opacity: 0.8;
+    }
+
+    .hero-tagline {
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5.5vw, 3.25rem);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 24px;
+      color: var(--text-primary);
+    }
+
+    .hero-tagline .highlight {
+      color: var(--gold);
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 2.2vw, 1.2rem);
+      color: var(--text-secondary);
+      margin-bottom: 48px;
+      font-weight: 300;
+      letter-spacing: 0.01em;
+    }
+
+    .hero-ctas {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Copy-to-clipboard snippet */
+    .cta-copy {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-gold);
+      border-radius: 8px;
+      padding: 14px 24px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-copy::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--gold-dim), transparent);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .cta-copy:hover::before {
+      opacity: 1;
+    }
+
+    .cta-copy:hover {
+      border-color: var(--gold);
+      box-shadow: 0 0 30px var(--gold-dim);
+    }
+
+    .cta-copy-prompt {
+      color: var(--gold);
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      user-select: none;
+    }
+
+    .cta-copy-text {
+      font-family: var(--font-code);
+      font-size: 1rem;
+      color: var(--green);
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-copy-icon {
+      color: var(--text-muted);
+      transition: color 0.2s;
+      position: relative;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+
+    .cta-copy:hover .cta-copy-icon {
+      color: var(--gold);
+    }
+
+    .cta-copy-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .cta-copy-feedback {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      color: var(--gold);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+      z-index: 2;
+      background: var(--bg-card);
+      padding: 4px 12px;
+      border-radius: 4px;
+    }
+
+    .cta-copy.copied .cta-copy-feedback {
+      opacity: 1;
+    }
+
+    .cta-copy.copied .cta-copy-prompt,
+    .cta-copy.copied .cta-copy-text,
+    .cta-copy.copied .cta-copy-icon {
+      opacity: 0.15;
+    }
+
+    .cta-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 400;
+      transition: color 0.2s;
+      letter-spacing: 0.02em;
+    }
+
+    .cta-secondary:hover {
+      color: var(--gold);
+    }
+
+    .cta-secondary svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      transition: transform 0.2s;
+    }
+
+    .cta-secondary:hover svg {
+      transform: translateX(3px);
+    }
+
+    /* Scroll indicator */
+    .scroll-indicator {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: var(--font-code);
+      animation: float 2.5s ease-in-out infinite;
+    }
+
+    .scroll-indicator .line {
+      width: 1px;
+      height: 32px;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(8px); }
+    }
+
+    /* =========================================================
+       HOW IT WORKS
+       ========================================================= */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      margin-top: 56px;
+    }
+
+    .step {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 36px 28px;
+      position: relative;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .step:hover {
+      border-color: var(--border-gold);
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .step-number {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--gold);
+      opacity: 0.2;
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      line-height: 1;
+    }
+
+    .step-command {
+      font-family: var(--font-code);
+      font-size: 0.9rem;
+      color: var(--green);
+      margin-bottom: 12px;
+      display: inline-block;
+      background: var(--green-dim);
+      padding: 4px 12px;
+      border-radius: 4px;
+    }
+
+    .step-description {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    /* =========================================================
+       PIPELINE DIAGRAM
+       ========================================================= */
+    .pipeline-section {
+      background: linear-gradient(180deg, transparent 0%, rgba(26, 26, 46, 0.3) 30%, rgba(26, 26, 46, 0.3) 70%, transparent 100%);
+    }
+
+    .pipeline-wrapper {
+      margin-top: 56px;
+      position: relative;
+    }
+
+    /* Input trigger */
+    .pipeline-trigger {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .pipeline-trigger-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-gold);
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-family: var(--font-code);
+      font-size: 0.85rem;
+      transition: all 0.6s ease;
+    }
+
+    .pipeline-trigger-box .slash {
+      color: var(--gold);
+    }
+
+    .pipeline-trigger-box .cmd {
+      color: var(--green);
+    }
+
+    .pipeline-trigger-box .arg {
+      color: var(--text-secondary);
+    }
+
+    /* Pipeline flow container */
+    .pipeline-flow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* Connector lines */
+    .pipeline-connector {
+      width: 2px;
+      height: 36px;
+      background: var(--border-subtle);
+      position: relative;
+      transition: background 0.5s ease;
+    }
+
+    .pipeline-connector.active {
+      background: var(--gold);
+      box-shadow: 0 0 8px var(--gold-dim);
+    }
+
+    /* Sequential row */
+    .pipeline-sequential {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .pipeline-arrow {
+      width: 48px;
+      height: 2px;
+      background: var(--border-subtle);
+      position: relative;
+      transition: background 0.5s ease;
+      flex-shrink: 0;
+    }
+
+    .pipeline-arrow.active {
+      background: var(--gold);
+    }
+
+    .pipeline-arrow::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid var(--border-subtle);
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      transition: border-left-color 0.5s ease;
+    }
+
+    .pipeline-arrow.active::after {
+      border-left-color: var(--gold);
+    }
+
+    /* Pipeline node */
+    .pipeline-node {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 20px 28px;
+      text-align: center;
+      min-width: 140px;
+      transition: all 0.5s ease;
+      position: relative;
+    }
+
+    .pipeline-node.active {
+      border-color: var(--gold);
+      box-shadow: 0 0 24px var(--gold-dim), inset 0 0 20px rgba(201, 168, 76, 0.03);
+    }
+
+    .pipeline-node-role {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      transition: color 0.5s ease;
+    }
+
+    .pipeline-node.active .pipeline-node-role {
+      color: var(--gold);
+    }
+
+    .pipeline-node-action {
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      transition: color 0.5s ease;
+    }
+
+    .pipeline-node.active .pipeline-node-action {
+      color: var(--green);
+    }
+
+    /* Parallel row */
+    .pipeline-parallel {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* Branch connectors */
+    .pipeline-branch {
+      display: flex;
+      justify-content: center;
+      position: relative;
+      height: 40px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .pipeline-branch::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 2px;
+      height: 16px;
+      background: var(--border-subtle);
+      transition: background 0.5s ease;
+    }
+
+    .pipeline-branch.active::before {
+      background: var(--gold);
+    }
+
+    .pipeline-branch::after {
+      content: '';
+      position: absolute;
+      top: 16px;
+      left: calc(50% - 170px);
+      width: 340px;
+      height: 2px;
+      background: var(--border-subtle);
+      transition: background 0.5s ease;
+    }
+
+    .pipeline-branch.active::after {
+      background: var(--gold);
+    }
+
+    .pipeline-branch-lines {
+      position: absolute;
+      top: 18px;
+      display: flex;
+      justify-content: space-between;
+      width: 340px;
+      left: calc(50% - 170px);
+    }
+
+    .pipeline-branch-line {
+      width: 2px;
+      height: 22px;
+      background: var(--border-subtle);
+      transition: background 0.5s ease;
+    }
+
+    .pipeline-branch.active .pipeline-branch-line {
+      background: var(--gold);
+    }
+
+    /* =========================================================
+       AGENTS GRID
+       ========================================================= */
+    .agents-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 56px;
+    }
+
+    .agent-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 28px 24px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .agent-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .agent-card:hover::before {
+      opacity: 1;
+    }
+
+    .agent-card:hover {
+      border-color: var(--border-gold);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .agent-card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .agent-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: var(--gold-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .agent-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--gold);
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .agent-name {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .agent-desc {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* =========================================================
+       WHY GUILD
+       ========================================================= */
+    .why-section {
+      background: linear-gradient(180deg, transparent 0%, rgba(26, 26, 46, 0.2) 50%, transparent 100%);
+    }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-top: 56px;
+    }
+
+    .why-card {
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 32px 28px;
+      transition: border-color 0.3s;
+    }
+
+    .why-card:hover {
+      border-color: var(--border-gold);
+    }
+
+    .why-card-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .why-card-text {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      line-height: 1.65;
+    }
+
+    /* =========================================================
+       FOOTER
+       ========================================================= */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 48px 0;
+      text-align: center;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .footer-links a:hover {
+      color: var(--gold);
+    }
+
+    .footer-links a svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .footer-motto {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-style: italic;
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+
+    .footer-license {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.03em;
+    }
+
+    /* =========================================================
+       DIVIDER
+       ========================================================= */
+    .divider {
+      width: 48px;
+      height: 1px;
+      background: var(--gold);
+      opacity: 0.4;
+      margin: 0 auto;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+    @media (max-width: 900px) {
+      .steps {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .agents-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .why-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .pipeline-sequential {
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .pipeline-arrow {
+        width: 2px;
+        height: 28px;
+      }
+
+      .pipeline-arrow::after {
+        right: auto;
+        top: auto;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 6px solid var(--border-subtle);
+        border-bottom: none;
+      }
+
+      .pipeline-arrow.active::after {
+        border-top-color: var(--gold);
+        border-left-color: transparent;
+      }
+
+      .pipeline-parallel {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .pipeline-branch {
+        display: none;
+      }
+
+      .pipeline-node {
+        min-width: 200px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+    }
+
+    @media (max-width: 600px) {
+      section {
+        padding: 72px 0;
+      }
+
+      .agents-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding-top: 100px;
+        min-height: auto;
+        padding-bottom: 80px;
+      }
+
+      .cta-copy {
+        padding: 12px 16px;
+        gap: 10px;
+      }
+
+      .cta-copy-text {
+        font-size: 0.85rem;
+      }
+
+      .scroll-indicator {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ============================================================
+       NAVIGATION
+       ============================================================ -->
+  <nav>
+    <div class="container">
+      <a href="#" class="nav-logo">
+        <!-- Shield icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/>
+          <path d="M12 8v4M12 16h.01" opacity="0.5"/>
+        </svg>
+        GUILD
+      </a>
+      <ul class="nav-links">
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#pipeline">Pipeline</a></li>
+        <li><a href="#agents">Agents</a></li>
+        <li><a href="#why">Why Guild</a></li>
+        <li>
+          <a href="https://github.com/Guild-Agents/guild" target="_blank" rel="noopener" class="nav-github">
+            <svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            GitHub
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       HERO
+       ============================================================ -->
+  <section class="hero" id="hero">
+    <div class="hero-content">
+      <!-- Shield emblem -->
+      <div class="hero-shield reveal">
+        <svg viewBox="0 0 64 64" fill="none" width="64" height="64">
+          <path d="M32 4L8 16v16c0 14.4 10.24 27.84 24 32 13.76-4.16 24-17.6 24-32V16L32 4z" stroke="#c9a84c" stroke-width="1.5" fill="none"/>
+          <path d="M32 4L8 16v16c0 14.4 10.24 27.84 24 32 13.76-4.16 24-17.6 24-32V16L32 4z" fill="rgba(201,168,76,0.05)"/>
+          <!-- Crossed swords inside shield -->
+          <line x1="24" y1="22" x2="40" y2="42" stroke="#c9a84c" stroke-width="1.2" opacity="0.6"/>
+          <line x1="40" y1="22" x2="24" y2="42" stroke="#c9a84c" stroke-width="1.2" opacity="0.6"/>
+          <circle cx="32" cy="32" r="3" stroke="#c9a84c" stroke-width="1" fill="rgba(201,168,76,0.15)"/>
+        </svg>
+      </div>
+
+      <h1 class="hero-tagline reveal reveal-delay-1">
+        Claude Code is powerful but chaotic.<br>
+        <span class="highlight">Guild gives it structure.</span>
+      </h1>
+
+      <p class="hero-subtitle reveal reveal-delay-2">
+        9 specialized agents. 10 skill workflows. One command.
+      </p>
+
+      <div class="hero-ctas reveal reveal-delay-3">
+        <button class="cta-copy" id="cta-copy" aria-label="Copy npx guild-agents init to clipboard" onclick="copyCommand()">
+          <span class="cta-copy-prompt">$</span>
+          <span class="cta-copy-text">npx guild-agents init</span>
+          <span class="cta-copy-icon">
+            <svg viewBox="0 0 24 24">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+            </svg>
+          </span>
+          <span class="cta-copy-feedback">Copied!</span>
+        </button>
+
+        <a href="https://github.com/Guild-Agents/guild" target="_blank" rel="noopener" class="cta-secondary">
+          View on GitHub
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="scroll-indicator">
+      <span>scroll</span>
+      <div class="line"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       HOW IT WORKS
+       ============================================================ -->
+  <section id="how-it-works">
+    <div class="container">
+      <div class="reveal">
+        <span class="section-label">// How It Works</span>
+        <h2 class="section-title">Three commands. Full pipeline.</h2>
+        <p class="section-subtitle">
+          From zero to a structured, multi-agent development workflow in minutes.
+        </p>
+      </div>
+
+      <div class="steps">
+        <!-- Step 1 -->
+        <div class="step reveal reveal-delay-1">
+          <span class="step-number">1</span>
+          <span class="step-command">guild init</span>
+          <p class="step-description">
+            Interactive onboarding. Generates 9 agents and 10 skill workflows tailored to your project.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step reveal reveal-delay-2">
+          <span class="step-number">2</span>
+          <span class="step-command">/guild-specialize</span>
+          <p class="step-description">
+            Explores your codebase. Enriches CLAUDE.md with real context, conventions, and patterns.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step reveal reveal-delay-3">
+          <span class="step-number">3</span>
+          <span class="step-command">/build-feature</span>
+          <p class="step-description">
+            Full pipeline: evaluation, spec, implementation, code review, and QA. End to end.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PIPELINE
+       ============================================================ -->
+  <section id="pipeline" class="pipeline-section">
+    <div class="container">
+      <div class="reveal" style="text-align: center;">
+        <span class="section-label">// The Pipeline</span>
+        <h2 class="section-title">How /build-feature orchestrates your agents</h2>
+        <p class="section-subtitle" style="margin: 0 auto;">
+          Each agent handles one responsibility. The pipeline moves forward automatically.
+        </p>
+      </div>
+
+      <div class="pipeline-wrapper reveal reveal-delay-1">
+        <!-- Trigger -->
+        <div class="pipeline-trigger">
+          <div class="pipeline-trigger-box" id="pipeline-trigger">
+            <span class="slash">/</span><span class="cmd">build-feature</span>
+            <span class="arg">"Add JWT auth"</span>
+          </div>
+        </div>
+
+        <div class="pipeline-flow" id="pipeline-flow">
+          <!-- Connector down -->
+          <div class="pipeline-connector" data-pipeline-step="0"></div>
+
+          <!-- Sequential: Advisor -> Tech Lead -> Developer -->
+          <div class="pipeline-sequential">
+            <div class="pipeline-node" data-pipeline-step="1">
+              <div class="pipeline-node-role">Advisor</div>
+              <div class="pipeline-node-action">evaluate</div>
+            </div>
+
+            <div class="pipeline-arrow" data-pipeline-step="2"></div>
+
+            <div class="pipeline-node" data-pipeline-step="3">
+              <div class="pipeline-node-role">Tech Lead</div>
+              <div class="pipeline-node-action">plan</div>
+            </div>
+
+            <div class="pipeline-arrow" data-pipeline-step="4"></div>
+
+            <div class="pipeline-node" data-pipeline-step="5">
+              <div class="pipeline-node-role">Developer</div>
+              <div class="pipeline-node-action">implement</div>
+            </div>
+          </div>
+
+          <!-- Branch connector -->
+          <div class="pipeline-branch" data-pipeline-step="6">
+            <div class="pipeline-branch-lines">
+              <div class="pipeline-branch-line"></div>
+              <div class="pipeline-branch-line"></div>
+              <div class="pipeline-branch-line"></div>
+            </div>
+          </div>
+
+          <!-- Parallel: Reviewer, QA, Bugfix -->
+          <div class="pipeline-parallel">
+            <div class="pipeline-node" data-pipeline-step="7">
+              <div class="pipeline-node-role">Reviewer</div>
+              <div class="pipeline-node-action">review</div>
+            </div>
+
+            <div class="pipeline-node" data-pipeline-step="7">
+              <div class="pipeline-node-role">QA</div>
+              <div class="pipeline-node-action">test</div>
+            </div>
+
+            <div class="pipeline-node" data-pipeline-step="7">
+              <div class="pipeline-node-role">Bugfix</div>
+              <div class="pipeline-node-action">fix</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       AGENTS
+       ============================================================ -->
+  <section id="agents">
+    <div class="container">
+      <div class="reveal" style="text-align: center;">
+        <span class="section-label">// The Agents</span>
+        <h2 class="section-title">Nine roles. One guild.</h2>
+        <p class="section-subtitle" style="margin: 0 auto;">
+          Each agent has a single responsibility and follows the project conventions defined in your CLAUDE.md.
+        </p>
+      </div>
+
+      <div class="agents-grid">
+
+        <!-- Advisor -->
+        <div class="agent-card reveal reveal-delay-1">
+          <div class="agent-card-header">
+            <div class="agent-icon">
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="8" r="4"/>
+                <path d="M6 20v-2a4 4 0 014-4h4a4 4 0 014 4v2"/>
+                <path d="M12 4V2M8.5 5.5L7 4M15.5 5.5L17 4" opacity="0.5"/>
+              </svg>
+            </div>
+            <div class="agent-name">Advisor</div>
+          </div>
+          <p class="agent-desc">Evaluates ideas and gives strategic direction. First gate before any work begins.</p>
+        </div>
+
+        <!-- Product Owner -->
+        <div class="agent-card reveal reveal-delay-2">
+          <div class="agent-card-header">
+            <div class="agent-icon">
+              <svg viewBox="0 0 24 24">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <line x1="9" y1="9" x2="15" y2="9"/>
+                <line x1="9" y1="13" x2="15" y2="13"/>
+                <line x1="9" y1="17" x2="12" y2="17"/>
+              </svg>
+            </div>
+            <div class="agent-name">Product Owner</div>
+          </div>
+          <p class="agent-desc">Converts ideas into concrete tasks with acceptance criteria and clear scope.</p>
+        </div>
+
+        <!-- Tech Lead -->
+        <div class="agent-card reveal reveal-delay-3">
+          <div class="agent-card-header">
+            <div class="agent-icon">
+              <svg viewBox="0 0 24 24">
+                <polyline points="16 18 22 12 16 6"/>
+                <polyline points="8 6 2 12 8 18"/>
+                <line x1="14" y1="4" x2="10" y2="20" opacity="0.5"/>
+              </svg>
+            </div>
+            <div class="agent-name">Tech Lead</div>
+          </div>
+          <p class="agent-desc">Defines technical approach, architecture, and implementation direction.</p>
+        </div>
+
+        <!-- Developer -->
+        <div class="agent-card reveal reveal-delay-4">
+          <div class="agent-card-header">
+            <div class="agent-icon">
+              <svg viewBox="0 0 24 24">
+                <rect x="2" y="3" width="20" height="14" rx="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+                <polyline points="7 9 9 11 7 13" opacity="0.8"/>
+                <line x1="11" y1="13" x2="15" y2="13" opacity="0.5"/>
+              </svg>
+            </div>
+            <div class="agent-name">Developer</div>
+          </div>
+          <p class="agent-desc">Implements features following project conventions, writes tests, makes atomic commits.</p>
+        </div>
+
+        <!-- Code Reviewer -->
+        <div class="agent-card reveal reveal-delay-5">
+          <div class="agent-card-header">
+            <div class="agent-icon">
+              <svg viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <path d="M8 11h6M11 8v6" opacity="0.4"/>
+              </svg>
+            </div>
+            <div class="agent-name">Code Reviewer</div>
+          </div>
+          <p class="agent-desc">Reviews code quality, patterns, and tech debt. Guards the standards of the guild.</p>
+        </div>
+
+        <!-- QA -->
+        <div class="agent-card reveal reveal-delay-6">
+          <div class="agent-card-header">
+            <div class="agent-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/>
+                <polyline points="9 12 11 14 15 10" opacity="0.8"/>
+              </svg>
+            </div>
+            <div class="agent-name">QA</div>
+          </div>
+          <p class="agent-desc">Testing, edge cases, and regression. Validates that the implementation meets acceptance criteria.</p>
+        </div>
+
+        <!-- Bugfix -->
+        <div class="agent-card reveal reveal-delay-7">
+          <div class="agent-card-header">
+            <div class="agent-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 2a7 7 0 017 7c0 5-7 11-7 11S5 14 5 9a7 7 0 017-7z" opacity="0.8"/>
+                <circle cx="12" cy="9" r="2"/>
+                <path d="M3 9h2M19 9h2M5.6 5.6l1.4 1.4M17 7l1.4-1.4" opacity="0.4"/>
+              </svg>
+            </div>
+            <div class="agent-name">Bugfix</div>
+          </div>
+          <p class="agent-desc">Diagnosis and bug resolution. Isolates root causes and applies targeted fixes.</p>
+        </div>
+
+        <!-- DB Migration -->
+        <div class="agent-card reveal reveal-delay-8">
+          <div class="agent-card-header">
+            <div class="agent-icon">
+              <svg viewBox="0 0 24 24">
+                <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                <path d="M21 5v6c0 1.66-4.03 3-9 3S3 12.66 3 11V5"/>
+                <path d="M21 11v6c0 1.66-4.03 3-9 3s-9-1.34-9-3v-6" opacity="0.6"/>
+              </svg>
+            </div>
+            <div class="agent-name">DB Migration</div>
+          </div>
+          <p class="agent-desc">Schema changes and safe migrations. Handles rollback strategies and data integrity.</p>
+        </div>
+
+        <!-- Platform Expert -->
+        <div class="agent-card reveal reveal-delay-9">
+          <div class="agent-card-header">
+            <div class="agent-icon">
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+              </svg>
+            </div>
+            <div class="agent-name">Platform Expert</div>
+          </div>
+          <p class="agent-desc">Resolves Claude Code integration issues, worktree configs, and environment problems.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       WHY GUILD
+       ============================================================ -->
+  <section id="why" class="why-section">
+    <div class="container">
+      <div class="reveal" style="text-align: center;">
+        <span class="section-label">// Why Guild</span>
+        <h2 class="section-title">Structure without infrastructure</h2>
+      </div>
+
+      <div class="why-grid">
+        <div class="why-card reveal reveal-delay-1">
+          <h3 class="why-card-title">Structure over chaos</h3>
+          <p class="why-card-text">
+            Claude Code without structure leads to inconsistent results. Guild gives every session a clear process:
+            evaluate, plan, implement, review, test.
+          </p>
+        </div>
+
+        <div class="why-card reveal reveal-delay-2">
+          <h3 class="why-card-title">Agents = WHO, Skills = HOW</h3>
+          <p class="why-card-text">
+            Agents define identity and expertise. Skills define workflows and steps.
+            Clean separation that scales without complexity.
+          </p>
+        </div>
+
+        <div class="why-card reveal reveal-delay-3">
+          <h3 class="why-card-title">State that persists</h3>
+          <p class="why-card-text">
+            CLAUDE.md holds project conventions. SESSION.md tracks what happened.
+            PROJECT.md keeps the roadmap. Context survives across sessions.
+          </p>
+        </div>
+
+        <div class="why-card reveal reveal-delay-4">
+          <h3 class="why-card-title">Zero infrastructure</h3>
+          <p class="why-card-text">
+            No servers, no databases, no API keys. Just markdown files and Claude Code.
+            Works in any project, any language, any stack.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <a href="https://github.com/Guild-Agents/guild" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
+          GitHub
+        </a>
+        <a href="https://www.npmjs.com/package/guild-agents" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><rect x="1" y="5" width="22" height="14" rx="0"/><path d="M5 19V8h4v8h3V8h3v11" fill="none" stroke="currentColor" stroke-width="0"/><text x="12" y="16" text-anchor="middle" font-size="9" font-family="sans-serif" fill="currentColor" stroke="none">npm</text></svg>
+          npm
+        </a>
+        <a href="https://github.com/Guild-Agents/guild/blob/main/LICENSE" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          MIT License
+        </a>
+      </div>
+      <p class="footer-motto">
+        "Guild builds itself &mdash; this project uses its own agents for development."
+      </p>
+      <p class="footer-license">
+        &copy; 2025 Guild Agents &middot; Open Source &middot; MIT
+      </p>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT
+       ============================================================ -->
+  <script>
+    /* ---------------------------------------------------------
+       Copy to clipboard
+       --------------------------------------------------------- */
+    function copyCommand() {
+      var text = 'npx guild-agents init';
+      var btn = document.getElementById('cta-copy');
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+          showCopied(btn);
+        }).catch(function() {
+          fallbackCopy(text, btn);
+        });
+      } else {
+        fallbackCopy(text, btn);
+      }
+    }
+
+    function fallbackCopy(text, btn) {
+      var textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showCopied(btn);
+      } catch (e) {
+        /* silent fail */
+      }
+      document.body.removeChild(textarea);
+    }
+
+    function showCopied(btn) {
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.classList.remove('copied');
+      }, 1500);
+    }
+
+    /* ---------------------------------------------------------
+       Scroll-triggered reveal animations (IntersectionObserver)
+       --------------------------------------------------------- */
+    (function() {
+      var reveals = document.querySelectorAll('.reveal');
+      if (!('IntersectionObserver' in window)) {
+        /* Fallback: show everything */
+        reveals.forEach(function(el) { el.classList.add('visible'); });
+        return;
+      }
+
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.12,
+        rootMargin: '0px 0px -40px 0px'
+      });
+
+      reveals.forEach(function(el) {
+        observer.observe(el);
+      });
+    })();
+
+    /* ---------------------------------------------------------
+       Pipeline animation — nodes light up in sequence
+       --------------------------------------------------------- */
+    (function() {
+      var pipelineFlow = document.getElementById('pipeline-flow');
+      if (!pipelineFlow || !('IntersectionObserver' in window)) return;
+
+      var animated = false;
+
+      var pipelineObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting && !animated) {
+            animated = true;
+            animatePipeline();
+            pipelineObserver.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.3
+      });
+
+      pipelineObserver.observe(pipelineFlow);
+
+      function animatePipeline() {
+        var maxStep = 7;
+        var baseDelay = 400; /* ms between sequential steps */
+
+        for (var step = 0; step <= maxStep; step++) {
+          (function(s) {
+            setTimeout(function() {
+              var elements = document.querySelectorAll('[data-pipeline-step="' + s + '"]');
+              elements.forEach(function(el) {
+                el.classList.add('active');
+              });
+            }, s * baseDelay);
+          })(step);
+        }
+      }
+    })();
+
+    /* ---------------------------------------------------------
+       Nav shrink on scroll
+       --------------------------------------------------------- */
+    (function() {
+      var nav = document.querySelector('nav');
+      var scrolled = false;
+
+      window.addEventListener('scroll', function() {
+        if (window.scrollY > 50 && !scrolled) {
+          nav.style.padding = '10px 0';
+          scrolled = true;
+        } else if (window.scrollY <= 50 && scrolled) {
+          nav.style.padding = '18px 0';
+          scrolled = false;
+        }
+      }, { passive: true });
+    })();
+  </script>
+
+</body>
+</html>
