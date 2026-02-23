@@ -4,9 +4,12 @@
  * Requiere que el usuario tenga gh instalado y autenticado.
  * Todas las operaciones son no-bloqueantes — si gh no está disponible,
  * Guild funciona normalmente sin integración GitHub.
+ *
+ * Uses execFileSync with array-based arguments to prevent shell injection
+ * through user-controlled strings (issue titles, bodies, labels).
  */
 
-import { execSync } from 'child_process';
+import { execFileSync } from 'node:child_process';
 
 const LABELS = [
   { name: 'backlog',      color: '8E8E8E', description: 'Tarea documentada, pendiente de iniciar' },
@@ -22,7 +25,7 @@ const LABELS = [
  */
 export function isGhAvailable() {
   try {
-    execSync('gh auth status', { stdio: 'ignore' });
+    execFileSync('gh', ['auth', 'status'], { stdio: 'ignore' });
     return true;
   } catch {
     return false;
@@ -43,10 +46,13 @@ export async function setupGithubLabels(repoUrl) {
 
   for (const label of LABELS) {
     try {
-      execSync(
-        `gh label create "${label.name}" --color "${label.color}" --description "${label.description}" --repo ${repo} --force`,
-        { stdio: 'ignore' }
-      );
+      execFileSync('gh', [
+        'label', 'create', label.name,
+        '--color', label.color,
+        '--description', label.description,
+        '--repo', repo,
+        '--force',
+      ], { stdio: 'ignore' });
     } catch {
       // Label ya existe o error no crítico
     }
@@ -60,8 +66,14 @@ export function assignIssue(issueNumber, fromLabel, toLabel) {
   if (!isGhAvailable()) return;
 
   try {
-    execSync(`gh issue assign ${issueNumber} --assignee @me`, { stdio: 'ignore' });
-    execSync(`gh issue edit ${issueNumber} --add-label "${toLabel}" --remove-label "${fromLabel}"`, { stdio: 'ignore' });
+    execFileSync('gh', [
+      'issue', 'assign', String(issueNumber), '--assignee', '@me',
+    ], { stdio: 'ignore' });
+    execFileSync('gh', [
+      'issue', 'edit', String(issueNumber),
+      '--add-label', toLabel,
+      '--remove-label', fromLabel,
+    ], { stdio: 'ignore' });
   } catch {
     // Non-critical
   }
@@ -74,7 +86,9 @@ export function commentIssue(issueNumber, body) {
   if (!isGhAvailable()) return;
 
   try {
-    execSync(`gh issue comment ${issueNumber} --body "${body}"`, { stdio: 'ignore' });
+    execFileSync('gh', [
+      'issue', 'comment', String(issueNumber), '--body', body,
+    ], { stdio: 'ignore' });
   } catch {
     // Non-critical
   }
@@ -87,7 +101,9 @@ export function closeIssue(issueNumber, comment) {
   if (!isGhAvailable()) return;
 
   try {
-    execSync(`gh issue close ${issueNumber} --comment "${comment}"`, { stdio: 'ignore' });
+    execFileSync('gh', [
+      'issue', 'close', String(issueNumber), '--comment', comment,
+    ], { stdio: 'ignore' });
   } catch {
     // Non-critical
   }
@@ -100,10 +116,12 @@ export function createBugIssue(title, body, parentIssueNumber) {
   if (!isGhAvailable()) return null;
 
   try {
-    const result = execSync(
-      `gh issue create --title "${title}" --body "${body}" --label "bug"`,
-      { encoding: 'utf8' }
-    );
+    const result = execFileSync('gh', [
+      'issue', 'create',
+      '--title', title,
+      '--body', body,
+      '--label', 'bug',
+    ], { encoding: 'utf8' });
     const issueUrl = result.trim();
     const issueNumber = issueUrl.split('/').pop();
 
