@@ -68,3 +68,16 @@ Si no hay tarea en curso, sugiere opciones:
 ### Paso 5 — Actualizar sesion
 
 Actualiza SESSION.md con la fecha actual para registrar que la sesion inicio.
+
+## Example Session
+
+```text
+User: /session-start
+
+Loading context...
+Last session: 2026-02-22
+Task in progress: user-preferences (Phase 4 — Implementation)
+Resumable: feature/user-preferences (wip: phase 3 complete)
+
+Suggested: Continue with /build-feature to resume implementation.
+```

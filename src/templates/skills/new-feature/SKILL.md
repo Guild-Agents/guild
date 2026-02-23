@@ -56,6 +56,18 @@ Actualiza SESSION.md con el contexto de la nueva feature:
 - **Tarea en curso:** nombre de la feature
 - **Estado:** Feature iniciada — pendiente de implementacion
 
+## Example Session
+
+```text
+User: /new-feature user-preferences
+
+Branch created: feature/user-preferences
+SESSION.md updated with feature context.
+GitHub Issue #42 created.
+
+Next: Run /build-feature to implement.
+```
+
 ### Paso 4 — GitHub Issue (opcional)
 
 Si el proyecto tiene integracion GitHub configurada en PROJECT.md:

@@ -56,6 +56,18 @@ Presenta el resultado:
 
 Actualiza SESSION.md con el resultado del ciclo QA.
 
+## Example Session
+
+```text
+User: /qa-cycle
+
+QA Cycle 1: 2 of 5 criteria pass. Bug: form validation missing on email field.
+Bugfix: Added email regex validation to UserForm component.
+QA Cycle 2: 5 of 5 criteria pass. 0 bugs.
+
+Result: Approved.
+```
+
 ## Subagent Configuration
 
 When spawning QA or Bugfix agents via the Task tool, always use `subagent_type: "general-purpose"`. Guild agent role names are NOT valid Claude Code subagent_types.

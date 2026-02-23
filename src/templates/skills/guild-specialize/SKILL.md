@@ -121,6 +121,31 @@ git commit -m "chore: enrich CLAUDE.md and agents via guild-specialize"
 
 This ensures enrichment survives any subsequent git operations (stash, checkout, rebase).
 
+## Example Session
+
+```text
+User: /guild-specialize
+
+Guild Specialize analyzing project...
+
+Stack detected:
+- Node.js 20.11.0, TypeScript 5.3.3
+- React 18.2.0, Next.js 14.1.0
+- PostgreSQL via Prisma 5.9.0
+
+Architecture:
+- Next.js App Router (src/app/)
+- API routes in src/app/api/
+- Shared components in src/components/
+
+Agents updated:
+- developer.md: Specialized for Next.js + TypeScript
+- qa.md: Configured for Vitest + Playwright
+- db-migration.md: Configured for Prisma
+
+Run /status to see the full state.
+```
+
 ## Notas importantes
 
 - NUNCA leas archivos `.env` reales — solo `.env.example` o `.env.local`

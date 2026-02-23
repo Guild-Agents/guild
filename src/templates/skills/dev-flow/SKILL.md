@@ -55,3 +55,15 @@ Siguiente paso: Ejecuta /build-feature para continuar desde la Fase 3.
 ```
 
 Si no hay feature en curso, informa que no hay pipeline activo y sugiere `/new-feature` o `/build-feature`.
+
+## Example Session
+
+```text
+User: /dev-flow
+
+Current pipeline: build-feature "add user preferences"
+Phase: 4 of 6 — Implementation
+Developer agent active.
+
+Next: Phase 5 — Code Review
+```
