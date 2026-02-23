@@ -9,6 +9,18 @@ A multi-agent framework for Claude Code.
 
 Sets up 8 specialized agents and 10 skill-based workflows as `.claude/` files in any project.
 
+## Installation
+
+```bash
+npm install -g guild-agents
+```
+
+Or run directly without installing:
+
+```bash
+npx guild-agents init
+```
+
 ## Quick Start
 
 ```bash
@@ -83,8 +95,6 @@ guild init                  # Interactive project onboarding
 guild new-agent <name>      # Create a custom agent
 guild status                # Show project status
 ```
-
-`npx guild-agents init` works without a global install.
 
 ## Generated Structure
 

@@ -3,16 +3,23 @@
   "version": "0.1.0",
   "description": "A multi-agent framework for Claude Code — specialized AI teams for every project",
   "type": "module",
-  "main": "src/index.js",
+  "files": [
+    "bin/",
+    "src/commands/",
+    "src/templates/",
+    "src/utils/",
+    "!src/utils/__tests__/"
+  ],
   "bin": {
-    "guild": "./bin/guild.js"
+    "guild": "bin/guild.js"
   },
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src/",
-    "dev": "node bin/guild.js"
+    "dev": "node bin/guild.js",
+    "prepublishOnly": "npm test && npm run lint"
   },
   "keywords": [
     "claude",
