@@ -21,7 +21,14 @@
     "ai",
     "workflow",
     "multi-agent",
-    "developer-tools"
+    "developer-tools",
+    "cli",
+    "framework",
+    "anthropic",
+    "ai-agents",
+    "automation",
+    "code-review",
+    "nodejs"
   ],
   "author": "",
   "license": "MIT",
