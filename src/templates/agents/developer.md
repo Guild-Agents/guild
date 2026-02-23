@@ -1,6 +1,8 @@
 ---
 name: developer
 description: "Implementa features siguiendo las convenciones del proyecto"
+tools: Read, Write, Edit, Bash, Glob, Grep
+permissionMode: bypassPermissions
 ---
 
 # Developer

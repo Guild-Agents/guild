@@ -12,7 +12,7 @@ const AGENTS_DIR = join('.claude', 'agents');
 const SKILLS_DIR = join('.claude', 'skills');
 
 /**
- * Lista los nombres de los 8 agentes v1.
+ * Lista los nombres de los 9 agentes v1.
  */
 export function getAgentNames() {
   return [
@@ -24,6 +24,7 @@ export function getAgentNames() {
     'qa',
     'bugfix',
     'db-migration',
+    'platform-expert',
   ];
 }
 

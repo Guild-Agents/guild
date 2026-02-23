@@ -1,6 +1,8 @@
 ---
 name: tech-lead
 description: "Define approach tecnico y arquitectura"
+tools: Read, Glob, Grep
+permissionMode: plan
 ---
 
 # Tech Lead

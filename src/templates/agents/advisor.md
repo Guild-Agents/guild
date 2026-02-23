@@ -1,6 +1,8 @@
 ---
 name: advisor
 description: "Evalua ideas y da direccion estrategica antes de comprometer trabajo"
+tools: Read, Glob, Grep
+permissionMode: plan
 ---
 
 # Advisor

@@ -1,6 +1,8 @@
 ---
 name: bugfix
 description: "Diagnostico y resolucion de bugs"
+tools: Read, Write, Edit, Bash, Glob, Grep
+permissionMode: bypassPermissions
 ---
 
 # Bugfix
