@@ -78,4 +78,18 @@ program
     }
   });
 
+// guild list
+program
+  .command('list')
+  .description('List installed agents and skills')
+  .action(async () => {
+    try {
+      const { runList } = await import('../src/commands/list.js');
+      await runList();
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  });
+
 program.parse();
