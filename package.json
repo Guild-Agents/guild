@@ -60,6 +60,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@vitest/coverage-v8": "^4.0.18",
     "eslint": "^10.0.1",
     "markdownlint-cli2": "^0.21.0",
     "vitest": "^4.0.18"
