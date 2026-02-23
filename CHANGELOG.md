@@ -9,6 +9,13 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.9] - 2026-02-23
+
+### Fixed
+
+- `guild init` summary showed "8 base agents" instead of 9 — now uses dynamic count from `getAgentNames().length`
+- CLAUDE.md had duplicate `## CLI commands` heading — renamed first to `## Development commands`
+
 ## [0.2.8] - 2026-02-23
 
 ### Added
@@ -143,7 +150,8 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-[Unreleased]: https://github.com/Guild-Agents/guild/compare/v0.2.8...HEAD
+[Unreleased]: https://github.com/Guild-Agents/guild/compare/v0.2.9...HEAD
+[0.2.9]: https://github.com/Guild-Agents/guild/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/Guild-Agents/guild/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/Guild-Agents/guild/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/Guild-Agents/guild/compare/v0.2.5...v0.2.6

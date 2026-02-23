@@ -17,7 +17,7 @@ Guild is an npm CLI (`npm install -g guild-agents`, command `guild`) that sets u
 - ESModules throughout the codebase — no CommonJS, no require()
 - Always use path.join() to build paths — never concatenate strings
 
-## CLI commands
+## Development commands
 ```bash
 npm test                    # tests (Vitest)
 npm run lint                # full lint (ESLint + markdownlint)
