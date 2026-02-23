@@ -117,7 +117,7 @@ When spawning council agents via the Task tool, always use `subagent_type: "gene
 
 Example:
 
-```
+```text
 Task tool with:
   subagent_type: "general-purpose"
   prompt: "Read .claude/agents/tech-lead.md and assume that role. Then: [debate question]"

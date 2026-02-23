@@ -134,7 +134,7 @@ Pattern for each phase:
 
 Also update SESSION.md at each phase transition:
 
-```
+```text
 - [timestamp] | build-feature | Phase N ([phase-name]) complete for [feature]
 ```
 
@@ -163,7 +163,7 @@ Al completar todas las fases exitosamente:
 When spawning agents via the Task tool, use these `subagent_type` values:
 
 | Guild Agent Role | subagent_type to use |
-|---|---|
+| --- | --- |
 | advisor, product-owner, tech-lead | `"general-purpose"` |
 | developer, bugfix | `"general-purpose"` |
 | code-reviewer, qa | `"general-purpose"` |
@@ -172,7 +172,7 @@ When spawning agents via the Task tool, use these `subagent_type` values:
 
 Example Task invocation:
 
-```
+```text
 Task tool with:
   subagent_type: "general-purpose"
   prompt: "Read .claude/agents/developer.md and assume that role. Then: [task description]"
