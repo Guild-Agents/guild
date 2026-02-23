@@ -1,115 +1,115 @@
 ---
 name: council
-description: "Convoca multiples agentes para debatir una decision importante"
+description: "Convenes multiple agents to debate an important decision"
 user-invocable: true
 ---
 
 # Council
 
-Convoca un consejo de agentes especializados para debatir una decision importante. Cada agente aporta su perspectiva independiente y el resultado es una sintesis del debate.
+Convenes a council of specialized agents to debate an important decision. Each agent contributes their independent perspective and the result is a synthesis of the debate.
 
-Los agentes se invocan EN PARALELO usando el tool `Task` para obtener perspectivas independientes sin sesgo.
+Agents are invoked IN PARALLEL using the `Task` tool to obtain independent perspectives without bias.
 
-## Cuando usarlo
+## When to use
 
-- Antes de tomar una decision arquitectonica importante
-- Para evaluar el scope de una feature con multiples perspectivas
-- Para decidir si abordar deuda tecnica y como priorizarla
-- Cuando necesitas multiples puntos de vista sobre un problema complejo
+- Before making an important architectural decision
+- To evaluate the scope of a feature with multiple perspectives
+- To decide whether to address technical debt and how to prioritize it
+- When you need multiple viewpoints on a complex problem
 
-## Uso
+## Usage
 
-`/council [pregunta o decision a debatir]`
+`/council [question or decision to debate]`
 
-Opcionalmente puedes especificar el tipo: `/council architecture [pregunta]`
+Optionally you can specify the type: `/council architecture [question]`
 
-## Tipos de consejo
+## Council Types
 
 ### 1. Council Architecture
 
-**Participantes:** Tech Lead + Advisor + Developer
-**Cuando aplica:** Decisiones sobre arquitectura, patrones, refactors grandes, tecnologias nuevas
+**Participants:** Tech Lead + Advisor + Developer
+**When it applies:** Decisions about architecture, patterns, large refactors, new technologies
 
-Invoca los 3 agentes EN PARALELO usando Task tool:
+Invokes all 3 agents IN PARALLEL using Task tool:
 
-- Task 1: Lee `.claude/agents/tech-lead.md` — perspectiva de arquitectura y coherencia tecnica
-- Task 2: Lee `.claude/agents/advisor.md` — perspectiva de viabilidad y riesgos de negocio
-- Task 3: Lee `.claude/agents/developer.md` — perspectiva de implementabilidad y pragmatismo
+- Task 1: Reads `.claude/agents/tech-lead.md` — architecture and technical coherence perspective
+- Task 2: Reads `.claude/agents/advisor.md` — feasibility and business risk perspective
+- Task 3: Reads `.claude/agents/developer.md` — implementability and pragmatism perspective
 
 ### 2. Council Feature-Scope
 
-**Participantes:** Advisor + Product Owner + Tech Lead
-**Cuando aplica:** Definir alcance de features, priorizar funcionalidades, evaluar propuestas de producto
+**Participants:** Advisor + Product Owner + Tech Lead
+**When it applies:** Defining feature scope, prioritizing functionality, evaluating product proposals
 
-Invoca los 3 agentes EN PARALELO usando Task tool:
+Invokes all 3 agents IN PARALLEL using Task tool:
 
-- Task 1: Lee `.claude/agents/advisor.md` — perspectiva de dominio y vision estrategica
-- Task 2: Lee `.claude/agents/product-owner.md` — perspectiva de valor para el usuario y scope
-- Task 3: Lee `.claude/agents/tech-lead.md` — perspectiva de viabilidad tecnica y esfuerzo
+- Task 1: Reads `.claude/agents/advisor.md` — domain and strategic vision perspective
+- Task 2: Reads `.claude/agents/product-owner.md` — user value and scope perspective
+- Task 3: Reads `.claude/agents/tech-lead.md` — technical feasibility and effort perspective
 
 ### 3. Council Tech-Debt
 
-**Participantes:** Tech Lead + Developer + Code Reviewer
-**Cuando aplica:** Decidir si abordar deuda tecnica, planificar refactors, evaluar calidad del codebase
+**Participants:** Tech Lead + Developer + Code Reviewer
+**When it applies:** Deciding whether to address technical debt, planning refactors, evaluating codebase quality
 
-Invoca los 3 agentes EN PARALELO usando Task tool:
+Invokes all 3 agents IN PARALLEL using Task tool:
 
-- Task 1: Lee `.claude/agents/tech-lead.md` — perspectiva de impacto arquitectonico
-- Task 2: Lee `.claude/agents/developer.md` — perspectiva de costo de implementacion
-- Task 3: Lee `.claude/agents/code-reviewer.md` — perspectiva de calidad y riesgos
+- Task 1: Reads `.claude/agents/tech-lead.md` — architectural impact perspective
+- Task 2: Reads `.claude/agents/developer.md` — implementation cost perspective
+- Task 3: Reads `.claude/agents/code-reviewer.md` — quality and risk perspective
 
-## Proceso
+## Process
 
-### Paso 1 — Identificar tipo de consejo
+### Step 1 — Identify council type
 
-Analiza la pregunta del usuario y determina que tipo de consejo aplica:
+Analyze the user's question and determine which council type applies:
 
-- Si menciona arquitectura, patrones, tecnologias → **architecture**
-- Si menciona features, prioridades, scope, usuarios → **feature-scope**
-- Si menciona deuda tecnica, refactor, calidad, mantenibilidad → **tech-debt**
-- Si no es claro, pregunta al usuario
+- If it mentions architecture, patterns, technologies -> **architecture**
+- If it mentions features, priorities, scope, users -> **feature-scope**
+- If it mentions technical debt, refactor, quality, maintainability -> **tech-debt**
+- If unclear, ask the user
 
-### Paso 2 — Convocar agentes
+### Step 2 — Convene agents
 
-Invoca los 3 agentes correspondientes EN PARALELO usando Task tool. Cada agente:
+Invoke the 3 corresponding agents IN PARALLEL using Task tool. Each agent:
 
-1. Lee su archivo `.claude/agents/[nombre].md` para asumir su rol
-2. Lee `CLAUDE.md` y `SESSION.md` para contexto del proyecto
-3. Analiza la pregunta desde su perspectiva especializada
-4. Emite su posicion con argumentos concretos
+1. Reads their `.claude/agents/[name].md` file to assume their role
+2. Reads `CLAUDE.md` and `SESSION.md` for project context
+3. Analyzes the question from their specialized perspective
+4. States their position with concrete arguments
 
-### Paso 3 — Presentar debate
+### Step 3 — Present debate
 
-Presenta las perspectivas de los 3 agentes de forma estructurada:
+Present the perspectives of all 3 agents in a structured format:
 
 ```text
-## Council: [tipo]
-Pregunta: [la pregunta del usuario]
+## Council: [type]
+Question: [the user's question]
 
-### [Agente 1] — [posicion]
-[argumentos principales]
+### [Agent 1] — [position]
+[main arguments]
 
-### [Agente 2] — [posicion]
-[argumentos principales]
+### [Agent 2] — [position]
+[main arguments]
 
-### [Agente 3] — [posicion]
-[argumentos principales]
+### [Agent 3] — [position]
+[main arguments]
 
-### Sintesis
-- Puntos de acuerdo: [...]
-- Puntos de desacuerdo: [...]
-- Riesgos identificados: [...]
+### Synthesis
+- Points of agreement: [...]
+- Points of disagreement: [...]
+- Identified risks: [...]
 ```
 
-### Paso 4 — Solicitar decision
+### Step 4 — Request decision
 
-Presenta opciones claras al usuario basadas en el debate:
+Present clear options to the user based on the debate:
 
-- Opcion A: [resumen de una posicion]
-- Opcion B: [resumen de otra posicion]
-- Opcion C: [compromiso o alternativa]
+- Option A: [summary of one position]
+- Option B: [summary of another position]
+- Option C: [compromise or alternative]
 
-Pide al usuario que decida. Si el usuario decide, documenta la decision en SESSION.md.
+Ask the user to decide. If the user decides, document the decision in SESSION.md.
 
 ## Subagent Configuration
 
@@ -137,9 +137,9 @@ Developer — Prefers REST simplicity. GraphQL adds tooling overhead.
 Consensus: Incremental adoption. New endpoints in GraphQL, existing stay REST.
 ```
 
-## Notas
+## Notes
 
-- Los agentes deben ser invocados en paralelo para evitar que uno influencie al otro
-- Cada perspectiva debe ser independiente — no "responder" a otro agente
-- La sintesis la haces tu (el skill), no los agentes
-- Si los 3 agentes estan de acuerdo, indica que hay consenso y sugiere actuar
+- Agents must be invoked in parallel to prevent one from influencing another
+- Each perspective must be independent — not "responding" to another agent
+- The synthesis is done by you (the skill), not by the agents
+- If all 3 agents agree, indicate consensus and suggest taking action

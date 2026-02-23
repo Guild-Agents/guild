@@ -1,33 +1,33 @@
 ---
 name: session-start
-description: "Carga contexto y retoma trabajo desde SESSION.md"
+description: "Loads context and resumes work from SESSION.md"
 user-invocable: true
 ---
 
 # Session Start
 
-Carga el contexto del proyecto y retoma el trabajo desde donde se dejo en la sesion anterior. Este es el primer skill que debes ejecutar al iniciar una sesion de trabajo.
+Loads the project context and resumes work from where it was left off in the previous session. This is the first skill you should run when starting a work session.
 
-## Cuando usarlo
+## When to use
 
-- Al inicio de cada sesion de trabajo con el proyecto
-- Cuando quieres retomar el contexto despues de una pausa
+- At the start of each work session with the project
+- When you want to resume context after a pause
 
-## Uso
+## Usage
 
 `/session-start`
 
-## Proceso
+## Process
 
-### Paso 1 — Cargar contexto
+### Step 1 — Load context
 
-Lee los archivos de estado de Guild:
+Read the Guild state files:
 
-- `CLAUDE.md` — instrucciones, convenciones y reglas del proyecto
-- `SESSION.md` — estado de la ultima sesion, tarea en curso, proximos pasos
-- `PROJECT.md` — identidad del proyecto, stack, agentes configurados
+- `CLAUDE.md` — project instructions, conventions, and rules
+- `SESSION.md` — last session state, task in progress, next steps
+- `PROJECT.md` — project identity, stack, configured agents
 
-### Paso 2 — Detect resumable work
+### Step 2 — Detect resumable work
 
 Check for `wip:` checkpoint commits on active branches:
 
@@ -39,35 +39,35 @@ done
 
 If `wip:` commits are found, present them to the user with the phase they were in when interrupted.
 
-### Paso 3 — Presentar estado
+### Step 3 — Present state
 
-Muestra un resumen de la sesion anterior:
+Show a summary of the previous session:
 
-- Fecha de la ultima sesion
-- Tarea en curso (si existe)
-- Estado en que quedo el trabajo
-- Decisiones tomadas previamente
-- Proximos pasos registrados
+- Date of the last session
+- Task in progress (if any)
+- State where the work left off
+- Decisions made previously
+- Recorded next steps
 - **Resumable pipelines** (if wip: commits detected)
 
-### Paso 4 — Sugerir como continuar
+### Step 4 — Suggest how to continue
 
-Si hay tarea en curso:
+If there is a task in progress:
 
-- Muestra el estado de la tarea
-- Sugiere continuar con el skill apropiado (ej: `/build-feature` si esta en implementacion)
-- Muestra los proximos pasos registrados en SESSION.md
+- Show the task state
+- Suggest continuing with the appropriate skill (e.g., `/build-feature` if in implementation)
+- Show the next steps recorded in SESSION.md
 
-Si no hay tarea en curso, sugiere opciones:
+If there is no task in progress, suggest options:
 
-- `/build-feature [descripcion]` — para implementar una feature nueva
-- `/new-feature [nombre]` — para preparar el entorno de una feature
-- `/status` — para ver el estado general del proyecto
-- `/council [pregunta]` — para debatir una decision importante
+- `/build-feature [description]` — to implement a new feature
+- `/new-feature [name]` — to prepare the environment for a feature
+- `/status` — to see the general project state
+- `/council [question]` — to debate an important decision
 
-### Paso 5 — Actualizar sesion
+### Step 5 — Update session
 
-Actualiza SESSION.md con la fecha actual para registrar que la sesion inicio.
+Update SESSION.md with the current date to record that the session has started.
 
 ## Example Session
 

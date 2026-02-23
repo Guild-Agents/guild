@@ -1,64 +1,64 @@
 ---
 name: review
-description: "Code review standalone sobre el diff actual"
+description: "Standalone code review on the current diff"
 user-invocable: true
 ---
 
 # Review
 
-Ejecuta un code review independiente sobre los cambios actuales del proyecto. Invoca al agente Code Reviewer para analizar calidad, patrones, seguridad y deuda tecnica.
+Runs an independent code review on the current project changes. Invokes the Code Reviewer agent to analyze quality, patterns, security, and technical debt.
 
-## Cuando usarlo
+## When to use
 
-- Antes de crear un PR
-- Para revisar cambios propios antes de pedir review a otros
-- Cuando quieres una segunda opinion sobre el codigo que escribiste
+- Before creating a PR
+- To review your own changes before requesting review from others
+- When you want a second opinion on the code you wrote
 
-## Uso
+## Usage
 
 `/review`
 
-## Proceso
+## Process
 
-### Paso 1 — Obtener diff y estado de verificacion
+### Step 1 — Get diff and verification state
 
-Obtiene los cambios actuales:
+Get the current changes:
 
-1. Primero intenta `git diff --staged` (cambios en staging)
-2. Si no hay cambios en staging, usa `git diff` (cambios sin stage)
-3. Si no hay ningun cambio, informa que no hay nada que revisar
+1. First try `git diff --staged` (staged changes)
+2. If there are no staged changes, use `git diff` (unstaged changes)
+3. If there are no changes at all, report that there is nothing to review
 
-Ejecuta verificacion automatizada para dar contexto al reviewer:
+Run automated verification to give context to the reviewer:
 
-1. Ejecuta tests del proyecto (ej: `npm test`) — captura resultado
-2. Ejecuta lint del proyecto (ej: `npm run lint`) — captura resultado
-3. Incluye ambos resultados como contexto para el Code Reviewer
+1. Run project tests (e.g., `npm test`) — capture result
+2. Run project lint (e.g., `npm run lint`) — capture result
+3. Include both results as context for the Code Reviewer
 
-Nota: El Code Reviewer no tiene acceso a Bash (solo Read, Glob, Grep), por eso los tests y lint se ejecutan aqui antes de invocar al reviewer.
+Note: The Code Reviewer does not have access to Bash (only Read, Glob, Grep), so tests and lint are run here before invoking the reviewer.
 
-### Paso 2 — Invocar Code Reviewer
+### Step 2 — Invoke Code Reviewer
 
-Invoca al agente Code Reviewer usando Task tool:
+Invoke the Code Reviewer agent using Task tool:
 
-1. Lee `.claude/agents/code-reviewer.md` para asumir el rol
-2. Lee CLAUDE.md para entender las convenciones del proyecto
-3. Recibe el diff completo + resultados de tests y lint del Paso 1
-4. Si tests o lint fallaron, esto es automaticamente un hallazgo Blocker
-5. Revisa el diff completo
-6. Clasifica cada hallazgo por severidad:
-   - **Blocker**: Debe corregirse antes de merge
-   - **Warning**: Deberia corregirse, introduce deuda tecnica
-   - **Suggestion**: Mejora opcional
+1. Read `.claude/agents/code-reviewer.md` to assume the role
+2. Read CLAUDE.md to understand the project conventions
+3. Receive the full diff + test and lint results from Step 1
+4. If tests or lint failed, this is automatically a Blocker finding
+5. Review the full diff
+6. Classify each finding by severity:
+   - **Blocker**: Must be fixed before merge
+   - **Warning**: Should be fixed, introduces technical debt
+   - **Suggestion**: Optional improvement
 
-### Paso 3 — Presentar hallazgos
+### Step 3 — Present findings
 
-Presenta el reporte organizado por severidad:
+Present the report organized by severity:
 
-- Cantidad total de hallazgos por tipo
-- Detalle de cada hallazgo: archivo, descripcion, sugerencia de correccion
-- Veredicto final: Aprobado / Aprobado con warnings / Bloqueado
+- Total count of findings by type
+- Detail of each finding: file, description, suggested fix
+- Final verdict: Approved / Approved with warnings / Blocked
 
-Si hay blockers, sugiere corregirlos y ejecutar `/review` de nuevo.
+If there are blockers, suggest fixing them and running `/review` again.
 
 ## Example Session
 

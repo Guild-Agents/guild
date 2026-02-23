@@ -3,9 +3,9 @@
 /**
  * Guild v1 — CLI entry point
  * Usage:
- *   guild init           — onboarding interactivo v1
- *   guild new-agent      — crear un nuevo agente
- *   guild status         — ver estado del proyecto
+ *   guild init           — interactive onboarding v1
+ *   guild new-agent      — create a new agent
+ *   guild status         — view project status
  */
 
 import { program } from 'commander';
@@ -24,7 +24,7 @@ program
 // guild init
 program
   .command('init')
-  .description('Inicializar Guild v1 en el proyecto actual')
+  .description('Initialize Guild v1 in the current project')
   .action(async () => {
     try {
       const { runInit } = await import('../src/commands/init.js');
@@ -38,8 +38,8 @@ program
 // guild new-agent
 program
   .command('new-agent')
-  .description('Crear un nuevo agente')
-  .argument('<name>', 'Nombre del agente (lowercase, guiones)')
+  .description('Create a new agent')
+  .argument('<name>', 'Agent name (lowercase, hyphens)')
   .action(async (name) => {
     try {
       const { runNewAgent } = await import('../src/commands/new-agent.js');
@@ -53,7 +53,7 @@ program
 // guild status
 program
   .command('status')
-  .description('Ver estado del proyecto Guild')
+  .description('View Guild project status')
   .action(async () => {
     try {
       const { runStatus } = await import('../src/commands/status.js');

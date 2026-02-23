@@ -1,116 +1,116 @@
 ---
 name: guild-specialize
-description: "Enriquece CLAUDE.md explorando el proyecto y especializa los agentes al stack real"
+description: "Enriches CLAUDE.md by exploring the project and specializes agents to the real stack"
 user-invocable: true
 ---
 
 # Guild Specialize
 
-Explora el proyecto real del usuario y enriquece toda la configuracion de Guild con informacion concreta del stack, arquitectura y convenciones detectadas.
+Explores the user's real project and enriches the entire Guild configuration with concrete information about the detected stack, architecture, and conventions.
 
-Este skill se ejecuta una vez despues de `guild init`. Transforma los placeholders genericos en informacion real del proyecto.
+This skill runs once after `guild init`. It transforms generic placeholders into real project information.
 
-## Cuando usarlo
+## When to use
 
-- Inmediatamente despues de ejecutar `guild init`
-- Cuando se agrega un stack nuevo al proyecto (nueva base de datos, nuevo framework)
-- Cuando la estructura del proyecto cambio significativamente
+- Immediately after running `guild init`
+- When a new stack is added to the project (new database, new framework)
+- When the project structure has changed significantly
 
-## Proceso
+## Process
 
-### Paso 1 — Leer contexto base
+### Step 1 — Read base context
 
-Lee los archivos de configuracion de Guild:
+Read the Guild configuration files:
 
-- `CLAUDE.md` — instrucciones actuales (contiene placeholders `[PENDIENTE: guild-specialize]`)
-- `PROJECT.md` — identidad y stack declarado durante init
-- `SESSION.md` — estado de sesion actual
+- `CLAUDE.md` — current instructions (contains `[PENDING: guild-specialize]` placeholders)
+- `PROJECT.md` — identity and stack declared during init
+- `SESSION.md` — current session state
 
-### Paso 2 — Explorar el proyecto real
+### Step 2 — Explore the real project
 
-Investiga la estructura real del proyecto buscando:
+Investigate the real project structure looking for:
 
-**Dependencias y versiones:**
+**Dependencies and versions:**
 
 - `package.json` (Node.js/frontend)
-- `pom.xml` o `build.gradle` (Java)
-- `requirements.txt` o `pyproject.toml` (Python)
+- `pom.xml` or `build.gradle` (Java)
+- `requirements.txt` or `pyproject.toml` (Python)
 - `Gemfile` (Ruby)
 - `go.mod` (Go)
 - `Cargo.toml` (Rust)
 
-**Arquitectura y estructura:**
+**Architecture and structure:**
 
-- Carpetas `src/`, `app/`, `lib/`, `pkg/`, `internal/`
-- Patron de organizacion: por capas, por features, por dominio
-- Entry points del proyecto
+- Folders `src/`, `app/`, `lib/`, `pkg/`, `internal/`
+- Organization pattern: by layers, by features, by domain
+- Project entry points
 
-**Configuracion y convenciones:**
+**Configuration and conventions:**
 
 - `tsconfig.json`, `eslint.config.*`, `.prettierrc`
-- `.env.example`, `.env.local` (variables de entorno — NO leer `.env` real)
+- `.env.example`, `.env.local` (environment variables — do NOT read real `.env`)
 - `Dockerfile`, `docker-compose.yml`
 - CI/CD: `.github/workflows/`, `.gitlab-ci.yml`
 
-**Base de datos y migraciones:**
+**Database and migrations:**
 
-- Carpeta `migrations/`, `db/`, `prisma/`, `drizzle/`
-- ORM o query builder configurado
-- Schema existente
+- Folder `migrations/`, `db/`, `prisma/`, `drizzle/`
+- Configured ORM or query builder
+- Existing schema
 
-**Documentacion existente:**
+**Existing documentation:**
 
-- `README.md` — vision general del proyecto
-- Documentacion interna en `docs/`
+- `README.md` — project overview
+- Internal documentation in `docs/`
 
-### Paso 3 — Enriquecer CLAUDE.md
+### Step 3 — Enrich CLAUDE.md
 
-Reemplaza todos los placeholders `[PENDIENTE: guild-specialize]` en CLAUDE.md con informacion real:
+Replace all `[PENDING: guild-specialize]` placeholders in CLAUDE.md with real information:
 
-- **Stack con versiones exactas**: extraidas de los archivos de dependencias
-- **Estructura de carpetas explicada**: que hace cada carpeta principal
-- **Convenciones de codigo detectadas**: linter, formatter, estilo de imports
-- **Patrones de arquitectura identificados**: MVC, hexagonal, modular, etc.
-- **Variables de entorno conocidas**: listadas desde `.env.example`
-- **Limitaciones y deuda tecnica visible**: dependencias desactualizadas, TODOs encontrados
-- **Comandos utiles del proyecto**: scripts de npm/make/cargo detectados
+- **Stack with exact versions**: extracted from dependency files
+- **Folder structure explained**: what each main folder does
+- **Detected code conventions**: linter, formatter, import style
+- **Identified architecture patterns**: MVC, hexagonal, modular, etc.
+- **Known environment variables**: listed from `.env.example`
+- **Visible limitations and technical debt**: outdated dependencies, TODOs found
+- **Useful project commands**: detected npm/make/cargo scripts
 
-### Paso 4 — Especializar agentes
+### Step 4 — Specialize agents
 
-Para cada agente en `.claude/agents/*.md`, agrega contexto especifico del proyecto:
+For each agent in `.claude/agents/*.md`, add project-specific context:
 
-- **advisor.md**: dominio real del proyecto, usuarios objetivo
-- **tech-lead.md**: stack especifico, patrones detectados, decisiones de arquitectura
-- **product-owner.md**: funcionalidades existentes, backlog visible
-- **developer.md**: convenciones de codigo, framework principal, estructura de archivos
-- **code-reviewer.md**: reglas de lint, patrones del proyecto, anti-patrones a vigilar
-- **qa.md**: framework de testing, comandos para ejecutar tests, cobertura actual
-- **bugfix.md**: stack de debugging, logs, herramientas disponibles
-- **db-migration.md**: ORM, herramienta de migraciones, schema actual (si aplica)
+- **advisor.md**: real project domain, target users
+- **tech-lead.md**: specific stack, detected patterns, architecture decisions
+- **product-owner.md**: existing functionality, visible backlog
+- **developer.md**: code conventions, main framework, file structure
+- **code-reviewer.md**: lint rules, project patterns, anti-patterns to watch
+- **qa.md**: testing framework, commands to run tests, current coverage
+- **bugfix.md**: debugging stack, logs, available tools
+- **db-migration.md**: ORM, migration tool, current schema (if applicable)
 
-Usa el tool `Task` para invocar cada agente leyendo su `.claude/agents/[nombre].md` si necesitas perspectiva especializada para enriquecer su configuracion.
+Use the `Task` tool to invoke each agent by reading their `.claude/agents/[name].md` if you need a specialized perspective to enrich their configuration.
 
-### Paso 5 — Confirmar
+### Step 5 — Confirm
 
-Presenta un resumen de lo detectado:
+Present a summary of what was detected:
 
 ```text
-Guild v1 especializado para [nombre-proyecto]
+Guild v1 specialized for [project-name]
 
-Stack detectado:
-- [lista de tecnologias con versiones]
+Detected stack:
+- [list of technologies with versions]
 
-Arquitectura:
-- [patron identificado]
-- [estructura principal]
+Architecture:
+- [identified pattern]
+- [main structure]
 
-Agentes actualizados:
-- [lista de agentes con su especializacion aplicada]
+Updated agents:
+- [list of agents with their applied specialization]
 
-Ejecuta /status para ver el estado completo.
+Run /status to see the full state.
 ```
 
-### Paso 6 — Commit enrichment immediately
+### Step 6 — Commit enrichment immediately
 
 **CRITICAL:** After enriching CLAUDE.md and agent files, commit the changes immediately as their own atomic commit. Do NOT leave them as unstaged changes — they are vulnerable to `git stash` and other operations.
 
@@ -146,11 +146,11 @@ Agents updated:
 Run /status to see the full state.
 ```
 
-## Notas importantes
+## Important Notes
 
-- NUNCA leas archivos `.env` reales — solo `.env.example` o `.env.local`
-- Si no puedes detectar algo con certeza, pregunta al usuario en vez de asumir
-- Prioriza precision sobre completitud — es mejor decir "no detectado" que inventar
-- Los agentes deben quedar especializados al stack real, no generico
+- NEVER read real `.env` files — only `.env.example` or `.env.local`
+- If you cannot detect something with certainty, ask the user instead of assuming
+- Prioritize accuracy over completeness — it is better to say "not detected" than to fabricate
+- Agents should be specialized to the real stack, not generic
 - NEVER use `git stash` in automated pipelines — use `wip:` commits instead
 - CLAUDE.md changes must always be committed separately from feature code

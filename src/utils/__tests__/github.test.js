@@ -222,7 +222,7 @@ describe('createBugIssue', () => {
     );
     expect(commentCalls).toHaveLength(1);
     expect(commentCalls[0][1]).toContain('--body');
-    expect(commentCalls[0][1][4]).toContain('Bug encontrado:');
+    expect(commentCalls[0][1][4]).toContain('Bug found:');
   });
 
   it('does not comment when parentIssueNumber is not provided', () => {
