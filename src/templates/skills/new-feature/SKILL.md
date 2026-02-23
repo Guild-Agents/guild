@@ -22,6 +22,7 @@ Prepara el entorno para trabajar en una nueva feature: crea branch, actualiza SE
 ### Paso 1 — Obtener nombre
 
 Si el usuario no proporciono nombre, preguntale:
+
 - Nombre corto para la feature (se usara en el nombre del branch)
 - Descripcion breve (1-2 oraciones)
 
@@ -46,6 +47,7 @@ Actualiza SESSION.md con el contexto de la nueva feature:
 ### Paso 4 — GitHub Issue (opcional)
 
 Si el proyecto tiene integracion GitHub configurada en PROJECT.md:
+
 1. Pregunta si quiere crear un GitHub Issue para la feature
 2. Si acepta, crea el issue con `gh issue create`
 3. Registra la URL del issue en SESSION.md
@@ -53,6 +55,7 @@ Si el proyecto tiene integracion GitHub configurada en PROJECT.md:
 ### Paso 5 — Confirmar
 
 Confirma al usuario:
+
 - Branch creado: `feature/[nombre]`
 - SESSION.md actualizado
 - GitHub Issue creado (si aplica)

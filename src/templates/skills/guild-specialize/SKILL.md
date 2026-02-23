@@ -31,6 +31,7 @@ Lee los archivos de configuracion de Guild:
 Investiga la estructura real del proyecto buscando:
 
 **Dependencias y versiones:**
+
 - `package.json` (Node.js/frontend)
 - `pom.xml` o `build.gradle` (Java)
 - `requirements.txt` o `pyproject.toml` (Python)
@@ -39,22 +40,26 @@ Investiga la estructura real del proyecto buscando:
 - `Cargo.toml` (Rust)
 
 **Arquitectura y estructura:**
+
 - Carpetas `src/`, `app/`, `lib/`, `pkg/`, `internal/`
 - Patron de organizacion: por capas, por features, por dominio
 - Entry points del proyecto
 
 **Configuracion y convenciones:**
+
 - `tsconfig.json`, `eslint.config.*`, `.prettierrc`
 - `.env.example`, `.env.local` (variables de entorno — NO leer `.env` real)
 - `Dockerfile`, `docker-compose.yml`
 - CI/CD: `.github/workflows/`, `.gitlab-ci.yml`
 
 **Base de datos y migraciones:**
+
 - Carpeta `migrations/`, `db/`, `prisma/`, `drizzle/`
 - ORM o query builder configurado
 - Schema existente
 
 **Documentacion existente:**
+
 - `README.md` — vision general del proyecto
 - Documentacion interna en `docs/`
 
@@ -89,7 +94,7 @@ Usa el tool `Task` para invocar cada agente leyendo su `.claude/agents/[nombre].
 
 Presenta un resumen de lo detectado:
 
-```
+```text
 Guild v1 especializado para [nombre-proyecto]
 
 Stack detectado:

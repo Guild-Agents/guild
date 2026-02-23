@@ -24,6 +24,7 @@ Pipeline completo para construir una feature de punta a punta con todos los agen
 **Agente:** Lee `.claude/agents/advisor.md` via Task tool
 **Input:** La descripcion de la feature proporcionada por el usuario
 **Proceso:**
+
 1. El Advisor evalua la feature contra la vision del proyecto
 2. Identifica riesgos, dependencias y conflictos con funcionalidad existente
 3. Emite evaluacion: Aprobado / Rechazado / Requiere ajustes
@@ -36,6 +37,7 @@ Pipeline completo para construir una feature de punta a punta con todos los agen
 **Agente:** Lee `.claude/agents/product-owner.md` via Task tool
 **Input:** La feature aprobada por el Advisor + sus observaciones
 **Proceso:**
+
 1. El Product Owner descompone la feature en tareas concretas
 2. Define criterios de aceptacion verificables para cada tarea
 3. Estima esfuerzo y sugiere orden de implementacion
@@ -47,6 +49,7 @@ Pipeline completo para construir una feature de punta a punta con todos los agen
 **Agente:** Lee `.claude/agents/tech-lead.md` via Task tool
 **Input:** Tareas del Product Owner + criterios de aceptacion
 **Proceso:**
+
 1. El Tech Lead define el approach de implementacion
 2. Identifica archivos a modificar, patrones a seguir, interfaces
 3. Anticipa riesgos tecnicos y propone mitigaciones
@@ -58,6 +61,7 @@ Pipeline completo para construir una feature de punta a punta con todos los agen
 **Agente:** Lee `.claude/agents/developer.md` via Task tool
 **Input:** Plan tecnico del Tech Lead + criterios de aceptacion del PO
 **Proceso:**
+
 1. El Developer implementa siguiendo el plan tecnico
 2. Escribe tests unitarios como parte de la implementacion
 3. Hace commits atomicos con mensajes descriptivos
@@ -70,6 +74,7 @@ Pipeline completo para construir una feature de punta a punta con todos los agen
 **Agente:** Lee `.claude/agents/code-reviewer.md` via Task tool
 **Input:** Los cambios implementados (git diff)
 **Proceso:**
+
 1. El Code Reviewer revisa calidad, patrones, seguridad y tests
 2. Clasifica hallazgos como Blocker, Warning o Suggestion
 
@@ -81,12 +86,14 @@ Pipeline completo para construir una feature de punta a punta con todos los agen
 **Agente:** Lee `.claude/agents/qa.md` via Task tool
 **Input:** Criterios de aceptacion del PO + codigo implementado
 **Proceso:**
+
 1. QA ejecuta los tests y valida criterios de aceptacion
 2. Prueba edge cases y escenarios de error
 3. Si encuentra bugs, reporta con pasos de reproduccion
 
 **Output:** Reporte QA con resultado por cada criterio de aceptacion
 **Condicion de loop:** Si hay bugs:
+
 1. Invoca agente Bugfix (lee `.claude/agents/bugfix.md` via Task tool) para corregir
 2. Vuelve a **Fase 5** (Review) para verificar el fix
 3. Maximo 2 ciclos de bugfix-review-QA

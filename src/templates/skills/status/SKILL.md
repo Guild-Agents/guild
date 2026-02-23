@@ -23,6 +23,7 @@ Muestra un resumen completo del estado actual del proyecto, la sesion activa y l
 ### Paso 1 — Leer archivos de estado
 
 Lee los archivos de configuracion de Guild:
+
 - `CLAUDE.md` — instrucciones y convenciones del proyecto
 - `PROJECT.md` — identidad, stack y agentes configurados
 - `SESSION.md` — estado de la sesion actual
@@ -31,7 +32,7 @@ Lee los archivos de configuracion de Guild:
 
 Muestra el resumen con el siguiente formato:
 
-```
+```text
 Guild v1 — [nombre del proyecto]
 
 Sesion actual:
@@ -55,6 +56,7 @@ Proximos pasos:
 ### Paso 3 — Sugerir acciones
 
 Si no hay tarea en curso, sugiere:
+
 - `/build-feature` para implementar algo nuevo
 - `/new-feature` para preparar el entorno de una feature
 - `/council` para debatir una decision
