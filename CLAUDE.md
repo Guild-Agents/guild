@@ -20,7 +20,9 @@ Guild es un CLI npm (`npm install -g guild-agents`, comando `guild`) que configu
 ## Comandos CLI
 ```bash
 npm test                    # tests (Vitest)
-npm run lint                # lint (ESLint flat config)
+npm run lint                # lint completo (ESLint + markdownlint)
+npm run lint:js             # solo ESLint (codigo JS)
+npm run lint:md             # solo markdownlint (templates .md)
 node bin/guild.js --help    # verificar CLI
 node bin/guild.js init      # probar onboarding v1
 ```
