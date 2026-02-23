@@ -30,9 +30,9 @@ Obtiene los cambios actuales:
 
 Ejecuta verificacion automatizada para dar contexto al reviewer:
 
-4. Ejecuta tests del proyecto (ej: `npm test`) — captura resultado
-5. Ejecuta lint del proyecto (ej: `npm run lint`) — captura resultado
-6. Incluye ambos resultados como contexto para el Code Reviewer
+1. Ejecuta tests del proyecto (ej: `npm test`) — captura resultado
+2. Ejecuta lint del proyecto (ej: `npm run lint`) — captura resultado
+3. Incluye ambos resultados como contexto para el Code Reviewer
 
 Nota: El Code Reviewer no tiene acceso a Bash (solo Read, Glob, Grep), por eso los tests y lint se ejecutan aqui antes de invocar al reviewer.
 
