@@ -1,42 +1,58 @@
 # Guild AI — CLI Framework para agentes de Claude Code
 
 ## Framework
-Este proyecto usa Guild. Leer PROJECT.md y SESSION.md al inicio de cada sesión antes de cualquier acción.
+Este proyecto usa Guild. Leer SESSION.md al inicio de cada sesion.
 
-## Qué es este proyecto
-Guild es un CLI npm (`npm install -g guild-agents`, comando `guild`) que configura un equipo de agentes IA especializados en cualquier proyecto que use Claude Code. El comando principal es `guild init`, que lanza un onboarding interactivo y genera toda la estructura necesaria.
+## Que es este proyecto
+Guild es un CLI npm (`npm install -g guild-agents`, comando `guild`) que configura un equipo de 8 agentes IA especializados y 10 skills en cualquier proyecto que use Claude Code. El comando principal es `guild init`, que lanza un onboarding interactivo y genera toda la estructura necesaria.
 
-**El proyecto usa sus propios agentes para construirse a sí mismo.**
+**Arquitectura v1:** Agentes = WHO (identidad plana en .md), Skills = HOW (workflows con SKILL.md). Composicion nativa de Claude Code — sin composer.js, sin active.md, sin expertise/.
+
+**El proyecto usa sus propios agentes para construirse a si mismo.**
 
 ## Reglas globales
-- Leer IMPLEMENTATION.md antes de empezar cualquier tarea nueva — tiene el mapa completo del proyecto
-- No modificar active.md directamente — se regenera via composer.js
-- No implementar sin plan aprobado por Advisor y dirección técnica del Tech Lead
-- El Developer escribe tests unitarios como parte de la implementación
-- Cobertura mínima antes de enviar a QA: 80% global, 90% en utils/
-- Actualizar SESSION.md al cerrar cada sesión
-- ESModules en todo el código — no CommonJS, no require()
+- No implementar sin plan aprobado por Advisor y direccion tecnica del Tech Lead
+- El Developer escribe tests unitarios como parte de la implementacion
+- Actualizar SESSION.md al cerrar cada sesion
+- ESModules en todo el codigo — no CommonJS, no require()
 - path.join() siempre para construir paths — nunca concatenar strings
 
-## Comandos CLI de referencia
+## Comandos CLI
 ```bash
-npm test                    # tests
-npm run lint                # lint
+npm test                    # tests (Vitest)
+npm run lint                # lint (ESLint flat config)
 node bin/guild.js --help    # verificar CLI
-node bin/guild.js init      # probar onboarding
+node bin/guild.js init      # probar onboarding v1
 ```
 
-## Slash commands del equipo
-- /advisor        — evaluar ideas y coherencia con el dominio developer tooling
-- /tech-lead      — dirección técnica, arquitectura Node.js CLI
-- /po             — documentar features, gestionar backlog
-- /developer      — implementar (Node.js + ESModules + Clack)
-- /qa             — validar con Vitest
-- /bug-fixer      — investigar bugs
-- /code-review    — revisar antes del PR
-- /feature        — flujo completo de una feature
-- /session-start  — retomar trabajo
-- /session-end    — guardar estado
+## CLI commands
+- `guild init`       — onboarding interactivo, genera estructura v1
+- `guild new-agent`  — crear agente personalizado (.md plano)
+- `guild status`     — ver estado del proyecto
 
-## Stack activo
-Ver PROJECT.md → Agentes activos y sus modos
+## Skills del equipo
+- /guild-specialize  — enriquecer CLAUDE.md explorando el proyecto real
+- /build-feature     — pipeline completo de desarrollo
+- /new-feature       — crear branch y scaffold para feature
+- /council           — debatir decisiones con multiples agentes
+- /review            — code review sobre el diff actual
+- /qa-cycle          — ciclo QA + bugfix
+- /status            — ver estado del proyecto
+- /dev-flow          — ver fase actual del pipeline
+- /session-start     — cargar contexto y retomar trabajo
+- /session-end       — guardar estado en SESSION.md
+
+## Stack
+Node.js 20+, ESModules, Commander.js, @clack/prompts, Vitest, ESLint
+
+## Estructura del proyecto
+```
+src/
+  commands/       — init.js, new-agent.js, status.js
+  utils/          — generators.js, files.js, github.js
+  templates/
+    agents/       — 8 archivos .md (advisor, developer, etc.)
+    skills/       — 10 directorios con SKILL.md
+bin/
+  guild.js        — entry point CLI (Commander)
+```
