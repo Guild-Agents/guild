@@ -1,5 +1,5 @@
 /**
- * files.js — Utilidades de sistema de archivos para Guild v1
+ * files.js — File system utilities for Guild v1
  */
 
 import { mkdirSync, copyFileSync, existsSync, readdirSync, readFileSync } from 'fs';
@@ -12,7 +12,7 @@ const AGENTS_DIR = join('.claude', 'agents');
 const SKILLS_DIR = join('.claude', 'skills');
 
 /**
- * Lista los nombres de los 9 agentes v1.
+ * Returns the names of the 9 v1 agents.
  */
 export function getAgentNames() {
   return [
@@ -29,7 +29,7 @@ export function getAgentNames() {
 }
 
 /**
- * Copia los templates de agentes y skills al proyecto del usuario.
+ * Copies agent and skill templates to the user's project.
  */
 export async function copyTemplates() {
   mkdirSync(AGENTS_DIR, { recursive: true });
@@ -65,7 +65,7 @@ export async function copyTemplates() {
 }
 
 /**
- * Lee el contenido de PROJECT.md si existe.
+ * Reads the contents of PROJECT.md if it exists.
  */
 export function readProjectMd() {
   const path = 'PROJECT.md';
@@ -74,7 +74,7 @@ export function readProjectMd() {
 }
 
 /**
- * Lee el contenido de SESSION.md si existe.
+ * Reads the contents of SESSION.md if it exists.
  */
 export function readSessionMd() {
   const path = 'SESSION.md';
@@ -83,9 +83,9 @@ export function readSessionMd() {
 }
 
 /**
- * Resuelve la raiz del proyecto Guild caminando hacia arriba desde startDir.
- * Busca .claude/ o PROJECT.md como marcadores de un proyecto Guild.
- * Retorna la ruta absoluta del proyecto o null si no se encuentra.
+ * Resolves the Guild project root by walking up from startDir.
+ * Looks for .claude/ or PROJECT.md as markers of a Guild project.
+ * Returns the absolute path to the project or null if not found.
  */
 export function resolveProjectRoot(startDir = process.cwd()) {
   let dir = resolve(startDir);

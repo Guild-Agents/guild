@@ -6,6 +6,8 @@
  *   guild init           — interactive onboarding v1
  *   guild new-agent      — create a new agent
  *   guild status         — view project status
+ *   guild doctor         — verify setup and report issues
+ *   guild list           — list installed agents and skills
  */
 
 import { program } from 'commander';

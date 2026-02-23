@@ -87,6 +87,7 @@ For each agent in `.claude/agents/*.md`, add project-specific context:
 - **qa.md**: testing framework, commands to run tests, current coverage
 - **bugfix.md**: debugging stack, logs, available tools
 - **db-migration.md**: ORM, migration tool, current schema (if applicable)
+- **platform-expert.md**: Claude Code version, known permission bugs, hook configuration
 
 Use the `Task` tool to invoke each agent by reading their `.claude/agents/[name].md` if you need a specialized perspective to enrich their configuration.
 

@@ -1,8 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdirSync, existsSync, rmSync, readdirSync, mkdtempSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { mkdirSync, existsSync, rmSync, readdirSync, mkdtempSync, writeFileSync, readFileSync } from 'fs';
+import { join, dirname } from 'path';
 import { tmpdir } from 'os';
+import { fileURLToPath } from 'url';
 import { copyTemplates, getAgentNames, resolveProjectRoot } from '../files.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const TEMPLATES_AGENTS_DIR = join(__dirname, '..', '..', 'templates', 'agents');
 
 const TEST_DIR = join(import.meta.dirname, '__tmp_files__');
 
@@ -83,6 +87,70 @@ describe('copyTemplates', () => {
       const agentPath = join('.claude', 'agents', name);
       // Should not be a directory
       expect(existsSync(join(agentPath, 'base.md'))).toBe(false);
+    }
+  });
+});
+
+// --- Agent template frontmatter validation ---
+
+describe('agent template frontmatter', () => {
+  /**
+   * Parses YAML frontmatter from a markdown string.
+   * Returns an object with the frontmatter fields.
+   */
+  function parseFrontmatter(content) {
+    const match = content.match(/^---\n([\s\S]*?)\n---/);
+    if (!match) return {};
+    const fields = {};
+    for (const line of match[1].split('\n')) {
+      const colonIdx = line.indexOf(':');
+      if (colonIdx > 0) {
+        const key = line.slice(0, colonIdx).trim();
+        const value = line.slice(colonIdx + 1).trim().replace(/^["']|["']$/g, '');
+        fields[key] = value;
+      }
+    }
+    return fields;
+  }
+
+  it('every agent template has required frontmatter fields', () => {
+    const requiredFields = ['name', 'description', 'tools', 'permissionMode'];
+
+    for (const agentName of getAgentNames()) {
+      const filePath = join(TEMPLATES_AGENTS_DIR, `${agentName}.md`);
+      const content = readFileSync(filePath, 'utf8');
+      const frontmatter = parseFrontmatter(content);
+
+      for (const field of requiredFields) {
+        expect(frontmatter[field], `${agentName}.md missing frontmatter field: ${field}`).toBeDefined();
+        expect(frontmatter[field].length, `${agentName}.md has empty frontmatter field: ${field}`).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it('analysis agents use plan permission mode', () => {
+    const analysisAgents = ['advisor', 'product-owner', 'tech-lead', 'code-reviewer'];
+
+    for (const agentName of analysisAgents) {
+      const filePath = join(TEMPLATES_AGENTS_DIR, `${agentName}.md`);
+      const content = readFileSync(filePath, 'utf8');
+      const frontmatter = parseFrontmatter(content);
+
+      expect(frontmatter.permissionMode, `${agentName}.md should use plan mode`).toBe('plan');
+      expect(frontmatter.tools, `${agentName}.md should have read-only tools`).not.toContain('Bash');
+    }
+  });
+
+  it('implementation agents use bypassPermissions mode', () => {
+    const implAgents = ['developer', 'bugfix', 'qa', 'db-migration', 'platform-expert'];
+
+    for (const agentName of implAgents) {
+      const filePath = join(TEMPLATES_AGENTS_DIR, `${agentName}.md`);
+      const content = readFileSync(filePath, 'utf8');
+      const frontmatter = parseFrontmatter(content);
+
+      expect(frontmatter.permissionMode, `${agentName}.md should use bypassPermissions`).toBe('bypassPermissions');
+      expect(frontmatter.tools, `${agentName}.md should have Bash access`).toContain('Bash');
     }
   });
 });
