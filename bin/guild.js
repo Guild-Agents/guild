@@ -26,8 +26,13 @@ program
   .command('init')
   .description('Inicializar Guild v1 en el proyecto actual')
   .action(async () => {
-    const { runInit } = await import('../src/commands/init.js');
-    await runInit();
+    try {
+      const { runInit } = await import('../src/commands/init.js');
+      await runInit();
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
   });
 
 // guild new-agent
@@ -36,8 +41,13 @@ program
   .description('Crear un nuevo agente')
   .argument('<name>', 'Nombre del agente (lowercase, guiones)')
   .action(async (name) => {
-    const { runNewAgent } = await import('../src/commands/new-agent.js');
-    await runNewAgent(name);
+    try {
+      const { runNewAgent } = await import('../src/commands/new-agent.js');
+      await runNewAgent(name);
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
   });
 
 // guild status
@@ -45,8 +55,13 @@ program
   .command('status')
   .description('Ver estado del proyecto Guild')
   .action(async () => {
-    const { runStatus } = await import('../src/commands/status.js');
-    await runStatus();
+    try {
+      const { runStatus } = await import('../src/commands/status.js');
+      await runStatus();
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
   });
 
 program.parse();

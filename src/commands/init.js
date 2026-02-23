@@ -28,7 +28,7 @@ export async function runInit() {
 
     if (p.isCancel(overwrite) || !overwrite) {
       p.cancel('Cancelado.');
-      process.exit(0);
+      return;
     }
   }
 
@@ -40,7 +40,7 @@ export async function runInit() {
       if (!val) return 'El nombre es requerido';
     },
   });
-  if (p.isCancel(name)) { p.cancel('Cancelado.'); process.exit(0); }
+  if (p.isCancel(name)) { p.cancel('Cancelado.'); return; }
 
   // ─── Tipo ───────────────────────────────────────────────────────────────────
   const type = await p.select({
@@ -53,7 +53,7 @@ export async function runInit() {
       { value: 'fullstack', label: 'Otro / Fullstack' },
     ],
   });
-  if (p.isCancel(type)) { p.cancel('Cancelado.'); process.exit(0); }
+  if (p.isCancel(type)) { p.cancel('Cancelado.'); return; }
 
   // ─── Stack ──────────────────────────────────────────────────────────────────
   const stack = await p.text({
@@ -63,7 +63,7 @@ export async function runInit() {
       if (!val) return 'El stack es requerido';
     },
   });
-  if (p.isCancel(stack)) { p.cancel('Cancelado.'); process.exit(0); }
+  if (p.isCancel(stack)) { p.cancel('Cancelado.'); return; }
 
   // ─── GitHub ─────────────────────────────────────────────────────────────────
   let github = null;
@@ -118,8 +118,7 @@ export async function runInit() {
     spinner.stop('Estructura creada.');
   } catch (error) {
     spinner.stop('Error durante la inicializacion.');
-    p.log.error(error.message);
-    process.exit(1);
+    throw error;
   }
 
   // ─── Resumen ────────────────────────────────────────────────────────────────
