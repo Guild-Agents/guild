@@ -1,12 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdirSync, readFileSync, rmSync, existsSync, writeFileSync } from 'fs';
+import { mkdirSync, readFileSync, rmSync, existsSync } from 'fs';
 import { join } from 'path';
-import {
-  generateProjectMd,
-  generateSessionMd,
-  generateClaudeMd,
-  updateProjectMdModes,
-} from '../generators.js';
+import { generateProjectMd, generateSessionMd, generateClaudeMd } from '../generators.js';
 
 const TEST_DIR = join(import.meta.dirname, '__tmp_generators__');
 
@@ -16,12 +11,11 @@ function setup() {
 
 function makeProjectData(overrides = {}) {
   return {
-    identity: { name: 'test-project', domain: 'Testing domain', description: 'A test project', scope: 'MVP scope' },
-    stack: { type: 'fullstack', frontend: 'react-vite', backend: 'node-express', db: ['postgres', 'redis'], details: 'Node 20' },
-    architecture: 'Feature-based folders',
-    domainRules: 'No global state',
-    testing: { framework: 'vitest', tdd: true },
-    github: { enabled: true, repoUrl: 'https://github.com/test/repo' },
+    name: 'test-project',
+    type: 'fullstack',
+    stack: 'React + Vite, Node.js + Express, postgres, redis',
+    github: { repoUrl: 'https://github.com/test/repo' },
+    hasExistingCode: false,
     ...overrides,
   };
 }
@@ -40,122 +34,44 @@ describe('generateProjectMd', () => {
     if (existsSync(TEST_DIR)) rmSync(TEST_DIR, { recursive: true });
   });
 
-  it('generates PROJECT.md with correct identity section', async () => {
+  it('generates PROJECT.md with project identity', async () => {
     await generateProjectMd(makeProjectData());
-
     const content = readFileSync('PROJECT.md', 'utf8');
     expect(content).toContain('**Nombre:** test-project');
-    expect(content).toContain('**Dominio:** Testing domain');
-    expect(content).toContain('**Descripción:** A test project');
-    expect(content).toContain('**Alcance inicial:** MVP scope');
+    expect(content).toContain('**Tipo:** fullstack');
+    expect(content).toContain('**Stack:** React + Vite, Node.js + Express, postgres, redis');
   });
 
-  it('generates correct stack section', async () => {
+  it('generates PROJECT.md with GitHub repo when provided', async () => {
     await generateProjectMd(makeProjectData());
-
     const content = readFileSync('PROJECT.md', 'utf8');
-    expect(content).toContain('**Frontend:** React + Vite');
-    expect(content).toContain('**Backend:** Node.js + Express');
-    expect(content).toContain('**Base de datos:** postgres, redis');
-    expect(content).toContain('**Detalles adicionales:** Node 20');
+    expect(content).toContain('**Repositorio:** https://github.com/test/repo');
   });
 
-  it('generates testing section with TDD enabled', async () => {
-    await generateProjectMd(makeProjectData());
-
-    const content = readFileSync('PROJECT.md', 'utf8');
-    expect(content).toContain('**Framework:** vitest');
-    expect(content).toContain('**TDD:** Sí');
-  });
-
-  it('generates testing section with TDD disabled', async () => {
-    await generateProjectMd(makeProjectData({ testing: { framework: 'jest', tdd: false } }));
-
-    const content = readFileSync('PROJECT.md', 'utf8');
-    expect(content).toContain('**TDD:** No');
-  });
-
-  it('generates agent modes section', async () => {
-    await generateProjectMd(makeProjectData());
-
-    const content = readFileSync('PROJECT.md', 'utf8');
-    expect(content).toContain('**developer:** react, vite, node, express');
-    expect(content).toContain('**dba:** postgres, redis');
-    expect(content).toContain('**qa:** vitest');
-    expect(content).toContain('**bug-fixer:** react, vite, node, express');
-  });
-
-  it('generates GitHub section when enabled', async () => {
-    await generateProjectMd(makeProjectData());
-
-    const content = readFileSync('PROJECT.md', 'utf8');
-    expect(content).toContain('**Habilitado:** Sí');
-    expect(content).toContain('**Repo:** https://github.com/test/repo');
-  });
-
-  it('generates GitHub section when disabled', async () => {
+  it('handles project with no repo', async () => {
     await generateProjectMd(makeProjectData({ github: null }));
-
     const content = readFileSync('PROJECT.md', 'utf8');
-    expect(content).toContain('**Habilitado:** No');
+    expect(content).not.toContain('**Repositorio:**');
   });
 
-  it('handles missing optional fields gracefully', async () => {
-    const data = makeProjectData({
-      identity: { name: 'minimal', domain: 'test', description: 'desc' },
-      stack: { type: 'backend', frontend: null, backend: null, db: ['none'], details: null },
-      architecture: null,
-      domainRules: null,
-    });
-
-    await generateProjectMd(data);
-
+  it('marks existing code status correctly', async () => {
+    await generateProjectMd(makeProjectData({ hasExistingCode: true }));
     const content = readFileSync('PROJECT.md', 'utf8');
-    expect(content).toContain('**Nombre:** minimal');
-    expect(content).toContain('Por definir con el Tech Lead');
-    expect(content).toContain('Por definir con el Advisor');
-  });
-});
-
-describe('generateSessionMd', () => {
-  let originalCwd;
-
-  beforeEach(() => {
-    originalCwd = process.cwd();
-    mkdirSync(TEST_DIR, { recursive: true });
-    setup();
+    expect(content).toContain('**Codigo existente:** Si');
   });
 
-  afterEach(() => {
-    process.chdir(originalCwd);
-    if (existsSync(TEST_DIR)) rmSync(TEST_DIR, { recursive: true });
+  it('marks new project status correctly', async () => {
+    await generateProjectMd(makeProjectData({ hasExistingCode: false }));
+    const content = readFileSync('PROJECT.md', 'utf8');
+    expect(content).toContain('**Codigo existente:** No');
   });
 
-  it('generates SESSION.md with correct structure', async () => {
-    await generateSessionMd(makeProjectData());
-
-    const content = readFileSync('SESSION.md', 'utf8');
-    expect(content).toContain('# SESSION.md');
-    expect(content).toContain('## Sesión activa');
-    expect(content).toContain('**Tarea en curso:** —');
-    expect(content).toContain('**Agente activo:** —');
-    expect(content).toContain('Proyecto recién inicializado con Guild');
-  });
-
-  it('includes current date', async () => {
-    await generateSessionMd(makeProjectData());
-
-    const content = readFileSync('SESSION.md', 'utf8');
-    const today = new Date().toISOString().split('T')[0];
-    expect(content).toContain(`**Fecha:** ${today}`);
-  });
-
-  it('includes next steps', async () => {
-    await generateSessionMd(makeProjectData());
-
-    const content = readFileSync('SESSION.md', 'utf8');
-    expect(content).toContain('## Próximos pasos');
-    expect(content).toContain('/guild-specialize');
+  it('does not contain v0 concepts', async () => {
+    await generateProjectMd(makeProjectData());
+    const content = readFileSync('PROJECT.md', 'utf8');
+    expect(content).not.toContain('Agentes activos');
+    expect(content).not.toContain('Estrategia de testing');
+    expect(content).not.toContain('Decisiones arquitectonicas');
   });
 });
 
@@ -175,43 +91,50 @@ describe('generateClaudeMd', () => {
 
   it('generates CLAUDE.md with project name as title', async () => {
     await generateClaudeMd(makeProjectData());
-
     const content = readFileSync('CLAUDE.md', 'utf8');
     expect(content).toContain('# test-project');
   });
 
   it('includes Guild framework reference', async () => {
     await generateClaudeMd(makeProjectData());
-
     const content = readFileSync('CLAUDE.md', 'utf8');
-    expect(content).toContain('Guild AI');
-    expect(content).toContain('PROJECT.md');
+    expect(content).toContain('Guild');
     expect(content).toContain('SESSION.md');
   });
 
-  it('includes all slash commands', async () => {
+  it('includes PENDIENTE placeholders for guild-specialize', async () => {
     await generateClaudeMd(makeProjectData());
-
     const content = readFileSync('CLAUDE.md', 'utf8');
-    expect(content).toContain('/advisor');
-    expect(content).toContain('/tech-lead');
-    expect(content).toContain('/developer');
-    expect(content).toContain('/qa');
-    expect(content).toContain('/session-start');
-    expect(content).toContain('/session-end');
-    expect(content).toContain('/guild-specialize');
+    expect(content).toContain('[PENDIENTE: guild-specialize]');
   });
 
-  it('includes global rules', async () => {
+  it('lists skills instead of slash commands', async () => {
     await generateClaudeMd(makeProjectData());
-
     const content = readFileSync('CLAUDE.md', 'utf8');
-    expect(content).toContain('No modificar active.md');
-    expect(content).toContain('Actualizar SESSION.md');
+    expect(content).toContain('/build-feature');
+    expect(content).toContain('/council');
+    expect(content).toContain('/guild-specialize');
+    expect(content).toContain('/session-start');
+    expect(content).toContain('/session-end');
+  });
+
+  it('does not reference v0 concepts', async () => {
+    await generateClaudeMd(makeProjectData());
+    const content = readFileSync('CLAUDE.md', 'utf8');
+    expect(content).not.toContain('active.md');
+    expect(content).not.toContain('composer');
+    expect(content).not.toContain('guild mode');
+    expect(content).not.toContain('expertise');
+  });
+
+  it('includes stack in content', async () => {
+    await generateClaudeMd(makeProjectData());
+    const content = readFileSync('CLAUDE.md', 'utf8');
+    expect(content).toContain('React + Vite, Node.js + Express, postgres, redis');
   });
 });
 
-describe('updateProjectMdModes', () => {
+describe('generateSessionMd', () => {
   let originalCwd;
 
   beforeEach(() => {
@@ -225,27 +148,30 @@ describe('updateProjectMdModes', () => {
     if (existsSync(TEST_DIR)) rmSync(TEST_DIR, { recursive: true });
   });
 
-  it('updates agent modes in existing PROJECT.md', async () => {
-    writeFileSync('PROJECT.md', '## Agentes activos y sus modos\n- **developer:** base\n- **qa:** vitest\n', 'utf8');
-
-    await updateProjectMdModes('developer', ['react', 'vite']);
-
-    const content = readFileSync('PROJECT.md', 'utf8');
-    expect(content).toContain('**developer:** react, vite');
-    expect(content).toContain('**qa:** vitest');
+  it('generates SESSION.md with correct structure', async () => {
+    await generateSessionMd();
+    const content = readFileSync('SESSION.md', 'utf8');
+    expect(content).toContain('# SESSION.md');
+    expect(content).toContain('## Sesion activa');
+    expect(content).toContain('**Tarea en curso:**');
   });
 
-  it('sets "solo base" when modes are empty', async () => {
-    writeFileSync('PROJECT.md', '- **developer:** react, vite\n', 'utf8');
-
-    await updateProjectMdModes('developer', []);
-
-    const content = readFileSync('PROJECT.md', 'utf8');
-    expect(content).toContain('**developer:** solo base');
+  it('includes current date', async () => {
+    await generateSessionMd();
+    const content = readFileSync('SESSION.md', 'utf8');
+    const today = new Date().toISOString().split('T')[0];
+    expect(content).toContain(`**Fecha:** ${today}`);
   });
 
-  it('does nothing when PROJECT.md does not exist', async () => {
-    // Should not throw
-    await updateProjectMdModes('developer', ['react']);
+  it('references guild-specialize as next step', async () => {
+    await generateSessionMd();
+    const content = readFileSync('SESSION.md', 'utf8');
+    expect(content).toContain('/guild-specialize');
+  });
+
+  it('does not reference v0 tasks directory', async () => {
+    await generateSessionMd();
+    const content = readFileSync('SESSION.md', 'utf8');
+    expect(content).not.toContain('tasks/');
   });
 });
