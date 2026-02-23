@@ -9,20 +9,28 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.6] - 2026-02-23
+
+### Added
+
+- Test coverage reporting in CI via `@vitest/coverage-v8`
+- Release automation workflow triggered by version tags (`.github/workflows/release.yml`)
+- Vitest config file for coverage scope (`vitest.config.js`)
+
+### Changed
+
+- CI test step now runs with coverage (`npx vitest run --coverage`)
+
 ## [0.2.5] - 2026-02-23
 
 ### Added
 
 - Security audit job in CI (`npm audit --audit-level=moderate`)
 - Dependabot config for automated npm and GitHub Actions dependency PRs
-- Test coverage reporting in CI via `@vitest/coverage-v8`
-- Release automation workflow triggered by version tags
-- Vitest config file for coverage scope (`vitest.config.js`)
 
 ### Changed
 
 - Remove redundant `lint-markdown` standalone CI job (covered by `npm run lint` since v0.2.3)
-- CI test step now runs with coverage (`npx vitest run --coverage`)
 
 ### Fixed
 
@@ -106,7 +114,8 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-[Unreleased]: https://github.com/Guild-Agents/guild/compare/v0.2.5...HEAD
+[Unreleased]: https://github.com/Guild-Agents/guild/compare/v0.2.6...HEAD
+[0.2.6]: https://github.com/Guild-Agents/guild/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/Guild-Agents/guild/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/Guild-Agents/guild/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/Guild-Agents/guild/compare/v0.2.2...v0.2.3
