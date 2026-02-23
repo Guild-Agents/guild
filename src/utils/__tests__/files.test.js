@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdirSync, existsSync, rmSync, readdirSync } from 'fs';
+import { mkdirSync, existsSync, rmSync, readdirSync, mkdtempSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { copyTemplates, getAgentNames } from '../files.js';
+import { tmpdir } from 'os';
+import { copyTemplates, getAgentNames, resolveProjectRoot } from '../files.js';
 
 const TEST_DIR = join(import.meta.dirname, '__tmp_files__');
 
@@ -82,5 +83,48 @@ describe('copyTemplates', () => {
       // Should not be a directory
       expect(existsSync(join(agentPath, 'base.md'))).toBe(false);
     }
+  });
+});
+
+// --- Tests for resolveProjectRoot ---
+
+describe('resolveProjectRoot', () => {
+  let tempDir;
+
+  beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), 'guild-root-test-'));
+  });
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  it('should return null when no project markers found', () => {
+    const result = resolveProjectRoot(tempDir);
+    expect(result).toBeNull();
+  });
+
+  it('should find root when .claude/ directory exists', () => {
+    mkdirSync(join(tempDir, '.claude'));
+    const result = resolveProjectRoot(tempDir);
+    expect(result).toBe(tempDir);
+  });
+
+  it('should find root when PROJECT.md exists', () => {
+    writeFileSync(join(tempDir, 'PROJECT.md'), '# Test');
+    const result = resolveProjectRoot(tempDir);
+    expect(result).toBe(tempDir);
+  });
+
+  it('should find root from nested subdirectory', () => {
+    mkdirSync(join(tempDir, '.claude'));
+    const nested = join(tempDir, 'sub1', 'sub2');
+    mkdirSync(nested, { recursive: true });
+    const result = resolveProjectRoot(nested);
+    expect(result).toBe(tempDir);
+  });
+
+  it('should not throw when called without arguments', () => {
+    expect(() => resolveProjectRoot()).not.toThrow();
   });
 });
