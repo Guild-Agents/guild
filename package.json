@@ -17,7 +17,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "lint": "eslint src/",
+    "lint": "eslint src/ && markdownlint-cli2 'src/templates/**/*.md'",
+    "lint:js": "eslint src/",
+    "lint:md": "markdownlint-cli2 'src/templates/**/*.md'",
     "dev": "node bin/guild.js",
     "prepublishOnly": "npm test && npm run lint"
   },
@@ -59,6 +61,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "eslint": "^10.0.1",
+    "markdownlint-cli2": "^0.21.0",
     "vitest": "^4.0.18"
   }
 }
