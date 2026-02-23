@@ -110,9 +110,22 @@ Agentes actualizados:
 Ejecuta /status para ver el estado completo.
 ```
 
+### Paso 6 — Commit enrichment immediately
+
+**CRITICAL:** After enriching CLAUDE.md and agent files, commit the changes immediately as their own atomic commit. Do NOT leave them as unstaged changes — they are vulnerable to `git stash` and other operations.
+
+```bash
+git add CLAUDE.md .claude/agents/*.md
+git commit -m "chore: enrich CLAUDE.md and agents via guild-specialize"
+```
+
+This ensures enrichment survives any subsequent git operations (stash, checkout, rebase).
+
 ## Notas importantes
 
 - NUNCA leas archivos `.env` reales — solo `.env.example` o `.env.local`
 - Si no puedes detectar algo con certeza, pregunta al usuario en vez de asumir
 - Prioriza precision sobre completitud — es mejor decir "no detectado" que inventar
 - Los agentes deben quedar especializados al stack real, no generico
+- NEVER use `git stash` in automated pipelines — use `wip:` commits instead
+- CLAUDE.md changes must always be committed separately from feature code

@@ -27,7 +27,19 @@ Lee los archivos de estado de Guild:
 - `SESSION.md` — estado de la ultima sesion, tarea en curso, proximos pasos
 - `PROJECT.md` — identidad del proyecto, stack, agentes configurados
 
-### Paso 2 — Presentar estado
+### Paso 2 — Detect resumable work
+
+Check for `wip:` checkpoint commits on active branches:
+
+```bash
+git branch --list "feature/*" --list "fix/*" | while read branch; do
+  git log --oneline "$branch" -1 | grep "^wip:" && echo "Resumable: $branch"
+done
+```
+
+If `wip:` commits are found, present them to the user with the phase they were in when interrupted.
+
+### Paso 3 — Presentar estado
 
 Muestra un resumen de la sesion anterior:
 
@@ -36,8 +48,9 @@ Muestra un resumen de la sesion anterior:
 - Estado en que quedo el trabajo
 - Decisiones tomadas previamente
 - Proximos pasos registrados
+- **Resumable pipelines** (if wip: commits detected)
 
-### Paso 3 — Sugerir como continuar
+### Paso 4 — Sugerir como continuar
 
 Si hay tarea en curso:
 
@@ -52,6 +65,6 @@ Si no hay tarea en curso, sugiere opciones:
 - `/status` — para ver el estado general del proyecto
 - `/council [pregunta]` — para debatir una decision importante
 
-### Paso 4 — Actualizar sesion
+### Paso 5 — Actualizar sesion
 
 Actualiza SESSION.md con la fecha actual para registrar que la sesion inicio.

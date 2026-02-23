@@ -111,6 +111,18 @@ Presenta opciones claras al usuario basadas en el debate:
 
 Pide al usuario que decida. Si el usuario decide, documenta la decision en SESSION.md.
 
+## Subagent Configuration
+
+When spawning council agents via the Task tool, always use `subagent_type: "general-purpose"`. Guild agent role names (advisor, developer, tech-lead, etc.) are NOT valid Claude Code subagent_types.
+
+Example:
+
+```text
+Task tool with:
+  subagent_type: "general-purpose"
+  prompt: "Read .claude/agents/tech-lead.md and assume that role. Then: [debate question]"
+```
+
 ## Notas
 
 - Los agentes deben ser invocados en paralelo para evitar que uno influencie al otro

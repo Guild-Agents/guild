@@ -49,10 +49,22 @@ Actualiza SESSION.md con la siguiente informacion:
 - Las 2-3 acciones concretas mas importantes al retomar
 - Skill sugerido para continuar (ej: "ejecutar /build-feature para continuar desde Fase 4")
 
-### Paso 3 — Confirmar
+### Paso 3 — Commit WIP if uncommitted work exists
+
+If there are uncommitted changes, create a checkpoint commit:
+
+```bash
+git add -A
+git commit -m "wip: session paused — [brief description of current state]"
+```
+
+This ensures no work is lost between sessions. Never leave uncommitted changes across session boundaries.
+
+### Paso 4 — Confirmar
 
 Confirma al usuario:
 
 - SESSION.md actualizado con el estado actual
+- WIP committed (if applicable)
 - Proximos pasos registrados
 - Puedes cerrar la sesion con seguridad
