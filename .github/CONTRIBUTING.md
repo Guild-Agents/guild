@@ -15,7 +15,7 @@ If you're new to the project, **templates are the best starting point**. Improvi
 
 ### Requirements
 
-- Node.js >= 18
+- Node.js >= 20
 - npm >= 9
 - Git
 
@@ -56,11 +56,11 @@ For files in `src/templates/agents/` and `src/templates/skills/`.
 
 ### Agents
 
-Each agent is a flat `.md` file that defines identity, responsibilities, and process. The 8 agents live in `src/templates/agents/`:
+Each agent is a flat `.md` file that defines identity, responsibilities, and process. The 9 agents live in `src/templates/agents/`:
 
 ```
 advisor.md, product-owner.md, tech-lead.md, developer.md,
-code-reviewer.md, qa.md, bugfix.md, db-migration.md
+code-reviewer.md, qa.md, bugfix.md, db-migration.md, platform-expert.md
 ```
 
 When improving an agent, focus on making instructions clear and actionable. Agents should define what they do, when they act, and how they interact with other agents.

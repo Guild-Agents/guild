@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [develop, main]
 
+permissions:
+  contents: read
+
 jobs:
   lint-and-test:
     name: Lint & Test
@@ -37,15 +40,22 @@ jobs:
       - name: Verify CLI entry point
         run: node bin/guild.js --version
 
-  lint-markdown:
-    name: Lint Markdown (expertises)
+  security-audit:
+    name: Security Audit
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Lint Markdown files
-        uses: DavidAnson/markdownlint-cli2-action@v16
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          globs: 'src/templates/**/*.md'
+          node-version: 22.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
