@@ -49,3 +49,18 @@ Presenta el reporte organizado por severidad:
 - Veredicto final: Aprobado / Aprobado con warnings / Bloqueado
 
 Si hay blockers, sugiere corregirlos y ejecutar `/review` de nuevo.
+
+## Example Session
+
+```text
+User: /review
+
+Reviewing diff: 4 files changed, +127 -34
+
+Findings:
+- [Warning] src/api/users.js:45 — No input validation on email parameter
+- [Suggestion] src/utils/format.js:12 — Consider using Intl.DateTimeFormat
+- [Blocker] src/db/queries.js:78 — SQL injection vulnerability in raw query
+
+1 blocker, 1 warning, 1 suggestion.
+```

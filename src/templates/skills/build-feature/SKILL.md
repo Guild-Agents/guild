@@ -178,6 +178,21 @@ Task tool with:
   prompt: "Read .claude/agents/developer.md and assume that role. Then: [task description]"
 ```
 
+## Example Session
+
+```text
+User: /build-feature add dark mode toggle to settings page
+
+Phase 1 — Advisor: Approved. Low risk, aligns with UX roadmap.
+Phase 2 — PO: 3 tasks defined with acceptance criteria.
+Phase 3 — Tech Lead: Use CSS variables + context provider pattern.
+Phase 4 — Developer: Implemented ThemeContext, toggle component, CSS vars.
+Phase 5 — Review: Passed. 1 suggestion (memoize context value).
+Phase 6 — QA: All 3 acceptance criteria verified. 0 bugs.
+
+Feature complete. PR ready for merge.
+```
+
 ## Notas
 
 - Si el usuario quiere saltar fases (ej: "ya la evaluo, implementa directo"), permite saltar a Fase 4 pero advierte que se pierde validacion

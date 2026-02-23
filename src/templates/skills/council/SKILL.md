@@ -123,6 +123,20 @@ Task tool with:
   prompt: "Read .claude/agents/tech-lead.md and assume that role. Then: [debate question]"
 ```
 
+## Example Session
+
+```text
+User: /council Should we migrate from REST to GraphQL?
+
+Council: Architecture
+
+Tech Lead — Recommends GraphQL for complex queries, keep REST for simple CRUD.
+Advisor — Risk is high mid-project. Suggests incremental adoption.
+Developer — Prefers REST simplicity. GraphQL adds tooling overhead.
+
+Consensus: Incremental adoption. New endpoints in GraphQL, existing stay REST.
+```
+
 ## Notas
 
 - Los agentes deben ser invocados en paralelo para evitar que uno influencie al otro

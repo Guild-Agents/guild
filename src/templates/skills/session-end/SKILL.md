@@ -60,6 +60,20 @@ git commit -m "wip: session paused — [brief description of current state]"
 
 This ensures no work is lost between sessions. Never leave uncommitted changes across session boundaries.
 
+## Example Session
+
+```text
+User: /session-end
+
+Saving session state...
+Task: user-preferences
+Phase: 4 — Implementation (in progress)
+Files modified: 3 files
+WIP committed: wip: session paused — user-preferences phase 4
+
+SESSION.md updated. Safe to close.
+```
+
 ### Paso 4 — Confirmar
 
 Confirma al usuario:
