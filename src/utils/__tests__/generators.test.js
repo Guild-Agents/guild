@@ -283,6 +283,12 @@ describe('generateSessionMd', () => {
     expect(content).toContain('/guild-specialize');
   });
 
+  it('references council as next step', async () => {
+    await generateSessionMd();
+    const content = readFileSync('SESSION.md', 'utf8');
+    expect(content).toContain('/council');
+  });
+
   it('does not reference v0 tasks directory', async () => {
     await generateSessionMd();
     const content = readFileSync('SESSION.md', 'utf8');

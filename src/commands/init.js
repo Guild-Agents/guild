@@ -127,19 +127,19 @@ export async function runInit() {
   p.log.success(`Created: CLAUDE.md, PROJECT.md, SESSION.md, ${agentCount} agents, ${skillCount} skills`);
 
   const relevantSkills = projectData.hasExistingCode
-    ? ['/guild-specialize', '/build-feature', '/review']
-    : ['/build-feature', '/new-feature', '/council'];
+    ? ['/guild-specialize', '/council', '/build-feature']
+    : ['/council', '/build-feature', '/new-feature'];
   p.log.info(`Start with: ${relevantSkills.join('  ')}`);
 
   const quickStart = projectData.hasExistingCode
-    ? '1. Open Claude Code in this directory\n' +
-      '2. Run /guild-specialize to analyze your codebase\n' +
-      '3. Start building with /build-feature'
-    : '1. Open Claude Code in this directory\n' +
-      '2. Start building with /build-feature\n' +
+    ? '1. Run /guild-specialize to analyze your codebase\n' +
+      '2. Run /council to spec your first feature\n' +
+      '3. Build it with /build-feature'
+    : '1. Run /council to spec your first feature\n' +
+      '2. Build it with /build-feature\n' +
       '3. Run /guild-specialize once you have code';
 
   p.note(quickStart, 'Quick start');
 
-  p.outro(chalk.bold.cyan('Guild v1 ready.'));
+  p.outro(chalk.bold.cyan('Guild ready — spec before you build.'));
 }

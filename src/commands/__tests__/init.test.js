@@ -118,6 +118,7 @@ describe('guild init — E2E', () => {
 
     expect(content).toContain(`**Date:** ${today}`);
     expect(content).toContain('/guild-specialize');
+    expect(content).toContain('/council');
     expect(content).toContain('/build-feature');
   });
 
