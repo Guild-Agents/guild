@@ -9,6 +9,36 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-02-24
+
+### Added
+
+- `/council` now writes design docs to `docs/specs/` after user decisions (spec-writing Step 5)
+- `/build-feature` appends structured Pipeline Trace to spec files, tracking phase verdicts and metrics
+- Standard spec template at `src/templates/specs/SPEC_TEMPLATE.md` with 10 required sections
+- `guild init` creates `docs/specs/` directory with `.gitkeep` for SDD spec artifacts
+- `ensureProjectRoot()` helper — CLI commands now resolve the project root from subdirectories
+- DevOps agent showcase spec (`docs/specs/devops-agent.md`) demonstrating the design doc format
+- `/create-pr` added to CONTRIBUTING.md skill list
+
+### Fixed
+
+- `guild status`, `guild doctor`, `guild list`, and `guild new-agent` now work from subdirectories
+- `resolveProjectRoot()` was implemented but never wired into any command (dead code)
+- `guild doctor` gracefully handles missing project root instead of throwing
+- Skill count corrected from 10 to 11 across README, CONTRIBUTING.md, and GitHub Pages
+- CONTRIBUTING.md markdownlint issues resolved (table separators, fenced code block languages)
+
+### Changed
+
+- **SDD Identity Pivot**: Guild now positions as "Specification-Driven Development" — "Guild makes Claude Code think before it builds"
+- README.md fully rewritten for SDD positioning: new tagline, pipeline diagram, skills grouped by function, agents demoted to "Under the Hood"
+- GitHub Pages (guildagents.dev) updated: hero, meta tags, OG image, pipeline section, value propositions, agent section reframed
+- Post-init onboarding teaches understand/spec/build workflow; `/council` is now a key step
+- `package.json` description: "Specification-driven development CLI for Claude Code — think before you build"
+- `bin/guild.js` Commander.js description updated to match
+- Keywords updated: added `specification-driven`, `spec-driven`, `spec-first`, `design-docs`; removed `multi-agent`, `ai-agents`, `framework`
+
 ## [0.2.9] - 2026-02-23
 
 ### Fixed
