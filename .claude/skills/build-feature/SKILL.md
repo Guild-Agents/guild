@@ -35,8 +35,31 @@ When running a single build-feature, a simple `git checkout -b` is sufficient.
 
 ## Pipeline de 6 fases
 
+### Indicador de progreso
+
+Al inicio de cada fase, mostrar un indicador de progreso al usuario antes de cualquier output del agente:
+
+```text
+[1/6] Advisor — Evaluando feature...
+[2/6] Product Owner — Definiendo spec...
+[3/6] Tech Lead — Definiendo approach tecnico...
+[4/6] Developer — Implementando...
+[5/6] Code Reviewer — Revisando cambios...
+[6/6] QA — Validando criterios de aceptacion...
+```
+
+Cuando una fase se repite (ciclos review-fix o QA-review), mostrar la iteracion:
+
+```text
+[5/6 · ronda 2] Code Reviewer — Re-revisando despues de fixes...
+[4/6 · ronda 2] Developer — Corrigiendo blockers del review...
+```
+
+Este indicador DEBE mostrarse antes de lanzar al agente de esa fase.
+
 ### Fase 1 — Evaluacion (Advisor)
 
+**Progreso:** `[1/6] Advisor — Evaluando feature...`
 **Agente:** Lee `.claude/agents/advisor.md` via Task tool
 **Input:** La descripcion de la feature proporcionada por el usuario
 **Proceso:**
@@ -50,6 +73,7 @@ When running a single build-feature, a simple `git checkout -b` is sufficient.
 
 ### Fase 2 — Especificacion (Product Owner)
 
+**Progreso:** `[2/6] Product Owner — Definiendo spec...`
 **Agente:** Lee `.claude/agents/product-owner.md` via Task tool
 **Input:** La feature aprobada por el Advisor + sus observaciones
 **Proceso:**
@@ -62,6 +86,7 @@ When running a single build-feature, a simple `git checkout -b` is sufficient.
 
 ### Fase 3 — Approach tecnico (Tech Lead)
 
+**Progreso:** `[3/6] Tech Lead — Definiendo approach tecnico...`
 **Agente:** Lee `.claude/agents/tech-lead.md` via Task tool
 **Input:** Tareas del Product Owner + criterios de aceptacion
 **Proceso:**
@@ -74,6 +99,7 @@ When running a single build-feature, a simple `git checkout -b` is sufficient.
 
 ### Fase 4 — Implementacion (Developer)
 
+**Progreso:** `[4/6] Developer — Implementando...`
 **Agente:** Lee `.claude/agents/developer.md` via Task tool
 **Input:** Plan tecnico del Tech Lead + criterios de aceptacion del PO
 **Proceso:**
@@ -97,6 +123,7 @@ Este gate NO se puede saltar, incluso si el usuario solicito skip de fases. Los 
 
 ### Fase 5 — Review (Code Reviewer)
 
+**Progreso:** `[5/6] Code Reviewer — Revisando cambios...`
 **Agente:** Lee `.claude/agents/code-reviewer.md` via Task tool
 **Input:** Los cambios implementados (git diff)
 **Proceso:**
@@ -108,6 +135,8 @@ Este gate NO se puede saltar, incluso si el usuario solicito skip de fases. Los 
 **Condicion de loop:** Si hay hallazgos de tipo Blocker, vuelve a **Fase 4** para que el Developer los corrija. Maximo 2 iteraciones de review-fix.
 
 ### Fase 6 — QA (delega a /qa-cycle)
+
+**Progreso:** `[6/6] QA — Validando criterios de aceptacion...`
 
 Ejecuta el skill `/qa-cycle` pasandole los criterios de aceptacion del PO como contexto. El qa-cycle se encarga de:
 
@@ -197,12 +226,23 @@ Task tool with:
 ```text
 User: /build-feature add dark mode toggle to settings page
 
-Phase 1 — Advisor: Approved. Low risk, aligns with UX roadmap.
-Phase 2 — PO: 3 tasks defined with acceptance criteria.
-Phase 3 — Tech Lead: Use CSS variables + context provider pattern.
-Phase 4 — Developer: Implemented ThemeContext, toggle component, CSS vars.
-Phase 5 — Review: Passed. 1 suggestion (memoize context value).
-Phase 6 — QA: All 3 acceptance criteria verified. 0 bugs.
+[1/6] Advisor — Evaluando feature...
+  Approved. Low risk, aligns with UX roadmap.
+
+[2/6] Product Owner — Definiendo spec...
+  3 tasks defined with acceptance criteria.
+
+[3/6] Tech Lead — Definiendo approach tecnico...
+  Use CSS variables + context provider pattern.
+
+[4/6] Developer — Implementando...
+  Implemented ThemeContext, toggle component, CSS vars.
+
+[5/6] Code Reviewer — Revisando cambios...
+  Passed. 1 suggestion (memoize context value).
+
+[6/6] QA — Validando criterios de aceptacion...
+  All 3 acceptance criteria verified. 0 bugs.
 
 Feature complete. PR ready for merge.
 ```
