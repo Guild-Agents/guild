@@ -9,6 +9,11 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- CHANGELOG.md: added missing v0.3.0 entry and enriched v0.3.1 with granular details
+- GitHub release notes updated for v0.3.0 and v0.3.1 with full descriptions
+
 ## [0.3.1] - 2026-02-24
 
 ### Added
