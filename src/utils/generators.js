@@ -168,8 +168,9 @@ export async function generateSessionMd() {
 - CLAUDE.md has placeholders — run /guild-specialize to enrich.
 
 ## Next steps
-1. Open Claude Code and run /guild-specialize
-2. Define the first feature with /build-feature
+1. Run /guild-specialize to analyze your codebase
+2. Spec your first feature with /council
+3. Build it with /build-feature
 `;
 
   writeFileSync('SESSION.md', content, 'utf8');
