@@ -3,7 +3,7 @@ import { mkdirSync, existsSync, rmSync, readdirSync, mkdtempSync, writeFileSync,
 import { join, dirname } from 'path';
 import { tmpdir } from 'os';
 import { fileURLToPath } from 'url';
-import { copyTemplates, getAgentNames, resolveProjectRoot } from '../files.js';
+import { copyTemplates, getAgentNames, getSkillNames, parseFrontmatter, resolveProjectRoot } from '../files.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEMPLATES_AGENTS_DIR = join(__dirname, '..', '..', 'templates', 'agents');
@@ -11,8 +11,9 @@ const TEMPLATES_AGENTS_DIR = join(__dirname, '..', '..', 'templates', 'agents');
 const TEST_DIR = join(import.meta.dirname, '__tmp_files__');
 
 describe('getAgentNames', () => {
-  it('returns 9 v1 agent names', () => {
+  it('reads agent names from the templates directory', () => {
     const names = getAgentNames();
+    // Should match the .md files in src/templates/agents/
     expect(names).toHaveLength(9);
     expect(names).toContain('advisor');
     expect(names).toContain('product-owner');
@@ -25,11 +26,41 @@ describe('getAgentNames', () => {
     expect(names).toContain('platform-expert');
   });
 
+  it('returns names sorted alphabetically', () => {
+    const names = getAgentNames();
+    const sorted = [...names].sort();
+    expect(names).toEqual(sorted);
+  });
+
   it('does not contain v0 agent names', () => {
     const names = getAgentNames();
     expect(names).not.toContain('code-review');
     expect(names).not.toContain('bug-fixer');
     expect(names).not.toContain('dba');
+  });
+});
+
+describe('getSkillNames', () => {
+  it('reads skill names from the templates directory', () => {
+    const names = getSkillNames();
+    // Should match the directories in src/templates/skills/
+    expect(names).toHaveLength(10);
+    expect(names).toContain('build-feature');
+    expect(names).toContain('council');
+    expect(names).toContain('dev-flow');
+    expect(names).toContain('guild-specialize');
+    expect(names).toContain('new-feature');
+    expect(names).toContain('qa-cycle');
+    expect(names).toContain('review');
+    expect(names).toContain('session-end');
+    expect(names).toContain('session-start');
+    expect(names).toContain('status');
+  });
+
+  it('returns names sorted alphabetically', () => {
+    const names = getSkillNames();
+    const sorted = [...names].sort();
+    expect(names).toEqual(sorted);
   });
 });
 
@@ -94,25 +125,6 @@ describe('copyTemplates', () => {
 // --- Agent template frontmatter validation ---
 
 describe('agent template frontmatter', () => {
-  /**
-   * Parses YAML frontmatter from a markdown string.
-   * Returns an object with the frontmatter fields.
-   */
-  function parseFrontmatter(content) {
-    const match = content.match(/^---\n([\s\S]*?)\n---/);
-    if (!match) return {};
-    const fields = {};
-    for (const line of match[1].split('\n')) {
-      const colonIdx = line.indexOf(':');
-      if (colonIdx > 0) {
-        const key = line.slice(0, colonIdx).trim();
-        const value = line.slice(colonIdx + 1).trim().replace(/^["']|["']$/g, '');
-        fields[key] = value;
-      }
-    }
-    return fields;
-  }
-
   it('every agent template has required frontmatter fields', () => {
     const requiredFields = ['name', 'description', 'tools', 'permissionMode'];
 
@@ -152,6 +164,53 @@ describe('agent template frontmatter', () => {
       expect(frontmatter.permissionMode, `${agentName}.md should use bypassPermissions`).toBe('bypassPermissions');
       expect(frontmatter.tools, `${agentName}.md should have Bash access`).toContain('Bash');
     }
+  });
+});
+
+// --- Tests for parseFrontmatter ---
+
+describe('parseFrontmatter', () => {
+  it('parses standard frontmatter', () => {
+    const content = '---\nname: advisor\ndescription: "Strategic advisor"\n---\n# Content';
+    const result = parseFrontmatter(content);
+    expect(result.name).toBe('advisor');
+    expect(result.description).toBe('Strategic advisor');
+  });
+
+  it('returns empty object for no frontmatter', () => {
+    const result = parseFrontmatter('# Just a heading');
+    expect(result).toEqual({});
+  });
+
+  it('handles single-quoted values', () => {
+    const content = "---\nname: 'test'\n---";
+    const result = parseFrontmatter(content);
+    expect(result.name).toBe('test');
+  });
+
+  it('handles values with colons', () => {
+    const content = '---\ndescription: "Key: value pair"\n---';
+    const result = parseFrontmatter(content);
+    expect(result.description).toBe('Key: value pair');
+  });
+
+  it('handles unquoted values', () => {
+    const content = '---\npermissionMode: plan\n---';
+    const result = parseFrontmatter(content);
+    expect(result.permissionMode).toBe('plan');
+  });
+
+  it('handles empty values', () => {
+    const content = '---\nname:\n---';
+    const result = parseFrontmatter(content);
+    expect(result.name).toBe('');
+  });
+
+  it('ignores lines without colons', () => {
+    const content = '---\nname: test\njust a line\n---';
+    const result = parseFrontmatter(content);
+    expect(result.name).toBe('test');
+    expect(Object.keys(result)).toHaveLength(1);
   });
 });
 

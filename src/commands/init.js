@@ -13,7 +13,7 @@ import * as p from '@clack/prompts';
 import chalk from 'chalk';
 import { existsSync } from 'fs';
 import { generateProjectMd, generateSessionMd, generateClaudeMd } from '../utils/generators.js';
-import { copyTemplates, getAgentNames } from '../utils/files.js';
+import { copyTemplates, getAgentNames, getSkillNames } from '../utils/files.js';
 
 export async function runInit() {
   console.log('');
@@ -123,7 +123,8 @@ export async function runInit() {
 
   // ─── Summary ──────────────────────────────────────────────────────────────
   const agentCount = getAgentNames().length;
-  p.log.success(`Created: CLAUDE.md, PROJECT.md, SESSION.md, ${agentCount} agents, 10 skills`);
+  const skillCount = getSkillNames().length;
+  p.log.success(`Created: CLAUDE.md, PROJECT.md, SESSION.md, ${agentCount} agents, ${skillCount} skills`);
 
   const relevantSkills = projectData.hasExistingCode
     ? ['/guild-specialize', '/build-feature', '/review']
