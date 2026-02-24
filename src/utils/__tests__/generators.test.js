@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdirSync, readFileSync, rmSync, existsSync } from 'fs';
 import { join } from 'path';
-import { generateProjectMd, generateSessionMd, generateClaudeMd } from '../generators.js';
+import { generateProjectMd, generateSessionMd, generateClaudeMd, inferCodeConventions, inferEnvVars } from '../generators.js';
 
 const TEST_DIR = join(import.meta.dirname, '__tmp_generators__');
 
@@ -102,10 +102,14 @@ describe('generateClaudeMd', () => {
     expect(content).toContain('SESSION.md');
   });
 
-  it('includes PENDIENTE placeholders for guild-specialize', async () => {
+  it('includes exactly 2 placeholders for guild-specialize', async () => {
     await generateClaudeMd(makeProjectData());
     const content = readFileSync('CLAUDE.md', 'utf8');
-    expect(content).toContain('[PENDING: guild-specialize]');
+    const matches = content.match(/\[PENDING: guild-specialize\]/g);
+    expect(matches).toHaveLength(2);
+    // Placeholders only in Project structure and Architecture patterns
+    expect(content).toContain('## Project structure\n[PENDING: guild-specialize]');
+    expect(content).toContain('## Architecture patterns\n[PENDING: guild-specialize]');
   });
 
   it('lists skills instead of slash commands', async () => {
@@ -131,6 +135,105 @@ describe('generateClaudeMd', () => {
     await generateClaudeMd(makeProjectData());
     const content = readFileSync('CLAUDE.md', 'utf8');
     expect(content).toContain('React + Vite, Node.js + Express, postgres, redis');
+  });
+
+  it('generates inferred Code conventions instead of placeholder', async () => {
+    await generateClaudeMd(makeProjectData({ type: 'webapp', stack: 'React + Vite' }));
+    const content = readFileSync('CLAUDE.md', 'utf8');
+    expect(content).toContain('## Code conventions');
+    expect(content).not.toMatch(/## Code conventions\n\[PENDING/);
+    expect(content).toContain('PascalCase');
+  });
+
+  it('generates inferred Environment variables instead of placeholder', async () => {
+    await generateClaudeMd(makeProjectData({ type: 'api', stack: 'Express, PostgreSQL, Redis' }));
+    const content = readFileSync('CLAUDE.md', 'utf8');
+    expect(content).toContain('## Environment variables');
+    expect(content).not.toMatch(/## Environment variables\n\[PENDING/);
+    expect(content).toContain('DATABASE_URL');
+    expect(content).toContain('REDIS_URL');
+  });
+});
+
+describe('inferCodeConventions', () => {
+  it('infers React conventions from stack', () => {
+    const result = inferCodeConventions('webapp', 'React + Vite, TailwindCSS');
+    expect(result).toContain('PascalCase');
+    expect(result).toContain('CSS Modules or Tailwind');
+  });
+
+  it('infers Express conventions from stack', () => {
+    const result = inferCodeConventions('api', 'Node.js + Express, PostgreSQL');
+    expect(result).toContain('Controllers/routes');
+    expect(result).toContain('Async/await');
+  });
+
+  it('infers TypeScript conventions from stack', () => {
+    const result = inferCodeConventions('webapp', 'Next.js, TypeScript, Prisma');
+    expect(result).toContain('Strict TypeScript');
+    expect(result).toContain('PascalCase');
+  });
+
+  it('falls back to type-specific conventions for CLI', () => {
+    const result = inferCodeConventions('cli', 'custom-framework');
+    expect(result).toContain('Commander.js');
+    expect(result).toContain('ESModules');
+  });
+
+  it('falls back to generic conventions for unknown stack', () => {
+    const result = inferCodeConventions('fullstack', 'custom-framework');
+    expect(result).toContain('naming conventions');
+  });
+
+  it('deduplicates accumulated rules', () => {
+    const result = inferCodeConventions('webapp', 'React, Next.js');
+    const lines = result.split('\n');
+    const unique = [...new Set(lines)];
+    expect(lines).toEqual(unique);
+  });
+});
+
+describe('inferEnvVars', () => {
+  it('infers Supabase env vars from stack', () => {
+    const result = inferEnvVars('webapp', 'Next.js, Supabase');
+    expect(result).toContain('SUPABASE_URL');
+    expect(result).toContain('SUPABASE_ANON_KEY');
+  });
+
+  it('infers Postgres env vars from stack', () => {
+    const result = inferEnvVars('api', 'Express, PostgreSQL');
+    expect(result).toContain('DATABASE_URL');
+  });
+
+  it('accumulates multiple stack matches', () => {
+    const result = inferEnvVars('api', 'Express, PostgreSQL, Redis, Stripe');
+    expect(result).toContain('DATABASE_URL');
+    expect(result).toContain('REDIS_URL');
+    expect(result).toContain('STRIPE_SECRET_KEY');
+  });
+
+  it('falls back to webapp vars when no stack match', () => {
+    const result = inferEnvVars('webapp', 'custom-framework');
+    expect(result).toContain('NODE_ENV');
+    expect(result).toContain('API_URL');
+  });
+
+  it('falls back to api vars when no stack match', () => {
+    const result = inferEnvVars('api', 'custom-framework');
+    expect(result).toContain('NODE_ENV');
+    expect(result).toContain('PORT');
+  });
+
+  it('falls back to NODE_ENV for unknown type', () => {
+    const result = inferEnvVars('other', 'custom-framework');
+    expect(result).toContain('NODE_ENV');
+  });
+
+  it('deduplicates accumulated vars', () => {
+    const result = inferEnvVars('api', 'Supabase, PostgreSQL');
+    const lines = result.split('\n');
+    const unique = [...new Set(lines)];
+    expect(lines).toEqual(unique);
   });
 });
 
