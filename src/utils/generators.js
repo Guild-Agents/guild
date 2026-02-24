@@ -72,6 +72,7 @@ ${data.stack}
 - /guild-specialize  — enrich CLAUDE.md by exploring the actual project
 - /build-feature     — full development pipeline
 - /new-feature       — create branch and scaffold for a feature
+- /create-pr         — create a structured pull request from current branch
 - /council           — debate decisions with multiple agents
 - /review            — code review on the current diff
 - /qa-cycle          — QA + bugfix cycle
