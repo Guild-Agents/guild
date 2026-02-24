@@ -35,8 +35,31 @@ When running a single build-feature, a simple `git checkout -b` is sufficient.
 
 ## 6-Phase Pipeline
 
+### Progress Display
+
+At the start of each phase, display a progress indicator to the user before any agent output:
+
+```text
+[1/6] Advisor — Evaluating feature...
+[2/6] Product Owner — Defining spec...
+[3/6] Tech Lead — Defining technical approach...
+[4/6] Developer — Implementing...
+[5/6] Code Reviewer — Reviewing changes...
+[6/6] QA — Validating acceptance criteria...
+```
+
+When a phase loops (review-fix or QA-review cycles), show the iteration:
+
+```text
+[5/6 · round 2] Code Reviewer — Re-reviewing after fixes...
+[4/6 · round 2] Developer — Fixing review blockers...
+```
+
+This indicator MUST be displayed before spawning the agent for that phase.
+
 ### Phase 1 — Evaluation (Advisor)
 
+**Progress:** `[1/6] Advisor — Evaluating feature...`
 **Agent:** Reads `.claude/agents/advisor.md` via Task tool
 **Input:** The feature description provided by the user
 **Process:**
@@ -50,6 +73,7 @@ When running a single build-feature, a simple `git checkout -b` is sufficient.
 
 ### Phase 2 — Specification (Product Owner)
 
+**Progress:** `[2/6] Product Owner — Defining spec...`
 **Agent:** Reads `.claude/agents/product-owner.md` via Task tool
 **Input:** The feature approved by the Advisor + their observations
 **Process:**
@@ -62,6 +86,7 @@ When running a single build-feature, a simple `git checkout -b` is sufficient.
 
 ### Phase 3 — Technical Approach (Tech Lead)
 
+**Progress:** `[3/6] Tech Lead — Defining technical approach...`
 **Agent:** Reads `.claude/agents/tech-lead.md` via Task tool
 **Input:** Product Owner tasks + acceptance criteria
 **Process:**
@@ -74,6 +99,7 @@ When running a single build-feature, a simple `git checkout -b` is sufficient.
 
 ### Phase 4 — Implementation (Developer)
 
+**Progress:** `[4/6] Developer — Implementing...`
 **Agent:** Reads `.claude/agents/developer.md` via Task tool
 **Input:** Tech Lead technical plan + PO acceptance criteria
 **Process:**
@@ -97,6 +123,7 @@ This gate CANNOT be skipped, even if the user requested phase skipping. The spec
 
 ### Phase 5 — Review (Code Reviewer)
 
+**Progress:** `[5/6] Code Reviewer — Reviewing changes...`
 **Agent:** Reads `.claude/agents/code-reviewer.md` via Task tool
 **Input:** The implemented changes (git diff)
 **Process:**
@@ -108,6 +135,8 @@ This gate CANNOT be skipped, even if the user requested phase skipping. The spec
 **Loop condition:** If there are Blocker findings, return to **Phase 4** for the Developer to fix them. Maximum 2 review-fix iterations.
 
 ### Phase 6 — QA (delegates to /qa-cycle)
+
+**Progress:** `[6/6] QA — Validating acceptance criteria...`
 
 Runs the `/qa-cycle` skill passing the PO acceptance criteria as context. The qa-cycle handles:
 
@@ -197,12 +226,23 @@ Task tool with:
 ```text
 User: /build-feature add dark mode toggle to settings page
 
-Phase 1 — Advisor: Approved. Low risk, aligns with UX roadmap.
-Phase 2 — PO: 3 tasks defined with acceptance criteria.
-Phase 3 — Tech Lead: Use CSS variables + context provider pattern.
-Phase 4 — Developer: Implemented ThemeContext, toggle component, CSS vars.
-Phase 5 — Review: Passed. 1 suggestion (memoize context value).
-Phase 6 — QA: All 3 acceptance criteria verified. 0 bugs.
+[1/6] Advisor — Evaluating feature...
+  Approved. Low risk, aligns with UX roadmap.
+
+[2/6] Product Owner — Defining spec...
+  3 tasks defined with acceptance criteria.
+
+[3/6] Tech Lead — Defining technical approach...
+  Use CSS variables + context provider pattern.
+
+[4/6] Developer — Implementing...
+  Implemented ThemeContext, toggle component, CSS vars.
+
+[5/6] Code Reviewer — Reviewing changes...
+  Passed. 1 suggestion (memoize context value).
+
+[6/6] QA — Validating acceptance criteria...
+  All 3 acceptance criteria verified. 0 bugs.
 
 Feature complete. PR ready for merge.
 ```
