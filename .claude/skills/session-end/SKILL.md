@@ -1,55 +1,55 @@
 ---
 name: session-end
-description: "Guarda estado actual en SESSION.md"
+description: "Saves current state to SESSION.md"
 user-invocable: true
 ---
 
 # Session End
 
-Guarda el estado actual del trabajo en SESSION.md para poder retomarlo en la siguiente sesion. Ejecuta este skill antes de cerrar la sesion de trabajo.
+Saves the current work state to SESSION.md so it can be resumed in the next session. Run this skill before closing your work session.
 
-## Cuando usarlo
+## When to use
 
-- Antes de cerrar la sesion de trabajo
-- Cuando necesitas pausar y quieres guardar el contexto
+- Before closing the work session
+- When you need to pause and want to save the context
 
-## Uso
+## Usage
 
 `/session-end`
 
-## Proceso
+## Process
 
-### Paso 1 — Recopilar estado actual
+### Step 1 — Gather current state
 
-Analiza el estado actual del trabajo:
+Analyze the current work state:
 
-- Que tarea estaba en curso
-- En que fase del pipeline se encuentra (si aplica)
-- Que archivos se modificaron (via `git status`)
-- Que commits se hicieron en esta sesion
+- What task was in progress
+- Which pipeline phase it is in (if applicable)
+- What files were modified (via `git status`)
+- What commits were made in this session
 
-### Paso 2 — Actualizar SESSION.md
+### Step 2 — Update SESSION.md
 
-Actualiza SESSION.md con la siguiente informacion:
+Update SESSION.md with the following information:
 
-- **Fecha:** fecha actual
-- **Tarea en curso:** nombre de la tarea o "ninguna"
-- **GitHub Issue:** URL del issue asociado (si existe)
-- **Agente activo:** ultimo agente utilizado o "ninguno"
-- **Estado:** descripcion concreta de donde quedo el trabajo
+- **Date:** current date
+- **Task in progress:** task name or "none"
+- **GitHub Issue:** associated issue URL (if it exists)
+- **Active agent:** last agent used or "none"
+- **State:** concrete description of where the work left off
 
-**Contexto relevante:**
+**Relevant context:**
 
-- Decisiones tomadas en esta sesion
-- Problemas encontrados y como se resolvieron
-- Informacion importante para retomar
+- Decisions made in this session
+- Problems encountered and how they were resolved
+- Important information for resuming
 
-**Proximos pasos:**
+**Next steps:**
 
-- Las 2-3 acciones concretas mas importantes al retomar
-- Skill sugerido para continuar (ej: "ejecutar /build-feature para continuar desde Fase 4")
+- The 2-3 most important concrete actions when resuming
+- Suggested skill to continue (e.g., "run /build-feature to continue from Phase 4")
 
-### Paso 3 — Commit WIP if uncommitted work exists
+### Step 3 — Commit WIP if uncommitted work exists
 
 If there are uncommitted changes, create a checkpoint commit:
 
@@ -74,11 +74,11 @@ WIP committed: wip: session paused — user-preferences phase 4
 SESSION.md updated. Safe to close.
 ```
 
-### Paso 4 — Confirmar
+### Step 4 — Confirm
 
-Confirma al usuario:
+Confirm to the user:
 
-- SESSION.md actualizado con el estado actual
+- SESSION.md updated with the current state
 - WIP committed (if applicable)
-- Proximos pasos registrados
-- Puedes cerrar la sesion con seguridad
+- Next steps recorded
+- You can safely close the session
