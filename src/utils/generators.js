@@ -32,6 +32,67 @@ export async function generateProjectMd(data) {
 }
 
 /**
+ * Infers code conventions based on project type and stack.
+ * Rules accumulate (not exclusive). Deduplicates lines.
+ */
+export function inferCodeConventions(type, stack) {
+  const s = (stack || '').toLowerCase();
+  const rules = [];
+
+  // Stack-specific rules
+  if (s.includes('next') || s.includes('react')) {
+    rules.push('- Components in PascalCase', '- CSS Modules or Tailwind utility classes');
+  }
+  if (s.includes('express') || (s.includes('node') && type === 'api')) {
+    rules.push('- Controllers/routes pattern', '- Async/await error handling');
+  }
+  if (s.includes('typescript') || /\bts\b/.test(s)) {
+    rules.push('- Strict TypeScript', '- Interfaces over types where possible');
+  }
+
+  // Type-specific fallbacks (only if no stack rules matched)
+  if (rules.length === 0) {
+    if (type === 'cli') {
+      rules.push('- Commander.js command pattern', '- ESModules throughout');
+    } else if (type === 'api') {
+      rules.push('- REST or GraphQL endpoint conventions', '- Input validation on all endpoints');
+    } else {
+      rules.push('- Consistent naming conventions', '- ESModules throughout');
+    }
+  }
+
+  // Deduplicate
+  return [...new Set(rules)].join('\n');
+}
+
+/**
+ * Infers likely environment variables based on project type and stack.
+ * Rules accumulate. Deduplicates lines.
+ */
+export function inferEnvVars(type, stack) {
+  const s = (stack || '').toLowerCase();
+  const vars = [];
+
+  // Stack-specific
+  if (s.includes('supabase')) vars.push('- `SUPABASE_URL`', '- `SUPABASE_ANON_KEY`');
+  if (s.includes('firebase')) vars.push('- `FIREBASE_API_KEY`', '- `FIREBASE_PROJECT_ID`');
+  if (s.includes('postgres')) vars.push('- `DATABASE_URL`');
+  if (s.includes('redis')) vars.push('- `REDIS_URL`');
+  if (s.includes('stripe')) vars.push('- `STRIPE_SECRET_KEY`', '- `STRIPE_WEBHOOK_SECRET`');
+  if (s.includes('vercel')) vars.push('- `VERCEL_URL`');
+  if (/\baws\b/.test(s)) vars.push('- `AWS_ACCESS_KEY_ID`', '- `AWS_SECRET_ACCESS_KEY`', '- `AWS_REGION`');
+
+  // Type-specific fallbacks
+  if (vars.length === 0) {
+    if (type === 'webapp') vars.push('- `NODE_ENV`', '- `API_URL`');
+    else if (type === 'api') vars.push('- `NODE_ENV`', '- `PORT`', '- `DATABASE_URL`');
+    else vars.push('- `NODE_ENV`');
+  }
+
+  return [...new Set(vars)].join('\n');
+}
+
+/**
  * Generates CLAUDE.md — central document with placeholders for guild-specialize.
  */
 export async function generateClaudeMd(data) {
@@ -47,13 +108,13 @@ ${data.stack}
 [PENDING: guild-specialize]
 
 ## Code conventions
-[PENDING: guild-specialize]
+${inferCodeConventions(data.type, data.stack)}
 
 ## Architecture patterns
 [PENDING: guild-specialize]
 
 ## Environment variables
-[PENDING: guild-specialize]
+${inferEnvVars(data.type, data.stack)}
 
 ## Global rules
 - Do not implement without an approved plan
