@@ -122,19 +122,23 @@ export async function runInit() {
   }
 
   // ─── Summary ──────────────────────────────────────────────────────────────
-  p.log.success('CLAUDE.md');
-  p.log.success('PROJECT.md');
-  p.log.success('SESSION.md');
-  p.log.success(`.claude/agents/    (${getAgentNames().length} base agents)`);
-  p.log.success('.claude/skills/    (10 skills)');
+  const agentCount = getAgentNames().length;
+  p.log.success(`Created: CLAUDE.md, PROJECT.md, SESSION.md, ${agentCount} agents, 10 skills`);
 
-  p.note(
-    'Open Claude Code in this directory and run:\n\n' +
-    '  /guild-specialize\n\n' +
-    'This skill will explore your code and enrich CLAUDE.md\n' +
-    'with the actual project information.',
-    'Next step'
-  );
+  const relevantSkills = projectData.hasExistingCode
+    ? ['/guild-specialize', '/build-feature', '/review']
+    : ['/build-feature', '/new-feature', '/council'];
+  p.log.info(`Start with: ${relevantSkills.join('  ')}`);
+
+  const quickStart = projectData.hasExistingCode
+    ? '1. Open Claude Code in this directory\n' +
+      '2. Run /guild-specialize to analyze your codebase\n' +
+      '3. Start building with /build-feature'
+    : '1. Open Claude Code in this directory\n' +
+      '2. Start building with /build-feature\n' +
+      '3. Run /guild-specialize once you have code';
+
+  p.note(quickStart, 'Quick start');
 
   p.outro(chalk.bold.cyan('Guild v1 ready.'));
 }
