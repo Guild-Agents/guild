@@ -18,10 +18,10 @@ describe('runStatus', () => {
     rmSync(tempDir, { recursive: true, force: true });
   });
 
-  it('should throw when PROJECT.md does not exist', async () => {
+  it('should throw when no Guild project found', async () => {
     process.chdir(tempDir);
     const { runStatus } = await import('../status.js');
-    await expect(runStatus()).rejects.toThrow('Guild is not installed');
+    await expect(runStatus()).rejects.toThrow('Guild project not found');
   });
 
   it('should not throw when PROJECT.md exists', async () => {

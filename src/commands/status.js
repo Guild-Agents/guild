@@ -6,11 +6,10 @@ import * as p from '@clack/prompts';
 import chalk from 'chalk';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
+import { ensureProjectRoot } from '../utils/files.js';
 
 export async function runStatus() {
-  if (!existsSync('PROJECT.md')) {
-    throw new Error('Guild is not installed. Run: guild init');
-  }
+  ensureProjectRoot();
 
   const projectMd = readFileSync('PROJECT.md', 'utf8');
   const nameMatch = projectMd.match(/\*\*Name:\*\*\s*(.+)/);

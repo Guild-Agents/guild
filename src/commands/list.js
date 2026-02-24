@@ -6,9 +6,11 @@ import * as p from '@clack/prompts';
 import chalk from 'chalk';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
-import { parseFrontmatter } from '../utils/files.js';
+import { ensureProjectRoot, parseFrontmatter } from '../utils/files.js';
 
 export async function runList() {
+  ensureProjectRoot();
+
   p.intro(chalk.bold.cyan('Guild — Agents & Skills'));
 
   // List agents
