@@ -111,6 +111,33 @@ Present clear options to the user based on the debate:
 
 Ask the user to decide. If the user decides, document the decision in SESSION.md.
 
+### Step 5 — Write Spec Document
+
+After the user makes their decision in Step 4, offer to write a spec document to `docs/specs/`.
+
+1. **Suggest filename**: Derive a kebab-case filename (3-5 words) from the council question. Present the suggested filename to the user for confirmation. Example: `docs/specs/graphql-migration-strategy.md`
+2. **Create directory**: Create `docs/specs/` if it does not already exist.
+3. **Read the spec template**: Read `src/templates/specs/SPEC_TEMPLATE.md` (or the project's local copy) to use as the structural guide.
+4. **Assemble spec content**: Map the council debate to the template format:
+   - **Title**: From the council question
+   - **spec-id**: Matches the filename (without `.md`)
+   - **status**: Always `draft`
+   - **date**: Current date in `YYYY-MM-DD` format
+   - **council-type**: From Step 1 (architecture, feature-scope, or tech-debt)
+   - **Context**: From the council question and background provided by the user
+   - **Decision**: The user's chosen option from Step 4
+   - **Constraints**: Extracted from agent arguments during the debate
+   - **Acceptance Criteria**: Derived from the decision, as checkboxes (`- [ ]`)
+   - **Technical Approach**: Synthesis of implementation details from agents
+   - **Trade-offs Considered**: Options A/B/C from Step 4 with their pros and cons
+   - **Unresolved Questions**: Open risks and unknowns identified during debate
+   - **Test Strategy**: How to verify the implementation meets the acceptance criteria
+   - **Council Perspectives**: Summary of each agent's independent position
+   - **Points of Dissent**: Where agents disagreed and how it was resolved, or "None — consensus reached"
+5. **Write the file**: Use the Write tool to create the spec at `docs/specs/<filename>.md`.
+6. **Report**: Tell the user the file path of the written spec.
+7. **Trivial decisions**: For trivial or low-impact decisions, offer SESSION.md-only logging instead of a full spec document.
+
 ## Subagent Configuration
 
 When spawning council agents via the Task tool, always use `subagent_type: "general-purpose"`. Guild agent role names (advisor, developer, tech-lead, etc.) are NOT valid Claude Code subagent_types.
@@ -143,3 +170,6 @@ Consensus: Incremental adoption. New endpoints in GraphQL, existing stay REST.
 - Each perspective must be independent — not "responding" to another agent
 - The synthesis is done by you (the skill), not by the agents
 - If all 3 agents agree, indicate consensus and suggest taking action
+- After the user decides, always offer to write the spec to `docs/specs/`
+- The spec document is the primary output of `/council` — it captures the debate, decision, and rationale
+- If the user declines the spec, log the decision to SESSION.md as before
