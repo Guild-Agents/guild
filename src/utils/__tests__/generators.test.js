@@ -191,6 +191,11 @@ describe('inferCodeConventions', () => {
     const unique = [...new Set(lines)];
     expect(lines).toEqual(unique);
   });
+
+  it('falls back to generic conventions for mobile with unknown stack', () => {
+    const result = inferCodeConventions('mobile', 'custom-framework');
+    expect(result).toContain('naming conventions');
+  });
 });
 
 describe('inferEnvVars', () => {
@@ -234,6 +239,12 @@ describe('inferEnvVars', () => {
     const lines = result.split('\n');
     const unique = [...new Set(lines)];
     expect(lines).toEqual(unique);
+  });
+
+  it('infers Firebase env vars from stack', () => {
+    const result = inferEnvVars('webapp', 'React + Firebase');
+    expect(result).toContain('FIREBASE_API_KEY');
+    expect(result).toContain('FIREBASE_PROJECT_ID');
   });
 });
 

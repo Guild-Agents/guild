@@ -36,7 +36,7 @@ export async function generateProjectMd(data) {
  * Rules accumulate (not exclusive). Deduplicates lines.
  */
 export function inferCodeConventions(type, stack) {
-  const s = stack.toLowerCase();
+  const s = (stack || '').toLowerCase();
   const rules = [];
 
   // Stack-specific rules
@@ -46,7 +46,7 @@ export function inferCodeConventions(type, stack) {
   if (s.includes('express') || (s.includes('node') && type === 'api')) {
     rules.push('- Controllers/routes pattern', '- Async/await error handling');
   }
-  if (s.includes('typescript') || s.includes('ts')) {
+  if (s.includes('typescript') || /\bts\b/.test(s)) {
     rules.push('- Strict TypeScript', '- Interfaces over types where possible');
   }
 
@@ -70,7 +70,7 @@ export function inferCodeConventions(type, stack) {
  * Rules accumulate. Deduplicates lines.
  */
 export function inferEnvVars(type, stack) {
-  const s = stack.toLowerCase();
+  const s = (stack || '').toLowerCase();
   const vars = [];
 
   // Stack-specific
@@ -80,7 +80,7 @@ export function inferEnvVars(type, stack) {
   if (s.includes('redis')) vars.push('- `REDIS_URL`');
   if (s.includes('stripe')) vars.push('- `STRIPE_SECRET_KEY`', '- `STRIPE_WEBHOOK_SECRET`');
   if (s.includes('vercel')) vars.push('- `VERCEL_URL`');
-  if (s.includes('aws')) vars.push('- `AWS_ACCESS_KEY_ID`', '- `AWS_SECRET_ACCESS_KEY`', '- `AWS_REGION`');
+  if (/\baws\b/.test(s)) vars.push('- `AWS_ACCESS_KEY_ID`', '- `AWS_SECRET_ACCESS_KEY`', '- `AWS_REGION`');
 
   // Type-specific fallbacks
   if (vars.length === 0) {
