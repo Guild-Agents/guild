@@ -13,10 +13,13 @@ import * as p from '@clack/prompts';
 import chalk from 'chalk';
 import { existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
+import { ensureProjectRoot } from '../utils/files.js';
 
 const AGENTS_DIR = join('.claude', 'agents');
 
 export async function runNewAgent(agentName) {
+  ensureProjectRoot();
+
   p.intro(chalk.bold.cyan('Guild — New agent'));
 
   // Validate name

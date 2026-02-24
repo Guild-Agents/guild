@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdirSync, existsSync, rmSync, readdirSync, mkdtempSync, writeFileSync, readFileSync } from 'fs';
+import { mkdirSync, existsSync, rmSync, readdirSync, mkdtempSync, writeFileSync, readFileSync, realpathSync } from 'fs';
 import { join, dirname } from 'path';
 import { tmpdir } from 'os';
 import { fileURLToPath } from 'url';
-import { copyTemplates, getAgentNames, getSkillNames, parseFrontmatter, resolveProjectRoot } from '../files.js';
+import { copyTemplates, ensureProjectRoot, getAgentNames, getSkillNames, parseFrontmatter, resolveProjectRoot } from '../files.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEMPLATES_AGENTS_DIR = join(__dirname, '..', '..', 'templates', 'agents');
@@ -255,5 +255,47 @@ describe('resolveProjectRoot', () => {
 
   it('should not throw when called without arguments', () => {
     expect(() => resolveProjectRoot()).not.toThrow();
+  });
+});
+
+// --- Tests for ensureProjectRoot ---
+
+describe('ensureProjectRoot', () => {
+  let originalCwd;
+  let tempDir;
+
+  beforeEach(() => {
+    originalCwd = process.cwd();
+    tempDir = realpathSync(mkdtempSync(join(tmpdir(), 'guild-ensure-test-')));
+  });
+
+  afterEach(() => {
+    process.chdir(originalCwd);
+    rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  it('returns the project root path when markers exist', () => {
+    mkdirSync(join(tempDir, '.claude'));
+    writeFileSync(join(tempDir, 'PROJECT.md'), '# Test');
+    process.chdir(tempDir);
+
+    const result = ensureProjectRoot();
+    expect(result).toBe(tempDir);
+  });
+
+  it('throws with clear message when no project markers exist', () => {
+    process.chdir(tempDir);
+
+    expect(() => ensureProjectRoot()).toThrow('Guild project not found. Run `guild init` to initialize.');
+  });
+
+  it('changes process.cwd() to the project root', () => {
+    mkdirSync(join(tempDir, '.claude'));
+    const nested = join(tempDir, 'sub1', 'sub2');
+    mkdirSync(nested, { recursive: true });
+    process.chdir(nested);
+
+    ensureProjectRoot();
+    expect(process.cwd()).toBe(tempDir);
   });
 });

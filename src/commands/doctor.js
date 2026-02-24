@@ -6,8 +6,14 @@ import * as p from '@clack/prompts';
 import chalk from 'chalk';
 import { existsSync, readdirSync } from 'fs';
 import { join } from 'path';
+import { resolveProjectRoot } from '../utils/files.js';
 
 export async function runDoctor() {
+  const root = resolveProjectRoot();
+  if (root) {
+    process.chdir(root);
+  }
+
   p.intro(chalk.bold.cyan('Guild — Doctor'));
 
   const checks = [];

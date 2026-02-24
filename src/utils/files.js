@@ -137,3 +137,17 @@ export function resolveProjectRoot(startDir = process.cwd()) {
     dir = parent;
   }
 }
+
+/**
+ * Resolves the Guild project root and changes the working directory to it.
+ * Throws if no Guild project is found.
+ * Returns the absolute path to the project root.
+ */
+export function ensureProjectRoot() {
+  const root = resolveProjectRoot();
+  if (!root) {
+    throw new Error('Guild project not found. Run `guild init` to initialize.');
+  }
+  process.chdir(root);
+  return root;
+}
