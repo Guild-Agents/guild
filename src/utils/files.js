@@ -12,20 +12,56 @@ const AGENTS_DIR = join('.claude', 'agents');
 const SKILLS_DIR = join('.claude', 'skills');
 
 /**
- * Returns the names of the 9 v1 agents.
+ * Returns the names of the v1 agents by reading the templates directory.
+ * Adding a new .md file to src/templates/agents/ automatically includes it.
  */
 export function getAgentNames() {
-  return [
-    'advisor',
-    'product-owner',
-    'tech-lead',
-    'developer',
-    'code-reviewer',
-    'qa',
-    'bugfix',
-    'db-migration',
-    'platform-expert',
-  ];
+  const agentsDir = join(TEMPLATES_DIR, 'agents');
+  if (!existsSync(agentsDir)) {
+    return [];
+  }
+  return readdirSync(agentsDir)
+    .filter(f => f.endsWith('.md'))
+    .map(f => f.replace('.md', ''))
+    .sort();
+}
+
+/**
+ * Returns the names of the v1 skills by reading the templates directory.
+ * Adding a new directory to src/templates/skills/ automatically includes it.
+ */
+export function getSkillNames() {
+  const skillsDir = join(TEMPLATES_DIR, 'skills');
+  if (!existsSync(skillsDir)) {
+    return [];
+  }
+  return readdirSync(skillsDir, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name)
+    .sort();
+}
+
+/**
+ * Parses YAML frontmatter from markdown content.
+ * Returns an object with { name, description, ...other fields } or empty object if no frontmatter.
+ */
+export function parseFrontmatter(content) {
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return {};
+
+  const frontmatter = {};
+  for (const line of match[1].split('\n')) {
+    const colonIndex = line.indexOf(':');
+    if (colonIndex === -1) continue;
+    const key = line.slice(0, colonIndex).trim();
+    let value = line.slice(colonIndex + 1).trim();
+    // Remove surrounding quotes
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    if (key) frontmatter[key] = value;
+  }
+  return frontmatter;
 }
 
 /**
