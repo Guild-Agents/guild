@@ -44,9 +44,10 @@ describe('getSkillNames', () => {
   it('reads skill names from the templates directory', () => {
     const names = getSkillNames();
     // Should match the directories in src/templates/skills/
-    expect(names).toHaveLength(10);
+    expect(names).toHaveLength(11);
     expect(names).toContain('build-feature');
     expect(names).toContain('council');
+    expect(names).toContain('create-pr');
     expect(names).toContain('dev-flow');
     expect(names).toContain('guild-specialize');
     expect(names).toContain('new-feature');
@@ -90,13 +91,13 @@ describe('copyTemplates', () => {
     }
   });
 
-  it('creates .claude/skills/ with 10 skill directories', async () => {
+  it('creates .claude/skills/ with 11 skill directories', async () => {
     await copyTemplates();
     const skillsDir = join('.claude', 'skills');
     expect(existsSync(skillsDir)).toBe(true);
 
     const expectedSkills = [
-      'guild-specialize', 'build-feature', 'council', 'new-feature',
+      'guild-specialize', 'build-feature', 'council', 'create-pr', 'new-feature',
       'qa-cycle', 'review', 'status', 'dev-flow', 'session-start', 'session-end',
     ];
     for (const skill of expectedSkills) {
