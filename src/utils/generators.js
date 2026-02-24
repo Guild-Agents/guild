@@ -107,6 +107,9 @@ ${data.stack}
 ## Project structure
 [PENDING: guild-specialize]
 
+docs/
+  specs/                              # Design documents (SDD specs)
+
 ## Code conventions
 ${inferCodeConventions(data.type, data.stack)}
 

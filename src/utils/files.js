@@ -2,7 +2,7 @@
  * files.js — File system utilities for Guild v1
  */
 
-import { mkdirSync, copyFileSync, existsSync, readdirSync, readFileSync } from 'fs';
+import { mkdirSync, copyFileSync, existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -78,6 +78,14 @@ export async function copyTemplates() {
     if (existsSync(src)) {
       copyFileSync(src, dest);
     }
+  }
+
+  // Create docs/specs/ directory with .gitkeep
+  const specsDir = join('docs', 'specs');
+  mkdirSync(specsDir, { recursive: true });
+  const gitkeep = join(specsDir, '.gitkeep');
+  if (!existsSync(gitkeep)) {
+    writeFileSync(gitkeep, '', 'utf8');
   }
 
   // Copy skill directories with SKILL.md

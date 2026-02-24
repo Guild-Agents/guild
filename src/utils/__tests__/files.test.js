@@ -105,6 +105,12 @@ describe('copyTemplates', () => {
     }
   });
 
+  it('creates docs/specs/ directory with .gitkeep', async () => {
+    await copyTemplates();
+    expect(existsSync(join('docs', 'specs'))).toBe(true);
+    expect(existsSync(join('docs', 'specs', '.gitkeep'))).toBe(true);
+  });
+
   it('does not create v0 directories', async () => {
     await copyTemplates();
     expect(existsSync('tasks')).toBe(false);
