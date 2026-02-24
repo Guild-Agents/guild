@@ -1,7 +1,7 @@
 {
   "name": "guild-agents",
   "version": "0.3.0",
-  "description": "A multi-agent framework for Claude Code — specialized AI teams for every project",
+  "description": "Specification-driven development CLI for Claude Code — think before you build",
   "type": "module",
   "files": [
     "bin/",
@@ -26,15 +26,16 @@
   "keywords": [
     "claude",
     "claude-code",
+    "anthropic",
+    "specification-driven",
+    "spec-driven",
+    "spec-first",
+    "design-docs",
+    "developer-tools",
+    "cli",
     "agents",
     "ai",
     "workflow",
-    "multi-agent",
-    "developer-tools",
-    "cli",
-    "framework",
-    "anthropic",
-    "ai-agents",
     "automation",
     "code-review",
     "nodejs"

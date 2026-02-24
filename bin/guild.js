@@ -20,7 +20,7 @@ const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8'))
 
 program
   .name('guild')
-  .description('Multi-agent framework for Claude Code')
+  .description('Specification-driven development CLI for Claude Code')
   .version(pkg.version);
 
 // guild init
