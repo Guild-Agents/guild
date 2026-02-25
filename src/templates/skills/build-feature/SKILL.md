@@ -466,3 +466,4 @@ Feature complete. PR ready for merge.
 - If the user wants to skip phases (e.g., "already evaluated, implement directly"), allow skipping to Phase 4 but warn that validation is lost. Verification gates (pre-Review and final) are NEVER skipped
 - The pipeline is sequential: each phase depends on the output of the previous one
 - Review/QA loops have limits to prevent infinite cycles
+- In v1.x, parallel pipeline execution (multiple build-features via worktrees) is best-effort and depends on the host environment supporting concurrent agents

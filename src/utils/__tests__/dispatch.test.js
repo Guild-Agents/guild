@@ -5,6 +5,7 @@ import {
   resolveAgentMetadata,
   resolveEffectiveTier,
   resolveModel,
+  extractDispatchConfigs,
 } from '../dispatch.js';
 
 describe('validateStepConfig', () => {
@@ -238,5 +239,104 @@ describe('resolveModel', () => {
   it('throws when entire chain has no model', () => {
     const emptyProfile = {};
     expect(() => resolveModel('reasoning', emptyProfile)).toThrow('Cannot resolve model');
+  });
+});
+
+describe('extractDispatchConfigs', () => {
+  const WORKFLOW_SKILL = `---
+name: test-skill
+description: "Test skill with workflow"
+workflow:
+  version: 1
+  steps:
+    - id: step-1
+      role: developer
+      intent: "Implement feature"
+      model-tier: execution
+    - id: step-2
+      role: qa
+      intent: "Validate implementation"
+      model-tier: execution
+---
+
+# Test Skill
+
+Body content here.
+`;
+
+  const PROSE_SKILL = `---
+name: prose-skill
+description: "Skill without workflow"
+---
+
+# Prose Skill
+
+Just some instructions without a workflow.
+`;
+
+  it('returns workflow source for skill with workflow frontmatter', () => {
+    const result = extractDispatchConfigs(WORKFLOW_SKILL);
+    expect(result.source).toBe('workflow');
+    expect(result.steps).toHaveLength(2);
+    expect(result.steps[0].role).toBe('developer');
+    expect(result.steps[1].role).toBe('qa');
+  });
+
+  it('returns normalized steps with camelCase keys', () => {
+    const result = extractDispatchConfigs(WORKFLOW_SKILL);
+    expect(result.steps[0].modelTier).toBe('execution');
+    expect(result.steps[0].id).toBe('step-1');
+  });
+
+  it('returns null source for skill without workflow', () => {
+    const result = extractDispatchConfigs(PROSE_SKILL);
+    expect(result.source).toBeNull();
+  });
+
+  it('returns null source for skill with no frontmatter', () => {
+    const result = extractDispatchConfigs('# Just a heading\n\nSome content.');
+    expect(result.source).toBeNull();
+  });
+
+  it('returns null source for empty string', () => {
+    const result = extractDispatchConfigs('');
+    expect(result.source).toBeNull();
+  });
+
+  it('returns null source for null input', () => {
+    const result = extractDispatchConfigs(null);
+    expect(result.source).toBeNull();
+  });
+
+  it('returns null source for undefined input', () => {
+    const result = extractDispatchConfigs(undefined);
+    expect(result.source).toBeNull();
+  });
+
+  it('returns null source for workflow with empty steps', () => {
+    const content = `---
+name: empty-workflow
+workflow:
+  version: 1
+  steps: []
+---
+
+# Empty workflow
+`;
+    const result = extractDispatchConfigs(content);
+    expect(result.source).toBeNull();
+  });
+
+  it('returns null source for workflow with version but no steps key', () => {
+    const content = `---
+name: no-steps
+workflow:
+  version: 1
+---
+
+# No steps
+`;
+    const result = extractDispatchConfigs(content);
+    expect(result.source).toBeNull();
   });
 });

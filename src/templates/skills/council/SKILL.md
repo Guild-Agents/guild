@@ -216,3 +216,4 @@ Consensus: Incremental adoption. New endpoints in GraphQL, existing stay REST.
 - After the user decides, always offer to write the spec to `docs/specs/`
 - The spec document is the primary output of `/council` — it captures the debate, decision, and rationale
 - If the user declines the spec, log the decision to SESSION.md as before
+- In v1.x, `parallel` execution is best-effort — the orchestrator may run parallel steps sequentially if concurrent agent execution is unavailable

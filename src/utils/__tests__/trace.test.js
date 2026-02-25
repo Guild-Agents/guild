@@ -13,7 +13,10 @@ import {
   formatDuration,
   listTraces,
   cleanTraces,
+  generateExecutionSummary,
+  EXECUTION_SUMMARY_BUDGET,
 } from '../trace.js';
+import { estimateTokens } from '../learnings.js';
 
 // --- resolveTraceLevel ---
 
@@ -319,6 +322,115 @@ describe('renderTrace', () => {
   });
 });
 
+// --- generateExecutionSummary ---
+
+describe('generateExecutionSummary', () => {
+  const makeCtx = (stepCount, longIntent = false) => {
+    const started = new Date('2026-02-25T14:30:00.000Z');
+    const steps = [];
+    for (let i = 0; i < stepCount; i++) {
+      const intent = longIntent
+        ? `Implement the complex feature module number ${i} with full validation, error handling, and comprehensive test coverage across multiple files`
+        : `Do task number ${i}`;
+      steps.push({
+        role: `agent-${i}`,
+        intent,
+        tier: 'execution',
+        model: 'claude-sonnet-4-6',
+        fallback: false,
+        started: `2026-02-25T14:${30 + i}:00.000Z`,
+        duration: 60,
+        tokens: 3000,
+        result: 'pass',
+      });
+    }
+    return {
+      workflow: 'test-workflow',
+      level: 'default',
+      started,
+      steps,
+      totalTokens: stepCount * 3000,
+    };
+  };
+
+  const summary = { result: 'pass', testsPass: true, lintPass: true };
+  const finished = new Date('2026-02-25T14:35:00.000Z');
+
+  it('includes workflow name, result, step count, tokens, and duration', () => {
+    const ctx = makeCtx(2);
+    const output = generateExecutionSummary(ctx, summary, finished);
+
+    expect(output).toContain('Workflow: test-workflow');
+    expect(output).toContain('Result: pass');
+    expect(output).toContain('Steps: 2');
+    expect(output).toContain('Tokens: 6000');
+    expect(output).toContain('Duration: 00:05:00');
+  });
+
+  it('includes all step lines for a short workflow', () => {
+    const ctx = makeCtx(3);
+    const output = generateExecutionSummary(ctx, summary, finished);
+
+    expect(output).toContain('1. agent-0: Do task number 0');
+    expect(output).toContain('2. agent-1: Do task number 1');
+    expect(output).toContain('3. agent-2: Do task number 2');
+    expect(output).not.toContain('omitted');
+  });
+
+  it('returns header only for zero steps', () => {
+    const ctx = makeCtx(0);
+    const output = generateExecutionSummary(ctx, summary, finished);
+
+    expect(output).toContain('Workflow: test-workflow');
+    expect(output).toContain('Steps: 0');
+    expect(output).not.toContain('omitted');
+  });
+
+  it('stays within 500 token budget for a large trace', () => {
+    const ctx = makeCtx(25, true);
+    const output = generateExecutionSummary(ctx, summary, finished);
+
+    expect(estimateTokens(output)).toBeLessThanOrEqual(EXECUTION_SUMMARY_BUDGET);
+  });
+
+  it('truncates with omission notice when over budget', () => {
+    const ctx = makeCtx(25, true);
+    const output = generateExecutionSummary(ctx, summary, finished);
+
+    expect(output).toContain('steps omitted)');
+    // Should include at least some steps
+    expect(output).toContain('1. agent-0');
+  });
+
+  it('omission count is accurate', () => {
+    const ctx = makeCtx(25, true);
+    const output = generateExecutionSummary(ctx, summary, finished);
+
+    const match = output.match(/\((\d+) steps omitted\)/);
+    expect(match).not.toBeNull();
+
+    const omitted = parseInt(match[1], 10);
+    // Count included step lines
+    const stepLineCount = (output.match(/^\d+\. agent-/gm) || []).length;
+    expect(omitted + stepLineCount).toBe(25);
+  });
+
+  it('uses provided finished date for duration', () => {
+    const ctx = makeCtx(1);
+    const customFinished = new Date('2026-02-25T15:30:00.000Z');
+    const output = generateExecutionSummary(ctx, summary, customFinished);
+
+    expect(output).toContain('Duration: 01:00:00');
+  });
+
+  it('defaults to current time when finished is omitted', () => {
+    const ctx = makeCtx(1);
+    const output = generateExecutionSummary(ctx, summary);
+
+    expect(output).toContain('Duration:');
+  });
+});
+
 // --- finalizeTrace ---
 
 describe('finalizeTrace', () => {
@@ -382,6 +494,41 @@ describe('finalizeTrace', () => {
     expect(result.totalTokens).toBe(3000);
     expect(typeof result.duration).toBe('number');
     expect(result.duration).toBeGreaterThanOrEqual(0);
+  });
+
+  it('returns executionSummary as a string', () => {
+    const tracesDir = join(tempDir, 'traces');
+    const ctx = createTrace('qa-cycle', 'default', tracesDir);
+
+    recordStep(ctx, {
+      role: 'qa',
+      intent: 'Validate',
+      tier: 'execution',
+      model: 'claude-sonnet-4-5',
+      fallback: false,
+      started: '2026-02-25T14:30:00.000Z',
+      duration: 60,
+      tokens: 3000,
+      result: 'pass',
+    });
+
+    const result = finalizeTrace(ctx, { result: 'pass', testsPass: true, lintPass: true });
+
+    expect(typeof result.executionSummary).toBe('string');
+    expect(result.executionSummary).toContain('qa-cycle');
+    expect(result.executionSummary).toContain('pass');
+    expect(result.executionSummary).toContain('qa');
+  });
+
+  it('returns non-empty executionSummary for zero steps', () => {
+    const tracesDir = join(tempDir, 'traces');
+    const ctx = createTrace('empty-workflow', 'default', tracesDir);
+
+    const result = finalizeTrace(ctx, { result: 'pass', testsPass: true, lintPass: true });
+
+    expect(typeof result.executionSummary).toBe('string');
+    expect(result.executionSummary).toContain('empty-workflow');
+    expect(result.executionSummary).toContain('Steps: 0');
   });
 });
 

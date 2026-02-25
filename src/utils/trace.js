@@ -9,6 +9,7 @@
 
 import { mkdirSync, writeFileSync, existsSync, readdirSync, readFileSync, unlinkSync, statSync } from 'fs';
 import { join, dirname } from 'path';
+import { estimateTokens } from './learnings.js';
 
 /** @typedef {'default' | 'verbose' | 'debug'} TraceLevel */
 
@@ -237,11 +238,74 @@ export function renderTrace(traceCtx, summary, finished) {
   return lines.join('\n');
 }
 
+/** Maximum token budget for execution summaries. */
+export const EXECUTION_SUMMARY_BUDGET = 500;
+
+/**
+ * Generates a compact execution summary for context injection.
+ * Designed for the learnings-extractor agent which runs on tier routine (Haiku).
+ * Pure function — no I/O.
+ *
+ * Dependency direction: trace.js imports estimateTokens from learnings.js.
+ * learnings.js must NOT import from trace.js.
+ *
+ * @param {TraceContext} traceCtx - The trace context with recorded steps
+ * @param {TraceSummary} summary - Final summary data (result, testsPass, lintPass)
+ * @param {Date} [finished] - Finish time (default: new Date())
+ * @returns {string} Plain text summary, estimated at <= 500 tokens
+ */
+export function generateExecutionSummary(traceCtx, summary, finished) {
+  const end = finished || new Date();
+  const durationMs = end.getTime() - traceCtx.started.getTime();
+  const durationStr = formatDuration(durationMs);
+
+  const headerLines = [
+    `Workflow: ${traceCtx.workflow}`,
+    `Result: ${summary.result}`,
+    `Steps: ${traceCtx.steps.length}`,
+    `Tokens: ${traceCtx.totalTokens}`,
+    `Duration: ${durationStr}`,
+  ];
+
+  const header = headerLines.join('\n') + '\n';
+
+  if (traceCtx.steps.length === 0) {
+    return header;
+  }
+
+  const stepLines = traceCtx.steps.map((step, i) =>
+    `${i + 1}. ${step.role}: ${step.intent} → ${step.result} (${step.tokens} tokens, ${step.duration}s)`
+  );
+
+  // Try full summary first
+  const full = header + '\n' + stepLines.join('\n');
+  if (estimateTokens(full) <= EXECUTION_SUMMARY_BUDGET) {
+    return full;
+  }
+
+  // Truncate step lines until within budget
+  const included = [];
+  for (let i = 0; i < stepLines.length; i++) {
+    const omissionNotice = `\n... (${traceCtx.steps.length - (i + 1)} steps omitted)`;
+    const candidate = header + '\n' + [...included, stepLines[i]].join('\n') + omissionNotice;
+    if (estimateTokens(candidate) > EXECUTION_SUMMARY_BUDGET) {
+      break;
+    }
+    included.push(stepLines[i]);
+  }
+
+  const omitted = traceCtx.steps.length - included.length;
+  if (included.length === 0) {
+    return header + `\n... (${omitted} steps omitted)`;
+  }
+  return header + '\n' + included.join('\n') + `\n... (${omitted} steps omitted)`;
+}
+
 /**
  * Finalizes a trace: computes duration, renders markdown, writes to disk.
  * @param {TraceContext} traceCtx - The trace context
  * @param {TraceSummary} summary - Final summary data (result, testsPass, lintPass)
- * @returns {{ filePath: string, duration: number, totalTokens: number }}
+ * @returns {{ filePath: string, duration: number, totalTokens: number, executionSummary: string }}
  */
 export function finalizeTrace(traceCtx, summary) {
   const finished = new Date();
@@ -254,10 +318,13 @@ export function finalizeTrace(traceCtx, summary) {
 
   writeFileSync(traceCtx.filePath, content, 'utf8');
 
+  const executionSummary = generateExecutionSummary(traceCtx, summary, finished);
+
   return {
     filePath: traceCtx.filePath,
     duration: durationMs,
     totalTokens: traceCtx.totalTokens,
+    executionSummary,
   };
 }
 

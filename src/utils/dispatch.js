@@ -9,6 +9,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { parseFrontmatter } from './files.js';
+import { parseSkill } from './workflow-parser.js';
 import {
   MODEL_TIERS,
   FAILURE_STRATEGIES,
@@ -140,4 +141,32 @@ export function resolveModel(tier, profile) {
   }
 
   throw new Error(`Cannot resolve model for tier "${tier}": no model available in profile after fallback chain`);
+}
+
+/**
+ * Extracts dispatch configuration from skill markdown content.
+ * Precedence: workflow steps (frontmatter) > null (legacy prose).
+ *
+ * Dependency direction: dispatch.js imports from workflow-parser.js.
+ * Do not reverse this — workflow-parser.js must not import from dispatch.js.
+ *
+ * @param {string} skillMarkdown - Raw SKILL.md content
+ * @returns {{ source: 'workflow', steps: Array<object> } | { source: null }}
+ * @throws {Error} If YAML frontmatter is malformed (propagated from parseSkill)
+ */
+export function extractDispatchConfigs(skillMarkdown) {
+  if (!skillMarkdown) {
+    return { source: null };
+  }
+
+  const skill = parseSkill(skillMarkdown);
+
+  if (skill.workflow && Array.isArray(skill.workflow.steps) && skill.workflow.steps.length > 0) {
+    return {
+      source: 'workflow',
+      steps: skill.workflow.steps,
+    };
+  }
+
+  return { source: null };
 }

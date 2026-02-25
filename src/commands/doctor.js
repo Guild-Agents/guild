@@ -125,11 +125,35 @@ export async function runDoctor() {
       healthy = false;
     }
     // If workflowCount === 0, don't add a check (no workflows to validate)
+
+    // Check for dual-format skills (workflow frontmatter + body step/phase headings)
+    const STEP_PHASE_RE = /^#{1,3}\s.*(step|phase)/im;
+    const dualFormatWarnings = [];
+
+    for (const [name, skill] of skills) {
+      if (skill.workflow && skill.body && STEP_PHASE_RE.test(skill.body)) {
+        dualFormatWarnings.push(name);
+      }
+    }
+
+    if (dualFormatWarnings.length > 0) {
+      checks.push({
+        name: `Dual-format skills (${dualFormatWarnings.length} warning(s))`,
+        pass: true,
+        warn: true,
+        detail: `Skills with both workflow frontmatter and body step/phase headings: ${dualFormatWarnings.join(', ')}. Workflow steps take precedence — consider removing prose steps from body.`,
+      });
+    }
   }
 
   // Display results
   for (const check of checks) {
-    if (check.pass) {
+    if (check.warn) {
+      p.log.warn(`${chalk.yellow('⚠')} ${check.name}`);
+      if (check.detail) {
+        p.log.info(chalk.gray(`  ${check.detail}`));
+      }
+    } else if (check.pass) {
       p.log.success(`${chalk.green('✓')} ${check.name}`);
     } else {
       p.log.error(`${chalk.red('✗')} ${check.name}`);
