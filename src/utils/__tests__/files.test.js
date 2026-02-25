@@ -14,7 +14,7 @@ describe('getAgentNames', () => {
   it('reads agent names from the templates directory', () => {
     const names = getAgentNames();
     // Should match the .md files in src/templates/agents/
-    expect(names).toHaveLength(9);
+    expect(names).toHaveLength(10);
     expect(names).toContain('advisor');
     expect(names).toContain('product-owner');
     expect(names).toContain('tech-lead');
@@ -85,7 +85,7 @@ describe('copyTemplates', () => {
     expect(existsSync(agentsDir)).toBe(true);
 
     const files = readdirSync(agentsDir);
-    expect(files).toHaveLength(9);
+    expect(files).toHaveLength(10);
     for (const name of getAgentNames()) {
       expect(files).toContain(`${name}.md`);
     }

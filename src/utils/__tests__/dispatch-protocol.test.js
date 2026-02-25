@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   MODEL_TIERS,
   FAILURE_STRATEGIES,
+  DEFAULT_FAILURE_STRATEGY,
   DEFAULT_AGENT_TIERS,
   DEFAULT_MODEL_PROFILES,
   FALLBACK_CHAIN,
@@ -18,12 +19,16 @@ describe('MODEL_TIERS', () => {
 });
 
 describe('FAILURE_STRATEGIES', () => {
-  it('has exactly 3 strategies', () => {
-    expect(FAILURE_STRATEGIES).toHaveLength(3);
+  it('has exactly 2 base strategies', () => {
+    expect(FAILURE_STRATEGIES).toHaveLength(2);
   });
 
-  it('contains stop, continue, retry', () => {
-    expect(FAILURE_STRATEGIES).toEqual(['stop', 'continue', 'retry']);
+  it('contains abort and continue', () => {
+    expect(FAILURE_STRATEGIES).toEqual(['abort', 'continue']);
+  });
+
+  it('has abort as the default failure strategy', () => {
+    expect(DEFAULT_FAILURE_STRATEGY).toBe('abort');
   });
 });
 

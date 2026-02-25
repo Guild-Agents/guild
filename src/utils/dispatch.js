@@ -37,8 +37,11 @@ export function validateStepConfig(config) {
     errors.push(`Invalid model-tier: "${config['model-tier']}". Must be one of: ${MODEL_TIERS.join(', ')}`);
   }
 
-  if (config['on-failure'] && !FAILURE_STRATEGIES.includes(config['on-failure'])) {
-    errors.push(`Invalid on-failure: "${config['on-failure']}". Must be one of: ${FAILURE_STRATEGIES.join(', ')}`);
+  if (config['on-failure']) {
+    const isGoto = config['on-failure'].startsWith('goto:');
+    if (!FAILURE_STRATEGIES.includes(config['on-failure']) && !isGoto) {
+      errors.push(`Invalid on-failure: "${config['on-failure']}". Must be one of: ${FAILURE_STRATEGIES.join(', ')}, or goto:<step-id>`);
+    }
   }
 
   if (config['max-retries'] !== undefined) {

@@ -102,10 +102,9 @@ export async function runDoctor() {
 
       // Check that agent references exist
       if (skill.workflow) {
-        const agentsDir2 = join('.claude', 'agents');
         for (const step of skill.workflow.steps) {
           if (step.role !== 'system' && step.role !== 'dynamic') {
-            const agentPath = join(agentsDir2, `${step.role}.md`);
+            const agentPath = join(agentsDir, `${step.role}.md`);
             if (!existsSync(agentPath)) {
               errorDetails.push(`${name}: step "${step.id}" references agent "${step.role}" — agent not found`);
               workflowErrors++;

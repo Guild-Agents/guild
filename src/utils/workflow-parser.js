@@ -7,7 +7,7 @@
  */
 
 import YAML from 'yaml';
-import { MODEL_TIERS } from './dispatch-protocol.js';
+import { MODEL_TIERS, FAILURE_STRATEGIES, DEFAULT_FAILURE_STRATEGY } from './dispatch-protocol.js';
 
 /**
  * Extracts the raw YAML frontmatter string and body from markdown content.
@@ -48,7 +48,7 @@ function normalizeStep(raw) {
     produces: raw.produces || [],
     modelTier: raw['model-tier'] || undefined,
     blocking: raw.blocking !== undefined ? raw.blocking : true,
-    onFailure: raw['on-failure'] || 'abort',
+    onFailure: raw['on-failure'] || DEFAULT_FAILURE_STRATEGY,
     gate: raw.gate || false,
     retry: raw.retry || undefined,
     condition: raw.condition || undefined,
@@ -150,9 +150,8 @@ export function validateWorkflow(workflow) {
 
     // Valid on-failure
     if (step.onFailure) {
-      const validValues = ['abort', 'continue'];
       const isGoto = step.onFailure.startsWith('goto:');
-      if (!validValues.includes(step.onFailure) && !isGoto) {
+      if (!FAILURE_STRATEGIES.includes(step.onFailure) && !isGoto) {
         errors.push(`Step "${step.id}" has invalid on-failure: "${step.onFailure}"`);
       }
     }

@@ -12,13 +12,19 @@
 export const MODEL_TIERS = ['reasoning', 'execution', 'routine'];
 
 /**
- * Valid failure strategy values for workflow steps.
- * - stop: halt the workflow on failure
+ * Valid failure strategy base values for workflow steps.
+ * - abort: halt the workflow on failure (default)
  * - continue: skip this step and proceed
- * - retry: re-attempt the step up to max-retries
- * @type {readonly ['stop', 'continue', 'retry']}
+ * Additionally, `goto:<step-id>` is valid for redirecting to another step.
+ * @type {readonly ['abort', 'continue']}
  */
-export const FAILURE_STRATEGIES = ['stop', 'continue', 'retry'];
+export const FAILURE_STRATEGIES = ['abort', 'continue'];
+
+/**
+ * Default failure strategy when none is specified.
+ * @type {string}
+ */
+export const DEFAULT_FAILURE_STRATEGY = 'abort';
 
 /**
  * Default tier assignment for each Guild agent role.

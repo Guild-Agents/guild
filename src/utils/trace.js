@@ -8,7 +8,7 @@
  */
 
 import { mkdirSync, writeFileSync, existsSync, readdirSync, readFileSync, unlinkSync, statSync } from 'fs';
-import { join } from 'path';
+import { join, dirname } from 'path';
 
 /** @typedef {'default' | 'verbose' | 'debug'} TraceLevel */
 
@@ -243,7 +243,7 @@ export function finalizeTrace(traceCtx, summary) {
   const content = renderTrace(traceCtx, summary, finished);
 
   // Ensure directory exists (may have been cleaned between create and finalize)
-  const dir = join(traceCtx.filePath, '..');
+  const dir = dirname(traceCtx.filePath);
   mkdirSync(dir, { recursive: true });
 
   writeFileSync(traceCtx.filePath, content, 'utf8');

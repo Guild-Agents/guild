@@ -21,7 +21,7 @@ describe('validateStepConfig', () => {
       role: 'developer',
       intent: 'Implement the feature',
       'model-tier': 'execution',
-      'on-failure': 'retry',
+      'on-failure': 'abort',
       'max-retries': 3,
     });
     expect(errors).toEqual([]);

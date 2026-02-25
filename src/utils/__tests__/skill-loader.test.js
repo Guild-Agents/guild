@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdirSync, writeFileSync, rmSync } from 'fs';
 import { join } from 'path';
+import { tmpdir } from 'os';
 import { loadSkill, loadAllSkills } from '../skill-loader.js';
 
-const TEST_DIR = join(import.meta.dirname, '__fixtures__', 'skills-test');
+const TEST_DIR = join(tmpdir(), `guild-skill-test-${process.pid}`);
 
 function writeSkill(name, content) {
   const dir = join(TEST_DIR, name);
