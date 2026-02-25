@@ -2,65 +2,77 @@
 
 ## Active session
 - **Date:** 2026-02-25
-- **Current task:** Roadmap review
-- **Active agent:** Council (Feature-Scope)
-- **Status:** New roadmap reviewed by council, no modifications
+- **Current task:** v1.x Core Infrastructure — `/build-feature` Phase 4 (Developer)
+- **Active agent:** Developer
+- **Branch:** `feature/v1x-core-infrastructure`
+- **Status:** Implementation in progress — T1+T3 done, T4 next
 
 ## What happened this session
 
-### Housekeeping
-- Deleted 10 stale spec files from `docs/specs/`
-- Cleaned up 16 stale branches (worktree, feature, fix, claude)
-- Removed 2 orphaned worktrees
-- Git state: clean, only `main`
+### Roadmap review
+- Read `guild-roadmap.docx` (3 horizons: v1.x, v2-exp, v3+)
+- `/council` Feature-Scope: Advisor + Product Owner + Tech Lead — all 3 approved
+- Council observations recorded (no roadmap modifications)
 
-### Pre-release & Snapshot Publishing (PR #45, merged)
-Full `/build-feature` pipeline — 6 phases completed:
+### Spec generation
+- Generated 3 technical specs via parallel council agents (2,592 lines total):
+  - `docs/specs/spec-guild-dispatch.md` (706 lines)
+  - `docs/specs/spec-declarative-workflows.md` (934 lines)
+  - `docs/specs/spec-logging-system.md` (952 lines)
 
-| Phase | Result |
-|-------|--------|
-| 1. Advisor | Approved (user override) |
-| 2. Product Owner | 7 stories, 38 acceptance criteria |
-| 3. Tech Lead | ESModule architecture, centralized version.js |
-| 4. Developer | 11 files, 19 new tests (123 total) |
-| 5. Code Review | 3 blockers fixed (ESM require, promote-beta, channel detection) |
-| 6. QA | 12/12 acceptance criteria pass, 0 bugs |
+### `/build-feature` pipeline — v1.x Core Infrastructure
+Currently in Phase 4 (Developer). Pipeline progress:
 
-**Delivered:**
-- `src/utils/version.js` — version parsing and computation
-- `scripts/version-{snapshot,beta,stable}.js` — ESModule wrappers
-- 7 npm scripts in package.json (version:*, publish:*, promote-beta)
-- CLI pre-release indicator (yellow beta, red snapshot, stderr)
-- `.github/workflows/snapshot.yml` — auto on push to `dev`
-- `.github/workflows/beta.yml` — manual with description
-- `.github/workflows/release.yml` — added workflow_dispatch with bump type
-- `.github/workflows/ci.yml` — added `dev` branch
+| Phase | Status | Result |
+|-------|--------|--------|
+| 1. Advisor | Done | Approved with 5 conditions |
+| 2. Product Owner | Done | 6 tasks, 87 acceptance criteria |
+| 3. Tech Lead | Done | Full technical plan (import graph, function signatures, test strategy) |
+| 4. Developer | **In progress** | T1+T3 done, T4 next |
+| 5. Code Review | Pending | — |
+| 6. QA | Pending | — |
+
+### Implementation progress (6 tasks)
+
+| Task | Status | Details |
+|------|--------|---------|
+| T1: dispatch-protocol.js + dispatch.js | **Done** | Constants, validation, tier resolution. 28 tests |
+| T2: yaml + workflow-parser.js + skill-loader.js | Pending | Blocked by T1 (now unblocked) |
+| T3: trace.js | **Done** | 3-level logging, pure rendering. 29 tests |
+| T4: Add default-tier to 8 agent templates | **Next** | Was starting when session paused |
+| T5: Migrate 4 Skills to declarative format | Pending | Depends on T1, T2, T4 |
+| T6: doctor.js integration + CLI flags | Pending | Depends on all above |
+
+### Files created this session
+- `src/utils/dispatch-protocol.js` — Constants (tiers, strategies, profiles, fallback chain)
+- `src/utils/dispatch.js` — validateStepConfig, resolveAgentMetadata, resolveEffectiveTier, resolveModel
+- `src/utils/trace.js` — createTrace, recordStep, finalizeTrace, renderTrace, listTraces, cleanTraces
+- `src/utils/__tests__/dispatch-protocol.test.js` — 15 tests
+- `src/utils/__tests__/dispatch.test.js` — 13 tests (+ integration with real agent files)
+- `src/utils/__tests__/trace.test.js` — 29 tests
+- `docs/specs/spec-guild-dispatch.md` — 706 lines
+- `docs/specs/spec-declarative-workflows.md` — 934 lines
+- `docs/specs/spec-logging-system.md` — 952 lines
 
 ## Key decisions made this session
 
 ### 1. New roadmap established (guild-roadmap.docx)
 - Three horizons: v1.x (shippable), v2-experimental (Agent Teams research), v3+ (Guild-sobre-Guild vision)
 - Tesis: Agent Teams es Kubernetes, Guild es Heroku
-- v1.x backlog: Compound Learning (P0), Model Routing (P0), Workflows Declarativos (P1), Logs (P1), dispatch (P1), Perfiles (P2)
-- Council reviewed unanimously — approved with observations (no modifications requested)
 
-### 2. Council observations (recorded, not acted upon)
-- **Consensus:** Workflows Declarativos should be P0; Model Routing should drop to P1
-- **Consensus:** Compound Learning needs token cap and user-facing UX for managing learnings
-- **Risk flagged:** Agent Teams dependency (experimental), Anthropic absorption risk
-- **Tech Lead:** Merge dispatch with Workflows Declarativos as single item
-- **Advisor:** Recognize v0.3→v1.x as a rewrite, not an iteration; add Plan B
+### 2. Advisor conditions for implementation
+- **Merge dispatch + workflows** — workflow frontmatter is canonical format; no separate guild-dispatch fenced blocks in SKILL bodies
+- **trace.js as pure utilities** — rendering functions have no I/O; orchestrator writes trace data via Skill prose
+- **Add `yaml` npm package** — for parsing nested YAML frontmatter in workflow definitions
+- **Limit Skill migration to 4** — build-feature, council, review, qa-cycle
+- **Phased implementation** — working commits after each module
 
-### 3. Previous: Backlog reset confirmed
-- Previous v0.4–v1.0 roadmap replaced by guild-roadmap.docx
-
-### 2. Pre-release spec implemented as-is
-- Advisor concerns overridden by user directive
-- ESM/package-name issues fixed during implementation
-
-### 3. Backward-compatible release workflow
-- Kept `v*` tag trigger alongside new `workflow_dispatch`
-- Both paths coexist safely
+### 3. Tech Lead: single import graph
+- dispatch-protocol.js is the leaf (zero deps)
+- dispatch.js and workflow-parser.js both import from dispatch-protocol
+- trace.js imports from dispatch-protocol for types
+- skill-loader.js imports from workflow-parser
+- doctor.js imports from dispatch + skill-loader
 
 ## Pending items
 
@@ -72,12 +84,17 @@ Snapshot workflow triggers on push to `dev`. Branch needs to be created when ado
 
 ## Technical context
 - **Version**: 0.3.1 (published to npm)
-- **Tests**: 123 passing (9 test files)
-- **Agents**: 9 templates + SDD Methodologist (local only)
-- **Skills**: 11 templates (including create-pr)
+- **Tests**: 195 passing (12 test files)
+- **Agents**: 9 templates (default-tier pending addition)
+- **Skills**: 11 templates (4 pending migration to declarative format)
 - **Node**: v24.12.0 local, CI matrix 20.x/22.x
+- **Branch**: feature/v1x-core-infrastructure (2 commits ahead of main)
 
 ## Next steps
-1. Begin v1.x implementation when user decides first feature to build
-2. Create `dev` branch when ready to use snapshot publishing
-3. Regenerate `docs/og-image.png` from updated SVG
+1. **Resume T4** — Add `default-tier` to 8 agent templates (trivial, ~10 min)
+2. **Implement T2** — Install `yaml`, create `workflow-parser.js` + `skill-loader.js` (largest task)
+3. **Implement T5** — Migrate 4 Skills to declarative workflow frontmatter
+4. **Implement T6** — doctor.js dispatch checks + `--verbose`/`--debug` CLI flags
+5. Continue `/build-feature` pipeline: Phase 5 (Code Review) → Phase 6 (QA)
+
+**Resume with:** Continue `/build-feature` from T4. All context is in this file and the task list.
