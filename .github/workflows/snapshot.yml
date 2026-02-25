@@ -1,0 +1,47 @@
+name: Publish Snapshot
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish-snapshot:
+    name: Publish Snapshot
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.x
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Set snapshot version
+        run: npm run version:snapshot
+
+      - name: Publish snapshot
+        run: npm publish --tag snapshot
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Report version
+        run: |
+          VERSION=$(node -p "JSON.parse(require('fs').readFileSync('package.json','utf8')).version")
+          echo "Published snapshot: $VERSION" >> $GITHUB_STEP_SUMMARY

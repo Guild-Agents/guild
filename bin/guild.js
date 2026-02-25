@@ -14,9 +14,17 @@ import { program } from 'commander';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import chalk from 'chalk';
+import { getPreReleaseWarning } from '../src/utils/version.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8'));
+
+const prereleaseWarning = getPreReleaseWarning(pkg.version);
+if (prereleaseWarning) {
+  const color = pkg.version.includes('-snapshot') ? chalk.red : chalk.yellow;
+  console.error(color(`Guild v${pkg.version} -- ${prereleaseWarning}`));
+}
 
 program
   .name('guild')
