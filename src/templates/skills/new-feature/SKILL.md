@@ -2,6 +2,39 @@
 name: new-feature
 description: "Creates branch and scaffold for a new feature"
 user-invocable: true
+workflow:
+  version: 1
+  steps:
+    - id: get-name
+      role: system
+      intent: "Obtain feature name from user input or prompt for it."
+      produces: [feature-name, feature-description]
+      gate: true
+    - id: create-branch
+      role: system
+      intent: "Create feature branch (simple checkout or worktree for parallel execution)."
+      commands: [git checkout -b]
+      requires: [feature-name]
+      produces: [branch-name]
+    - id: update-session
+      role: system
+      intent: "Update SESSION.md with new feature context, date, and state."
+      requires: [feature-name, feature-description, branch-name]
+      produces: [session-update]
+      gate: true
+    - id: create-issue
+      role: system
+      intent: "Optionally create GitHub Issue for the feature via gh CLI."
+      commands: [gh issue create]
+      requires: [feature-name, feature-description]
+      produces: [issue-url]
+      condition: user-wants-issue
+    - id: confirm
+      role: system
+      intent: "Confirm branch created, SESSION.md updated, issue created. Suggest /build-feature."
+      requires: [branch-name, session-update]
+      produces: [confirmation]
+      gate: true
 ---
 
 # New Feature

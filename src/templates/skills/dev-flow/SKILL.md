@@ -2,6 +2,20 @@
 name: dev-flow
 description: "Shows current pipeline phase and what comes next"
 user-invocable: true
+workflow:
+  version: 1
+  steps:
+    - id: read-state
+      role: system
+      intent: "Read SESSION.md to determine current feature and pipeline phase."
+      commands: [cat SESSION.md]
+      produces: [session-state, feature-name, current-phase]
+    - id: present-flow
+      role: system
+      intent: "Display pipeline progress with phase checklist and suggest next step."
+      requires: [session-state, feature-name, current-phase]
+      produces: [flow-display]
+      gate: true
 ---
 
 # Dev Flow

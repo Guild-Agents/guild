@@ -2,6 +2,38 @@
 name: session-start
 description: "Loads context and resumes work from SESSION.md"
 user-invocable: true
+workflow:
+  version: 1
+  steps:
+    - id: load-context
+      role: system
+      intent: "Read CLAUDE.md, SESSION.md, and PROJECT.md to load project context."
+      commands: [cat CLAUDE.md, cat SESSION.md, cat PROJECT.md]
+      produces: [claude-md, session-md, project-md]
+    - id: detect-resumable
+      role: system
+      intent: "Check for wip: checkpoint commits on feature and fix branches."
+      commands: [git branch --list "feature/*" --list "fix/*", git log --oneline -1]
+      requires: [session-md]
+      produces: [resumable-branches, last-phase]
+    - id: present-state
+      role: system
+      intent: "Display previous session summary: date, task, state, decisions, next steps, resumable pipelines."
+      requires: [session-md, resumable-branches]
+      produces: [state-display]
+      gate: true
+    - id: suggest-continuation
+      role: system
+      intent: "Suggest appropriate skill to continue based on current state."
+      requires: [state-display]
+      produces: [suggested-action]
+      gate: true
+    - id: update-session
+      role: system
+      intent: "Update SESSION.md with current date to record session start."
+      requires: [session-md]
+      produces: [session-updated]
+      gate: true
 ---
 
 # Session Start

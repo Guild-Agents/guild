@@ -2,6 +2,26 @@
 name: status
 description: "Shows current project and session state"
 user-invocable: true
+workflow:
+  version: 1
+  steps:
+    - id: read-state
+      role: system
+      intent: "Read CLAUDE.md, PROJECT.md, and SESSION.md for project state."
+      commands: [cat CLAUDE.md, cat PROJECT.md, cat SESSION.md]
+      produces: [claude-md, project-md, session-md]
+    - id: scan-resources
+      role: system
+      intent: "List available agents and skills from .claude/ directories."
+      commands: [ls .claude/agents/, ls .claude/skills/]
+      requires: [claude-md]
+      produces: [agent-list, skill-list]
+    - id: present-status
+      role: system
+      intent: "Display project summary: name, stack, session state, agents, skills, and suggested next steps."
+      requires: [project-md, session-md, agent-list, skill-list]
+      produces: [status-display]
+      gate: true
 ---
 
 # Status
