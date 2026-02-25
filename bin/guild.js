@@ -105,4 +105,19 @@ program
     }
   });
 
+// guild reset-learnings
+program
+  .command('reset-learnings')
+  .description('Reset the compound learnings file')
+  .option('-f, --force', 'Skip confirmation prompt')
+  .action(async (options) => {
+    try {
+      const { runResetLearnings } = await import('../src/commands/reset-learnings.js');
+      await runResetLearnings(options);
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  });
+
 program.parse();
