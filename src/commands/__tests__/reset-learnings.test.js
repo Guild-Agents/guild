@@ -101,12 +101,11 @@ describe('runResetLearnings', () => {
   });
 
   it('throws when not in a Guild project', async () => {
-    const emptyDir = mkdtempSync(join(tmpdir(), 'guild-empty-'));
-    process.chdir(emptyDir);
+    // Use tempDir without .claude/ marker — remove it so ensureProjectRoot fails
+    rmSync(join(tempDir, '.claude'), { recursive: true, force: true });
+    process.chdir(tempDir);
 
     const { runResetLearnings } = await import('../reset-learnings.js');
     await expect(runResetLearnings({ force: true })).rejects.toThrow('Guild project not found');
-
-    rmSync(emptyDir, { recursive: true, force: true });
   });
 });

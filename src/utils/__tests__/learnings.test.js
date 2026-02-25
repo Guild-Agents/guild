@@ -277,6 +277,10 @@ describe('buildContextInjection', () => {
     expect(buildContextInjection(empty)).toBe('');
   });
 
+  it('returns empty string for whitespace-only content', () => {
+    expect(buildContextInjection('   \n\t  ')).toBe('');
+  });
+
   it('wraps content in guild-learnings tags', () => {
     const result = buildContextInjection(SAMPLE_LEARNINGS);
     expect(result).toContain('<guild-learnings>');
