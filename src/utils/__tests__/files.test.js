@@ -24,6 +24,7 @@ describe('getAgentNames', () => {
     expect(names).toContain('bugfix');
     expect(names).toContain('db-migration');
     expect(names).toContain('platform-expert');
+    expect(names).toContain('learnings-extractor');
   });
 
   it('returns names sorted alphabetically', () => {
@@ -79,7 +80,7 @@ describe('copyTemplates', () => {
     if (existsSync(TEST_DIR)) rmSync(TEST_DIR, { recursive: true });
   });
 
-  it('creates .claude/agents/ with 9 flat .md files', async () => {
+  it('creates .claude/agents/ with 10 flat .md files', async () => {
     await copyTemplates();
     const agentsDir = join('.claude', 'agents');
     expect(existsSync(agentsDir)).toBe(true);

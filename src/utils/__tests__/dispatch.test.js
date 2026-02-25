@@ -61,6 +61,15 @@ describe('validateStepConfig', () => {
     expect(errors).toContainEqual(expect.stringContaining('on-failure'));
   });
 
+  it('accepts goto: on-failure value', () => {
+    const errors = validateStepConfig({
+      role: 'developer',
+      intent: 'Do something',
+      'on-failure': 'goto:fallback-step',
+    });
+    expect(errors).toEqual([]);
+  });
+
   it('returns error for negative max-retries', () => {
     const errors = validateStepConfig({
       role: 'developer',
