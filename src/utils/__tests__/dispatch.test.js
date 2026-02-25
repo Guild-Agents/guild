@@ -1,5 +1,7 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { join } from 'path';
+import { mkdirSync, writeFileSync, rmSync, mkdtempSync } from 'fs';
+import { tmpdir } from 'os';
 import {
   validateStepConfig,
   resolveAgentMetadata,
@@ -111,36 +113,69 @@ describe('validateStepConfig', () => {
 });
 
 describe('resolveAgentMetadata', () => {
-  // Use the real project root to read actual agent files
-  const projectRoot = join(import.meta.dirname, '..', '..', '..');
+  let tempDir;
+
+  beforeEach(() => {
+    tempDir = mkdtempSync(join(tmpdir(), 'guild-dispatch-test-'));
+    const agentsDir = join(tempDir, '.claude', 'agents');
+    mkdirSync(agentsDir, { recursive: true });
+
+    writeFileSync(join(agentsDir, 'tech-lead.md'), [
+      '---',
+      'name: tech-lead',
+      'description: "Technical architect"',
+      'tools: Read, Glob, Grep',
+      'permissionMode: plan',
+      'default-tier: reasoning',
+      '---',
+      '',
+      '# Tech Lead',
+    ].join('\n'));
+
+    writeFileSync(join(agentsDir, 'developer.md'), [
+      '---',
+      'name: developer',
+      'description: "Implementation agent"',
+      'tools: Read, Write, Edit, Bash, Glob, Grep',
+      'permissionMode: bypassPermissions',
+      'default-tier: execution',
+      '---',
+      '',
+      '# Developer',
+    ].join('\n'));
+  });
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true });
+  });
 
   it('reads existing agent frontmatter', () => {
-    const meta = resolveAgentMetadata('tech-lead', projectRoot);
+    const meta = resolveAgentMetadata('tech-lead', tempDir);
     expect(meta).not.toBeNull();
     expect(meta.role).toBe('tech-lead');
     expect(meta.name).toBe('tech-lead');
   });
 
   it('reads developer agent frontmatter', () => {
-    const meta = resolveAgentMetadata('developer', projectRoot);
+    const meta = resolveAgentMetadata('developer', tempDir);
     expect(meta).not.toBeNull();
     expect(meta.role).toBe('developer');
     expect(meta.name).toBe('developer');
   });
 
   it('returns null for nonexistent agent', () => {
-    const meta = resolveAgentMetadata('nonexistent-agent', projectRoot);
+    const meta = resolveAgentMetadata('nonexistent-agent', tempDir);
     expect(meta).toBeNull();
   });
 
   it('reads default-tier from agent frontmatter', () => {
-    const meta = resolveAgentMetadata('tech-lead', projectRoot);
+    const meta = resolveAgentMetadata('tech-lead', tempDir);
     expect(meta).not.toBeNull();
     expect(meta.defaultTier).toBe('reasoning');
   });
 
   it('reads execution tier from developer agent', () => {
-    const meta = resolveAgentMetadata('developer', projectRoot);
+    const meta = resolveAgentMetadata('developer', tempDir);
     expect(meta).not.toBeNull();
     expect(meta.defaultTier).toBe('execution');
   });
