@@ -56,7 +56,7 @@ jobs:
       - name: Read version
         id: version
         run: |
-          VERSION=$(node -p "JSON.parse(require('fs').readFileSync('package.json','utf8')).version")
+          VERSION=$(node --input-type=commonjs -p "require('./package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Publish to npm
@@ -75,7 +75,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          VERSION=$(node -p "JSON.parse(require('fs').readFileSync('package.json','utf8')).version")
+          VERSION=$(node --input-type=commonjs -p "require('./package.json').version")
           git add package.json
           git commit -m "release: v${VERSION}"
           git push

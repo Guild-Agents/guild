@@ -43,5 +43,5 @@ jobs:
 
       - name: Report version
         run: |
-          VERSION=$(node -p "JSON.parse(require('fs').readFileSync('package.json','utf8')).version")
+          VERSION=$(node --input-type=commonjs -p "require('./package.json').version")
           echo "Published snapshot: $VERSION" >> $GITHUB_STEP_SUMMARY
