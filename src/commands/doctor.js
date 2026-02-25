@@ -127,7 +127,8 @@ export async function runDoctor() {
     // If workflowCount === 0, don't add a check (no workflows to validate)
 
     // Check for dual-format skills (workflow frontmatter + body step/phase headings)
-    const STEP_PHASE_RE = /^#{1,3}\s.*(step|phase)/im;
+    // Matches "### Step 1", "## Phase 2", etc. — requires digit after Step/Phase
+    const STEP_PHASE_RE = /^#{1,3}\s+(Step|Phase)\s+\d/im;
     const dualFormatWarnings = [];
 
     for (const [name, skill] of skills) {

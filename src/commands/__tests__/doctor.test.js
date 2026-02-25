@@ -3,15 +3,16 @@ import { mkdirSync, rmSync, mkdtempSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
-// Unit test for the dual-format detection heuristic (same regex as doctor.js)
+// Unit test for the dual-format detection heuristic
+// Must match the regex in doctor.js: /^#{1,3}\s+(Step|Phase)\s+\d/im
 describe('dual-format detection heuristic', () => {
-  const STEP_PHASE_RE = /^#{1,3}\s.*(step|phase)/im;
+  const STEP_PHASE_RE = /^#{1,3}\s+(Step|Phase)\s+\d/im;
 
-  it('matches heading with "Step"', () => {
+  it('matches heading with "Step N"', () => {
     expect(STEP_PHASE_RE.test('### Step 1 — Evaluate')).toBe(true);
   });
 
-  it('matches heading with "Phase"', () => {
+  it('matches heading with "Phase N"', () => {
     expect(STEP_PHASE_RE.test('## Phase 2 — Implementation')).toBe(true);
   });
 
@@ -20,7 +21,7 @@ describe('dual-format detection heuristic', () => {
     expect(STEP_PHASE_RE.test('### phase 3')).toBe(true);
   });
 
-  it('matches H1, H2, and H3 only', () => {
+  it('matches H1, H2, and H3', () => {
     expect(STEP_PHASE_RE.test('# Step 1')).toBe(true);
     expect(STEP_PHASE_RE.test('## Step 1')).toBe(true);
     expect(STEP_PHASE_RE.test('### Step 1')).toBe(true);
@@ -34,9 +35,10 @@ describe('dual-format detection heuristic', () => {
     expect(STEP_PHASE_RE.test('This step is important')).toBe(false);
   });
 
-  it('does not match body without step/phase headings', () => {
-    const body = '## Notes\n\n- Some note\n- Another note';
-    expect(STEP_PHASE_RE.test(body)).toBe(false);
+  it('does not match unrelated headings containing step/phase', () => {
+    expect(STEP_PHASE_RE.test('## Troubleshooting Steps')).toBe(false);
+    expect(STEP_PHASE_RE.test('## A multistep approach')).toBe(false);
+    expect(STEP_PHASE_RE.test('## Debugging the deployment phase')).toBe(false);
   });
 
   it('matches within multiline content', () => {

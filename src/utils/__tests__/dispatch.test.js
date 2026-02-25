@@ -339,4 +339,8 @@ workflow:
     const result = extractDispatchConfigs(content);
     expect(result.source).toBeNull();
   });
+
+  it('throws for malformed YAML', () => {
+    expect(() => extractDispatchConfigs('---\n: :\n---')).toThrow();
+  });
 });
