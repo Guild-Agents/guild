@@ -2,9 +2,9 @@
 
 ## Active session
 - **Date:** 2026-02-25
-- **Current task:** None — session complete
-- **Active agent:** None
-- **Status:** Pre-release publishing merged, backlog pending reset
+- **Current task:** Roadmap review
+- **Active agent:** Council (Feature-Scope)
+- **Status:** New roadmap reviewed by council, no modifications
 
 ## What happened this session
 
@@ -38,9 +38,21 @@ Full `/build-feature` pipeline — 6 phases completed:
 
 ## Key decisions made this session
 
-### 1. Backlog is being reset
-- Previous v0.4–v1.0 roadmap on hold
-- User will provide new backlog direction
+### 1. New roadmap established (guild-roadmap.docx)
+- Three horizons: v1.x (shippable), v2-experimental (Agent Teams research), v3+ (Guild-sobre-Guild vision)
+- Tesis: Agent Teams es Kubernetes, Guild es Heroku
+- v1.x backlog: Compound Learning (P0), Model Routing (P0), Workflows Declarativos (P1), Logs (P1), dispatch (P1), Perfiles (P2)
+- Council reviewed unanimously — approved with observations (no modifications requested)
+
+### 2. Council observations (recorded, not acted upon)
+- **Consensus:** Workflows Declarativos should be P0; Model Routing should drop to P1
+- **Consensus:** Compound Learning needs token cap and user-facing UX for managing learnings
+- **Risk flagged:** Agent Teams dependency (experimental), Anthropic absorption risk
+- **Tech Lead:** Merge dispatch with Workflows Declarativos as single item
+- **Advisor:** Recognize v0.3→v1.x as a rewrite, not an iteration; add Plan B
+
+### 3. Previous: Backlog reset confirmed
+- Previous v0.4–v1.0 roadmap replaced by guild-roadmap.docx
 
 ### 2. Pre-release spec implemented as-is
 - Advisor concerns overridden by user directive
@@ -66,6 +78,6 @@ Snapshot workflow triggers on push to `dev`. Branch needs to be created when ado
 - **Node**: v24.12.0 local, CI matrix 20.x/22.x
 
 ## Next steps
-1. Receive new backlog from user
+1. Begin v1.x implementation when user decides first feature to build
 2. Create `dev` branch when ready to use snapshot publishing
 3. Regenerate `docs/og-image.png` from updated SVG
