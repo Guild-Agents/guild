@@ -2,6 +2,33 @@
 name: session-end
 description: "Saves current state to SESSION.md"
 user-invocable: true
+workflow:
+  version: 1
+  steps:
+    - id: gather-state
+      role: system
+      intent: "Analyze current work state: task in progress, pipeline phase, modified files, session commits."
+      commands: [git status, git log --oneline -10]
+      produces: [work-state, modified-files, session-commits]
+    - id: update-session
+      role: system
+      intent: "Write current state, decisions, and next steps to SESSION.md."
+      requires: [work-state, modified-files, session-commits]
+      produces: [session-update]
+      gate: true
+    - id: commit-wip
+      role: system
+      intent: "Create WIP checkpoint commit if uncommitted changes exist."
+      commands: [git add -A, git commit -m "wip: session paused"]
+      requires: [modified-files]
+      produces: [wip-commit]
+      condition: has-uncommitted-changes
+    - id: confirm
+      role: system
+      intent: "Confirm SESSION.md updated, WIP committed, safe to close."
+      requires: [session-update]
+      produces: [confirmation]
+      gate: true
 ---
 
 # Session End

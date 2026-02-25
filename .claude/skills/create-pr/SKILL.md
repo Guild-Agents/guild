@@ -2,6 +2,38 @@
 name: create-pr
 description: "Create a pull request from the current branch with structured summary"
 user-invocable: true
+workflow:
+  version: 1
+  steps:
+    - id: verify-branch
+      role: system
+      intent: "Verify not on main/develop, check for uncommitted changes, get commits ahead of main."
+      commands: [git branch --show-current, git status, git log main..HEAD --oneline]
+      produces: [branch-name, branch-state, commit-list]
+    - id: gather-context
+      role: system
+      intent: "Collect diff stats, run tests and lint for PR description context."
+      commands: [git diff main..HEAD --stat, npm test, npm run lint]
+      requires: [branch-state]
+      produces: [diff-summary, test-result, lint-result]
+    - id: generate-description
+      role: system
+      intent: "Build structured PR description from commits, diff stats, and test results."
+      requires: [commit-list, diff-summary, test-result, lint-result]
+      produces: [pr-description, pr-title]
+      gate: true
+    - id: create-pr
+      role: system
+      intent: "Push branch to origin and create PR via gh CLI."
+      commands: [git push -u origin, gh pr create]
+      requires: [pr-description, pr-title, branch-name]
+      produces: [pr-url]
+    - id: post-creation
+      role: system
+      intent: "Display PR URL and suggest next steps."
+      requires: [pr-url]
+      produces: [summary]
+      gate: true
 ---
 
 # Create PR

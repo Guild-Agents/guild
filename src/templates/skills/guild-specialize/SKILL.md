@@ -2,6 +2,44 @@
 name: guild-specialize
 description: "Enriches CLAUDE.md by exploring the project and specializes agents to the real stack"
 user-invocable: true
+workflow:
+  version: 1
+  steps:
+    - id: read-base
+      role: system
+      intent: "Read CLAUDE.md, PROJECT.md, and SESSION.md for current Guild configuration."
+      commands: [cat CLAUDE.md, cat PROJECT.md, cat SESSION.md]
+      produces: [claude-md, project-md, session-md]
+    - id: explore-project
+      role: system
+      intent: "Scan project structure, dependency files, configs, CI, and documentation to detect stack and architecture."
+      commands: [ls -R src/, cat package.json]
+      produces: [detected-stack, detected-architecture, detected-conventions]
+      gate: true
+    - id: enrich-claude-md
+      role: tech-lead
+      intent: "Replace [PENDING: guild-specialize] placeholders in CLAUDE.md with detected project information."
+      requires: [claude-md, detected-stack, detected-architecture, detected-conventions]
+      produces: [enriched-claude-md]
+      model-tier: reasoning
+    - id: specialize-agents
+      role: tech-lead
+      intent: "Add project-specific context to each agent definition in .claude/agents/."
+      requires: [detected-stack, detected-architecture, detected-conventions]
+      produces: [specialized-agents]
+      model-tier: execution
+    - id: confirm
+      role: system
+      intent: "Present summary of detected stack, architecture, and updated agents."
+      requires: [enriched-claude-md, specialized-agents]
+      produces: [specialization-summary]
+      gate: true
+    - id: commit-enrichment
+      role: system
+      intent: "Commit enriched CLAUDE.md and agent files as an atomic commit."
+      commands: [git add CLAUDE.md .claude/agents/*.md, git commit]
+      requires: [enriched-claude-md, specialized-agents]
+      produces: [enrichment-commit]
 ---
 
 # Guild Specialize

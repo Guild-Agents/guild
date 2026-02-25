@@ -2,6 +2,104 @@
 name: build-feature
 description: "Full pipeline: evaluation -> spec -> implementation -> review -> QA"
 user-invocable: true
+workflow:
+  version: 1
+  steps:
+    - id: evaluate
+      role: advisor
+      intent: "Evaluate the feature against the project vision. Identify risks, dependencies, and conflicts. Issue verdict: Approved / Rejected / Requires adjustments."
+      requires: [feature-description]
+      produces: [evaluation-report, verdict]
+      model-tier: reasoning
+      on-failure: abort
+    - id: specify
+      role: product-owner
+      intent: "Break the feature into concrete tasks with verifiable acceptance criteria. Estimate effort and suggest implementation order."
+      requires: [feature-description, evaluation-report]
+      produces: [task-list, acceptance-criteria]
+      model-tier: reasoning
+      condition: step.evaluate.verdict != rejected
+    - id: design
+      role: tech-lead
+      intent: "Define implementation approach: files to modify, patterns to follow, interfaces, and technical risks."
+      requires: [task-list, acceptance-criteria]
+      produces: [technical-plan]
+      model-tier: reasoning
+    - id: implement
+      role: developer
+      intent: "Implement the feature following the technical plan. Write unit tests. Make atomic commits."
+      requires: [technical-plan, acceptance-criteria]
+      produces: [implementation, test-results]
+      model-tier: execution
+    - id: gate-pre-review
+      role: system
+      intent: "Run project tests and lint. Both must pass before review."
+      commands: [npm test, npm run lint]
+      gate: true
+      produces: [gate-pre-review-result]
+      on-failure: goto:implement
+    - id: checkpoint-phase4
+      role: system
+      intent: "Create checkpoint commit and write partial pipeline trace (phases 1-4) to spec file."
+      requires: [implementation, gate-pre-review-result]
+      produces: [checkpoint-commit]
+      gate: true
+    - id: review
+      role: code-reviewer
+      intent: "Review code quality, patterns, security, and test coverage. Classify findings as Blocker, Warning, or Suggestion."
+      requires: [implementation, gate-pre-review-result]
+      produces: [review-report]
+      model-tier: reasoning
+      retry:
+        max: 2
+        on: has-blockers
+    - id: fix-review-blockers
+      role: developer
+      intent: "Fix blocker findings from code review. Run tests after fixing."
+      requires: [review-report]
+      produces: [implementation]
+      model-tier: execution
+      condition: step.review.has-blockers
+      on-failure: goto:review
+    - id: qa-phase
+      role: system
+      intent: "Run QA validation with bugfix cycles."
+      delegates-to: qa-cycle
+      requires: [acceptance-criteria, implementation]
+      produces: [qa-report]
+      retry:
+        max: 2
+        on: has-bugs
+    - id: post-qa-review
+      role: code-reviewer
+      intent: "Review changes introduced during QA bugfix cycles."
+      requires: [qa-report, implementation]
+      produces: [post-qa-review-report]
+      model-tier: reasoning
+      condition: step.qa-phase.had-significant-changes
+      retry:
+        max: 2
+        on: has-blockers
+    - id: gate-final
+      role: system
+      intent: "Run project tests and lint as final verification. Both must pass."
+      commands: [npm test, npm run lint]
+      gate: true
+      produces: [final-gate-result]
+      on-failure: goto:qa-phase
+    - id: completion
+      role: system
+      intent: "Write complete pipeline trace to spec file. Update SESSION.md. Present summary to user."
+      requires: [final-gate-result, review-report, qa-report]
+      produces: [pipeline-trace, session-update]
+      gate: true
+    - id: extract-learnings
+      role: learnings-extractor
+      intent: "Extract compound learnings from this pipeline execution."
+      requires: [pipeline-trace]
+      produces: [updated-learnings]
+      model-tier: routine
+      blocking: false
 ---
 
 # Build Feature
@@ -368,3 +466,4 @@ Feature complete. PR ready for merge.
 - If the user wants to skip phases (e.g., "already evaluated, implement directly"), allow skipping to Phase 4 but warn that validation is lost. Verification gates (pre-Review and final) are NEVER skipped
 - The pipeline is sequential: each phase depends on the output of the previous one
 - Review/QA loops have limits to prevent infinite cycles
+- In v1.x, parallel pipeline execution (multiple build-features via worktrees) is best-effort and depends on the host environment supporting concurrent agents
