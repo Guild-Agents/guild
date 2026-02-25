@@ -28,8 +28,8 @@ describe('FAILURE_STRATEGIES', () => {
 });
 
 describe('DEFAULT_AGENT_TIERS', () => {
-  it('covers 9 agents', () => {
-    expect(Object.keys(DEFAULT_AGENT_TIERS)).toHaveLength(9);
+  it('covers 10 agents', () => {
+    expect(Object.keys(DEFAULT_AGENT_TIERS)).toHaveLength(10);
   });
 
   it('maps reasoning agents correctly', () => {
@@ -44,6 +44,7 @@ describe('DEFAULT_AGENT_TIERS', () => {
     expect(DEFAULT_AGENT_TIERS['bugfix']).toBe('execution');
     expect(DEFAULT_AGENT_TIERS['db-migration']).toBe('execution');
     expect(DEFAULT_AGENT_TIERS['qa']).toBe('execution');
+    expect(DEFAULT_AGENT_TIERS['platform-expert']).toBe('execution');
   });
 
   it('maps routine agents correctly', () => {

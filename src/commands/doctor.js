@@ -7,6 +7,7 @@ import chalk from 'chalk';
 import { existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { resolveProjectRoot } from '../utils/files.js';
+import { loadAllSkills } from '../utils/skill-loader.js';
 
 export async function runDoctor() {
   const root = resolveProjectRoot();
@@ -81,6 +82,50 @@ export async function runDoctor() {
   } else {
     checks.push({ name: 'SESSION.md', pass: false, fix: 'Run: guild init (creates SESSION.md for session tracking)' });
     healthy = false;
+  }
+
+  // Check workflow validation in skills
+  if (existsSync(skillsDir)) {
+    const skills = loadAllSkills(skillsDir);
+    let workflowCount = 0;
+    let workflowErrors = 0;
+    const errorDetails = [];
+
+    for (const [name, skill] of skills) {
+      if (skill.workflow) {
+        workflowCount++;
+        if (skill.errors.length > 0) {
+          workflowErrors++;
+          errorDetails.push(`${name}: ${skill.errors.join('; ')}`);
+        }
+      }
+
+      // Check that agent references exist
+      if (skill.workflow) {
+        const agentsDir2 = join('.claude', 'agents');
+        for (const step of skill.workflow.steps) {
+          if (step.role !== 'system' && step.role !== 'dynamic') {
+            const agentPath = join(agentsDir2, `${step.role}.md`);
+            if (!existsSync(agentPath)) {
+              errorDetails.push(`${name}: step "${step.id}" references agent "${step.role}" — agent not found`);
+              workflowErrors++;
+            }
+          }
+        }
+      }
+    }
+
+    if (workflowCount > 0 && workflowErrors === 0) {
+      checks.push({ name: `Workflows (${workflowCount} valid)`, pass: true });
+    } else if (workflowCount > 0 && workflowErrors > 0) {
+      checks.push({
+        name: `Workflows (${workflowErrors} issue(s))`,
+        pass: false,
+        fix: errorDetails.join('\n    '),
+      });
+      healthy = false;
+    }
+    // If workflowCount === 0, don't add a check (no workflows to validate)
   }
 
   // Display results

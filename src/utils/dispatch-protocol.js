@@ -35,6 +35,7 @@ export const DEFAULT_AGENT_TIERS = {
   'bugfix': 'execution',
   'db-migration': 'execution',
   'qa': 'execution',
+  'platform-expert': 'execution',
   'learnings-extractor': 'routine',
 };
 

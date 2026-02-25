@@ -2,6 +2,49 @@
 name: council
 description: "Convenes multiple agents to debate an important decision"
 user-invocable: true
+workflow:
+  version: 1
+  steps:
+    - id: identify-type
+      role: system
+      intent: "Analyze the question and determine council type: architecture, feature-scope, or tech-debt."
+      requires: [user-question]
+      produces: [council-type, participant-roles]
+      gate: true
+    - id: agent-1
+      role: dynamic
+      intent: "Analyze the question from specialized perspective. State position with concrete arguments."
+      requires: [user-question, council-type]
+      produces: [perspective-1]
+      model-tier: reasoning
+      parallel: [agent-2, agent-3]
+    - id: agent-2
+      role: dynamic
+      intent: "Analyze the question from specialized perspective. State position with concrete arguments."
+      requires: [user-question, council-type]
+      produces: [perspective-2]
+      model-tier: reasoning
+      parallel: [agent-1, agent-3]
+    - id: agent-3
+      role: dynamic
+      intent: "Analyze the question from specialized perspective. State position with concrete arguments."
+      requires: [user-question, council-type]
+      produces: [perspective-3]
+      model-tier: reasoning
+      parallel: [agent-1, agent-2]
+    - id: synthesize
+      role: system
+      intent: "Synthesize debate: points of agreement, disagreement, risks. Present options to user."
+      requires: [perspective-1, perspective-2, perspective-3]
+      produces: [synthesis, options]
+      gate: true
+    - id: write-spec
+      role: system
+      intent: "After user decides, write spec document to docs/specs/."
+      requires: [synthesis, user-decision]
+      produces: [spec-document]
+      condition: user-wants-spec
+      gate: true
 ---
 
 # Council

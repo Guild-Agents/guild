@@ -123,12 +123,16 @@ describe('resolveAgentMetadata', () => {
     expect(meta).toBeNull();
   });
 
-  it('returns undefined defaultTier when agent has no default-tier field', () => {
+  it('reads default-tier from agent frontmatter', () => {
     const meta = resolveAgentMetadata('tech-lead', projectRoot);
-    // Before T4 adds default-tier, this should be undefined
-    // After T4, this test will need updating
     expect(meta).not.toBeNull();
-    expect(meta.defaultTier === undefined || typeof meta.defaultTier === 'string').toBe(true);
+    expect(meta.defaultTier).toBe('reasoning');
+  });
+
+  it('reads execution tier from developer agent', () => {
+    const meta = resolveAgentMetadata('developer', projectRoot);
+    expect(meta).not.toBeNull();
+    expect(meta.defaultTier).toBe('execution');
   });
 });
 

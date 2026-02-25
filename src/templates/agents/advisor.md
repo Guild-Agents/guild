@@ -3,6 +3,7 @@ name: advisor
 description: "Evaluates ideas and provides strategic direction before committing work"
 tools: Read, Glob, Grep
 permissionMode: plan
+default-tier: reasoning
 ---
 
 # Advisor

@@ -3,6 +3,7 @@ name: developer
 description: "Implements features following the project conventions"
 tools: Read, Write, Edit, Bash, Glob, Grep
 permissionMode: bypassPermissions
+default-tier: execution
 ---
 
 # Developer

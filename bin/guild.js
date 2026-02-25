@@ -30,7 +30,9 @@ if (prereleaseWarning) {
 program
   .name('guild')
   .description('Specification-driven development CLI for Claude Code')
-  .version(pkg.version);
+  .version(pkg.version)
+  .option('--verbose', 'Enable verbose logging (records decision trail)')
+  .option('--debug', 'Enable debug logging (records full prompts and responses)');
 
 // guild init
 program

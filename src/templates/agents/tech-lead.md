@@ -3,6 +3,7 @@ name: tech-lead
 description: "Defines technical approach and architecture"
 tools: Read, Glob, Grep
 permissionMode: plan
+default-tier: reasoning
 ---
 
 # Tech Lead
