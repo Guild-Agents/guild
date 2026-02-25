@@ -1,0 +1,1705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- SEO -->
+  <title>Guild — Multi-Agent Framework for Claude Code</title>
+  <meta name="description" content="Guild installs 9 specialized AI agents and 10 skill workflows in any project. Structure for Claude Code — without the chaos.">
+  <meta name="theme-color" content="#1a0f05">
+  <link rel="canonical" href="https://guildagents.dev">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Guild">
+  <meta property="og:title" content="Guild — Multi-Agent Framework for Claude Code">
+  <meta property="og:description" content="9 specialized agents. 10 skill workflows. One command to set it all up.">
+  <meta property="og:url" content="https://guildagents.dev">
+  <meta property="og:image" content="https://guildagents.dev/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Guild — Multi-Agent Framework for Claude Code">
+  <meta name="twitter:description" content="9 specialized agents. 10 skill workflows. One command to set it all up.">
+  <meta name="twitter:image" content="https://guildagents.dev/og-image.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Guild",
+    "description": "Multi-agent framework for Claude Code — 9 specialized AI agents and 10 skill workflows",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Cross-platform",
+    "url": "https://guildagents.dev",
+    "codeRepository": "https://github.com/Guild-Agents/guild",
+    "author": {
+      "@type": "Organization",
+      "name": "Guild Agents",
+      "url": "https://github.com/Guild-Agents"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel+Decorative:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ========================================================
+       RESET & BASE
+       ======================================================== */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-dark: #1a0f05;
+      --bg-card: #2a1a0a;
+      --parchment: #d4a96a;
+      --parchment-light: #e8c68a;
+      --deep-red: #8b1a1a;
+      --bright-gold: #f5c842;
+      --moss-green: #3d5a3e;
+      --moss-light: #5a7a5c;
+      --text-light: #f0e0c8;
+      --text-dim: #a08a6a;
+      --border-ornament: #6b4a2a;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Crimson Text', Georgia, serif;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      line-height: 1.7;
+      overflow-x: hidden;
+      font-size: 18px;
+    }
+
+    /* ========================================================
+       SPARK PARTICLES CANVAS (behind everything)
+       ======================================================== */
+    #sparks-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ========================================================
+       UTILITY
+       ======================================================== */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 1;
+    }
+
+    section {
+      position: relative;
+      z-index: 1;
+    }
+
+    code, .code {
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* ========================================================
+       ORNAMENTAL BORDER MIXIN (pseudo-element corners)
+       ======================================================== */
+    .ornament-box {
+      position: relative;
+      border: 1px solid var(--border-ornament);
+    }
+
+    /* Top-left corner ornament */
+    .ornament-box::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      width: 24px;
+      height: 24px;
+      border-top: 3px solid var(--bright-gold);
+      border-left: 3px solid var(--bright-gold);
+      pointer-events: none;
+    }
+
+    /* Bottom-right corner ornament */
+    .ornament-box::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      width: 24px;
+      height: 24px;
+      border-bottom: 3px solid var(--bright-gold);
+      border-right: 3px solid var(--bright-gold);
+      pointer-events: none;
+    }
+
+    /* Full four-corner ornament (using inner wrapper) */
+    .ornament-box-full {
+      position: relative;
+      border: 1px solid var(--border-ornament);
+    }
+
+    .ornament-box-full::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
+      border: none;
+      pointer-events: none;
+      /* Four corners via box-shadow trick */
+      background:
+        linear-gradient(var(--bright-gold), var(--bright-gold)) top left / 20px 3px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) top left / 3px 20px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) top right / 20px 3px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) top right / 3px 20px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) bottom left / 20px 3px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) bottom left / 3px 20px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) bottom right / 20px 3px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) bottom right / 3px 20px no-repeat;
+    }
+
+    /* ========================================================
+       SECTION DIVIDER — ornamental horizontal rule
+       ======================================================== */
+    .section-divider {
+      text-align: center;
+      margin: 0;
+      padding: 40px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-divider::before {
+      content: '';
+      display: block;
+      width: 60%;
+      max-width: 400px;
+      height: 1px;
+      margin: 0 auto 12px;
+      background: linear-gradient(90deg, transparent, var(--bright-gold), transparent);
+    }
+
+    .section-divider::after {
+      content: '';
+      display: block;
+      width: 8px;
+      height: 8px;
+      margin: 0 auto;
+      background: var(--bright-gold);
+      transform: rotate(45deg);
+    }
+
+    /* ========================================================
+       TORCH FLAME ANIMATION (pure CSS)
+       Each torch = a vertical stick + animated flame layers
+       ======================================================== */
+    .torch {
+      position: absolute;
+      bottom: 0;
+      width: 18px;
+      height: 120px;
+      z-index: 2;
+    }
+
+    .torch-left {
+      left: 0;
+    }
+
+    .torch-right {
+      right: 0;
+    }
+
+    /* The stick */
+    .torch .stick {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 60px;
+      background: linear-gradient(to top, #3a2a1a, #5a4030);
+      border-radius: 2px;
+    }
+
+    /* Flame container at top of stick */
+    .torch .flame-wrap {
+      position: absolute;
+      bottom: 55px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 18px;
+      height: 50px;
+    }
+
+    /* Base flame */
+    .torch .flame {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 14px;
+      height: 36px;
+      transform: translateX(-50%);
+      background: radial-gradient(ellipse at bottom, #f5c842 0%, #e87a20 40%, #8b1a1a 70%, transparent 100%);
+      border-radius: 50% 50% 20% 20%;
+      animation: flame-dance 0.4s ease-in-out infinite alternate;
+      filter: blur(1px);
+    }
+
+    .torch .flame-inner {
+      position: absolute;
+      bottom: 2px;
+      left: 50%;
+      width: 8px;
+      height: 24px;
+      transform: translateX(-50%);
+      background: radial-gradient(ellipse at bottom, #fffbe6 0%, #f5c842 50%, #e87a20 100%);
+      border-radius: 50% 50% 20% 20%;
+      animation: flame-dance-inner 0.3s ease-in-out infinite alternate-reverse;
+      filter: blur(0.5px);
+    }
+
+    /* Glow beneath the flame */
+    .torch .glow {
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 60px;
+      background: radial-gradient(circle, rgba(245,200,66,0.25) 0%, transparent 70%);
+      border-radius: 50%;
+      animation: glow-pulse 1.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes flame-dance {
+      0% { height: 36px; width: 14px; }
+      50% { height: 42px; width: 12px; }
+      100% { height: 34px; width: 16px; }
+    }
+
+    @keyframes flame-dance-inner {
+      0% { height: 24px; width: 8px; }
+      50% { height: 28px; width: 6px; }
+      100% { height: 22px; width: 9px; }
+    }
+
+    @keyframes glow-pulse {
+      0% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+      100% { opacity: 1; transform: translateX(-50%) scale(1.15); }
+    }
+
+    /* ========================================================
+       HERO SECTION — The Guild Hall Entrance
+       ======================================================== */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      /* Warm radial glow = torch-lit guild hall */
+      background:
+        radial-gradient(ellipse at 50% 40%, rgba(245,200,66,0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 20% 50%, rgba(139,26,26,0.06) 0%, transparent 40%),
+        radial-gradient(ellipse at 80% 50%, rgba(139,26,26,0.06) 0%, transparent 40%),
+        var(--bg-dark);
+      overflow: hidden;
+      padding: 60px 24px;
+    }
+
+    /* Large ambient glow behind title */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(245,200,66,0.07) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 780px;
+    }
+
+    /* Torches flanking the hero */
+    .hero-torches {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero-torches .torch {
+      top: 22%;
+    }
+
+    .hero-torches .torch-left {
+      left: 6%;
+    }
+
+    .hero-torches .torch-right {
+      right: 6%;
+    }
+
+    /* Title */
+    .hero-title {
+      font-family: 'MedievalSharp', cursive;
+      font-size: clamp(4rem, 12vw, 8rem);
+      color: var(--bright-gold);
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+      text-shadow:
+        0 0 40px rgba(245,200,66,0.4),
+        0 0 80px rgba(245,200,66,0.2),
+        0 2px 4px rgba(0,0,0,0.8);
+      margin-bottom: 16px;
+    }
+
+    .hero-tagline {
+      font-family: 'Cinzel Decorative', 'Crimson Text', serif;
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--parchment);
+      font-weight: 400;
+      max-width: 600px;
+      margin: 0 auto 12px;
+      line-height: 1.5;
+    }
+
+    .hero-subtitle {
+      font-family: 'Crimson Text', serif;
+      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+      color: var(--text-dim);
+      margin-bottom: 48px;
+      font-style: italic;
+    }
+
+    /* CTA area */
+    .hero-cta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    /* Quest scroll — the primary CTA */
+    .quest-scroll {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      background:
+        linear-gradient(135deg, #3a2812 0%, #2a1a0a 50%, #3a2812 100%);
+      border: 2px solid var(--bright-gold);
+      border-radius: 4px;
+      padding: 20px 40px;
+      transition: all 0.3s ease;
+    }
+
+    .quest-scroll::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      background:
+        linear-gradient(var(--bright-gold), var(--bright-gold)) top left / 16px 2px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) top left / 2px 16px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) top right / 16px 2px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) top right / 2px 16px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) bottom left / 16px 2px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) bottom left / 2px 16px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) bottom right / 16px 2px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) bottom right / 2px 16px no-repeat;
+      pointer-events: none;
+    }
+
+    .quest-scroll:hover {
+      background:
+        linear-gradient(135deg, #4a3822 0%, #3a2a1a 50%, #4a3822 100%);
+      box-shadow: 0 0 30px rgba(245,200,66,0.2);
+      transform: translateY(-2px);
+    }
+
+    .quest-scroll-label {
+      display: block;
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 0.75rem;
+      color: var(--bright-gold);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-bottom: 8px;
+    }
+
+    .quest-scroll-code {
+      display: block;
+      font-family: 'Fira Code', monospace;
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--parchment-light);
+      letter-spacing: 0.02em;
+    }
+
+    .quest-scroll-hint {
+      display: block;
+      font-family: 'Crimson Text', serif;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: 8px;
+      font-style: italic;
+      transition: color 0.3s;
+    }
+
+    .quest-scroll-hint.copied {
+      color: var(--bright-gold);
+    }
+
+    .hero-secondary {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 0.9rem;
+      color: var(--parchment);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      border-bottom: 1px solid transparent;
+      transition: all 0.3s;
+      padding-bottom: 2px;
+    }
+
+    .hero-secondary:hover {
+      color: var(--bright-gold);
+      border-bottom-color: var(--bright-gold);
+    }
+
+    /* ========================================================
+       SECTION HEADING STYLE
+       ======================================================== */
+    .section-heading {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      color: var(--bright-gold);
+      text-align: center;
+      margin-bottom: 8px;
+      text-shadow: 0 0 20px rgba(245,200,66,0.2);
+    }
+
+    .section-subtitle {
+      font-family: 'Crimson Text', serif;
+      font-size: 1.1rem;
+      color: var(--text-dim);
+      text-align: center;
+      font-style: italic;
+      margin-bottom: 48px;
+    }
+
+    /* ========================================================
+       THE PATH — How It Works (3 quest steps)
+       ======================================================== */
+    .the-path {
+      padding: 80px 0;
+      /* Parchment-textured background via CSS gradient */
+      background:
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 3px,
+          rgba(212,169,106,0.015) 3px,
+          rgba(212,169,106,0.015) 4px
+        ),
+        linear-gradient(180deg, var(--bg-dark), #1f1408, var(--bg-dark));
+    }
+
+    .path-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 640px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* Vertical connecting line */
+    .path-steps::before {
+      content: '';
+      position: absolute;
+      left: 28px;
+      top: 28px;
+      bottom: 28px;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--bright-gold), var(--border-ornament), var(--bright-gold));
+      z-index: 0;
+    }
+
+    .path-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      padding: 28px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Waypoint marker */
+    .path-marker {
+      flex-shrink: 0;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 2px solid var(--bright-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'MedievalSharp', cursive;
+      font-size: 1.4rem;
+      color: var(--bright-gold);
+      box-shadow: 0 0 15px rgba(245,200,66,0.15);
+    }
+
+    .path-step-content h3 {
+      font-family: 'Fira Code', monospace;
+      font-size: 1.1rem;
+      color: var(--parchment-light);
+      margin-bottom: 6px;
+    }
+
+    .path-step-content p {
+      color: var(--text-dim);
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    /* ========================================================
+       THE QUEST — build-feature pipeline as quest map
+       ======================================================== */
+    .the-quest {
+      padding: 80px 0;
+      background: var(--bg-dark);
+    }
+
+    .quest-map {
+      position: relative;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Quest start node */
+    .quest-start {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .quest-start-badge {
+      display: inline-block;
+      background: var(--bg-card);
+      border: 2px solid var(--moss-green);
+      border-radius: 8px;
+      padding: 12px 28px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.95rem;
+      color: var(--moss-light);
+    }
+
+    .quest-start-badge span {
+      color: var(--parchment-light);
+    }
+
+    /* Quest path connections */
+    .quest-row {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .quest-connector {
+      text-align: center;
+      margin: 8px 0;
+    }
+
+    .quest-connector-line {
+      display: inline-block;
+      width: 2px;
+      height: 32px;
+      background: var(--border-ornament);
+      position: relative;
+    }
+
+    /* Animated glow trail */
+    .quest-connector-line::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -2px;
+      width: 6px;
+      height: 12px;
+      background: var(--bright-gold);
+      border-radius: 3px;
+      filter: blur(2px);
+      animation: trail-flow 2s ease-in-out infinite;
+    }
+
+    @keyframes trail-flow {
+      0% { top: -4px; opacity: 0; }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { top: calc(100% - 8px); opacity: 0; }
+    }
+
+    /* Quest branch connectors */
+    .quest-branch {
+      text-align: center;
+      margin: 8px 0;
+      position: relative;
+      height: 40px;
+    }
+
+    .quest-branch::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 16px;
+      background: var(--border-ornament);
+    }
+
+    .quest-branch::after {
+      content: '';
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(500px, 70%);
+      height: 2px;
+      background: linear-gradient(90deg, var(--border-ornament), var(--bright-gold), var(--border-ornament));
+    }
+
+    .quest-branch-lines {
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(500px, 70%);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .quest-branch-lines span {
+      display: block;
+      width: 2px;
+      height: 22px;
+      background: var(--border-ornament);
+    }
+
+    /* Quest node — each pipeline step */
+    .quest-node {
+      background: var(--bg-card);
+      border: 1px solid var(--border-ornament);
+      border-radius: 6px;
+      padding: 16px 20px;
+      text-align: center;
+      min-width: 140px;
+      flex: 0 1 180px;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .quest-node:hover {
+      border-color: var(--bright-gold);
+      box-shadow: 0 0 20px rgba(245,200,66,0.1);
+      transform: translateY(-3px);
+    }
+
+    .quest-node-icon {
+      font-size: 1.6rem;
+      margin-bottom: 6px;
+    }
+
+    .quest-node-title {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 0.8rem;
+      color: var(--parchment);
+      margin-bottom: 4px;
+    }
+
+    .quest-node-action {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    /* Animated glow ring around active nodes */
+    .quest-node::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: linear-gradient(var(--bg-card), var(--bg-card)) padding-box,
+                  linear-gradient(135deg, transparent 30%, var(--bright-gold) 50%, transparent 70%) border-box;
+      background-size: 100% 100%, 300% 300%;
+      animation: glow-sweep 4s linear infinite;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .quest-node:hover::after {
+      opacity: 1;
+    }
+
+    @keyframes glow-sweep {
+      0% { background-position: 100% 100%, 0% 0%; }
+      100% { background-position: 100% 100%, 100% 100%; }
+    }
+
+    /* Horizontal arrow between quest nodes */
+    .quest-arrow {
+      display: flex;
+      align-items: center;
+      color: var(--border-ornament);
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .quest-arrow::before {
+      content: '';
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--border-ornament), var(--bright-gold));
+    }
+
+    .quest-arrow::after {
+      content: '';
+      display: block;
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 8px solid var(--bright-gold);
+    }
+
+    /* ========================================================
+       THE PARTY — Agent character cards
+       ======================================================== */
+    .the-party {
+      padding: 80px 0;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(212,169,106,0.01) 2px,
+          rgba(212,169,106,0.01) 3px
+        ),
+        linear-gradient(180deg, var(--bg-dark), #1f1408 50%, var(--bg-dark));
+    }
+
+    .party-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    /* Character card */
+    .char-card {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border-ornament);
+      border-radius: 4px;
+      padding: 28px 24px 24px;
+      transition: all 0.4s ease;
+      overflow: hidden;
+    }
+
+    /* Four-corner ornamental border */
+    .char-card::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      pointer-events: none;
+      background:
+        linear-gradient(var(--bright-gold), var(--bright-gold)) top left / 18px 2px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) top left / 2px 18px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) top right / 18px 2px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) top right / 2px 18px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) bottom left / 18px 2px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) bottom left / 2px 18px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) bottom right / 18px 2px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) bottom right / 2px 18px no-repeat;
+      opacity: 0.5;
+      transition: opacity 0.4s;
+    }
+
+    .char-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      border-color: var(--parchment);
+    }
+
+    .char-card:hover::before {
+      opacity: 1;
+    }
+
+    /* Subtle warm glow on hover */
+    .char-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--bright-gold), transparent);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .char-card:hover::after {
+      opacity: 0.6;
+    }
+
+    .char-card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .char-icon {
+      font-size: 2rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .char-class {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1rem;
+      color: var(--bright-gold);
+      display: block;
+      line-height: 1.2;
+    }
+
+    .char-name {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      display: block;
+      margin-top: 2px;
+    }
+
+    .char-desc {
+      font-size: 0.95rem;
+      color: var(--parchment);
+      line-height: 1.6;
+    }
+
+    /* ========================================================
+       THE CODEX — Why Guild
+       ======================================================== */
+    .the-codex {
+      padding: 80px 0;
+      background: var(--bg-dark);
+    }
+
+    .codex-book {
+      max-width: 720px;
+      margin: 0 auto;
+      background:
+        /* Parchment-like texture with CSS */
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 28px,
+          rgba(212,169,106,0.04) 28px,
+          rgba(212,169,106,0.04) 29px
+        ),
+        linear-gradient(135deg, #2a1a0a 0%, #1f1408 50%, #2a1a0a 100%);
+      border: 1px solid var(--border-ornament);
+      border-radius: 2px;
+      padding: 48px 40px;
+      position: relative;
+    }
+
+    /* Book spine effect on the left */
+    .codex-book::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      bottom: 8px;
+      width: 4px;
+      background: linear-gradient(to bottom, var(--bright-gold), var(--border-ornament), var(--bright-gold));
+      border-radius: 2px 0 0 2px;
+    }
+
+    /* Corner embellishment */
+    .codex-book::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      pointer-events: none;
+      background:
+        linear-gradient(var(--bright-gold), var(--bright-gold)) top left / 28px 2px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) top left / 2px 28px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) top right / 28px 2px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) top right / 2px 28px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) bottom left / 28px 2px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) bottom left / 2px 28px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) bottom right / 28px 2px no-repeat,
+        linear-gradient(var(--bright-gold), var(--bright-gold)) bottom right / 2px 28px no-repeat;
+    }
+
+    .codex-entries {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .codex-entry {
+      padding-left: 28px;
+      position: relative;
+    }
+
+    /* Diamond bullet */
+    .codex-entry::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      width: 10px;
+      height: 10px;
+      background: var(--bright-gold);
+      transform: rotate(45deg);
+    }
+
+    .codex-entry h3 {
+      font-family: 'Cinzel Decorative', serif;
+      font-size: 1.1rem;
+      color: var(--parchment-light);
+      margin-bottom: 6px;
+    }
+
+    .codex-entry p {
+      color: var(--text-dim);
+      font-size: 1rem;
+      line-height: 1.7;
+    }
+
+    .codex-entry code {
+      color: var(--parchment-light);
+      font-size: 0.9rem;
+      background: rgba(212,169,106,0.1);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+
+    /* ========================================================
+       FOOTER
+       ======================================================== */
+    .site-footer {
+      padding: 48px 0 32px;
+      background: #120a02;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .footer-links a {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      color: var(--parchment);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .footer-links a:hover {
+      color: var(--bright-gold);
+      border-bottom-color: var(--bright-gold);
+    }
+
+    .footer-note {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      font-style: italic;
+      margin-bottom: 12px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .footer-license {
+      font-size: 0.8rem;
+      color: #5a4a3a;
+    }
+
+    /* ========================================================
+       RESPONSIVE
+       ======================================================== */
+    @media (max-width: 768px) {
+      body {
+        font-size: 16px;
+      }
+
+      .hero {
+        min-height: auto;
+        padding: 100px 20px 80px;
+      }
+
+      .hero-torches .torch {
+        display: none;
+      }
+
+      .path-steps::before {
+        left: 24px;
+      }
+
+      .path-marker {
+        width: 48px;
+        height: 48px;
+        font-size: 1.2rem;
+      }
+
+      .quest-row {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .quest-arrow {
+        transform: rotate(90deg);
+      }
+
+      .quest-node {
+        flex: 0 1 auto;
+        width: 200px;
+      }
+
+      .quest-branch {
+        display: none;
+      }
+
+      .quest-branch-lines {
+        display: none;
+      }
+
+      .party-grid {
+        grid-template-columns: 1fr;
+        max-width: 400px;
+      }
+
+      .codex-book {
+        padding: 32px 24px;
+      }
+
+      .footer-links {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .quest-scroll {
+        padding: 16px 24px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: 3.2rem;
+      }
+
+      .section-heading {
+        font-size: 1.5rem;
+      }
+
+      .path-step {
+        gap: 16px;
+      }
+
+      .quest-start-badge {
+        font-size: 0.8rem;
+        padding: 10px 16px;
+      }
+    }
+
+    /* ========================================================
+       SMOOTH ENTRANCE ANIMATIONS
+       ======================================================== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Floating spark particles -->
+  <canvas id="sparks-canvas"></canvas>
+
+  <!-- ============================================================
+       HERO — The Guild Hall Entrance
+       ============================================================ -->
+  <section class="hero">
+    <!-- Torch flames flanking the title -->
+    <div class="hero-torches">
+      <div class="torch torch-left">
+        <div class="glow"></div>
+        <div class="flame-wrap">
+          <div class="flame"></div>
+          <div class="flame-inner"></div>
+        </div>
+        <div class="stick"></div>
+      </div>
+      <div class="torch torch-right">
+        <div class="glow"></div>
+        <div class="flame-wrap">
+          <div class="flame"></div>
+          <div class="flame-inner"></div>
+        </div>
+        <div class="stick"></div>
+      </div>
+    </div>
+
+    <div class="hero-content">
+      <h1 class="hero-title">Guild</h1>
+      <p class="hero-tagline">Claude Code is powerful but chaotic.<br>Guild gives it structure.</p>
+      <p class="hero-subtitle">9 specialized agents. 10 skill workflows. One command.</p>
+
+      <div class="hero-cta">
+        <!-- Quest scroll CTA — click to copy -->
+        <div class="quest-scroll" id="quest-cta" onclick="copyCommand()" role="button" tabindex="0" aria-label="Copy install command to clipboard">
+          <span class="quest-scroll-label">Begin Your Quest</span>
+          <code class="quest-scroll-code">npx guild-agents init</code>
+          <span class="quest-scroll-hint" id="copy-hint">click to copy</span>
+        </div>
+
+        <a href="https://github.com/Guild-Agents/guild" class="hero-secondary" target="_blank" rel="noopener">
+          View the Archives &rarr;
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ============================================================
+       THE PATH — How It Works
+       ============================================================ -->
+  <section class="the-path">
+    <div class="container">
+      <h2 class="section-heading fade-in">The Path</h2>
+      <p class="section-subtitle fade-in">Three steps to forge your guild</p>
+
+      <div class="path-steps">
+        <div class="path-step fade-in">
+          <div class="path-marker">I</div>
+          <div class="path-step-content">
+            <h3>guild init</h3>
+            <p>Interactive onboarding. Generates 9 agents and 10 skills, calibrated to your project.</p>
+          </div>
+        </div>
+
+        <div class="path-step fade-in">
+          <div class="path-marker">II</div>
+          <div class="path-step-content">
+            <h3>/guild-specialize</h3>
+            <p>Explores your codebase. Enriches CLAUDE.md with real context so every agent understands your project.</p>
+          </div>
+        </div>
+
+        <div class="path-step fade-in">
+          <div class="path-marker">III</div>
+          <div class="path-step-content">
+            <h3>/build-feature</h3>
+            <p>Full pipeline: evaluate, spec, implement, review, QA. One command triggers the whole guild.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ============================================================
+       THE QUEST — build-feature Pipeline
+       ============================================================ -->
+  <section class="the-quest">
+    <div class="container">
+      <h2 class="section-heading fade-in">The Quest</h2>
+      <p class="section-subtitle fade-in">How <code>/build-feature</code> orchestrates your guild</p>
+
+      <div class="quest-map fade-in">
+        <!-- Start -->
+        <div class="quest-start">
+          <div class="quest-start-badge">
+            You &rarr; <span>/build-feature</span> "Add JWT auth"
+          </div>
+        </div>
+
+        <div class="quest-connector">
+          <div class="quest-connector-line"></div>
+        </div>
+
+        <!-- Row 1: Linear pipeline -->
+        <div class="quest-row">
+          <div class="quest-node">
+            <div class="quest-node-icon">&#129497;</div>
+            <div class="quest-node-title">Sage</div>
+            <div class="quest-node-action">evaluate</div>
+          </div>
+          <div class="quest-arrow"></div>
+          <div class="quest-node">
+            <div class="quest-node-icon">&#9876;&#65039;</div>
+            <div class="quest-node-title">Strategist</div>
+            <div class="quest-node-action">plan</div>
+          </div>
+          <div class="quest-arrow"></div>
+          <div class="quest-node">
+            <div class="quest-node-icon">&#128296;</div>
+            <div class="quest-node-title">Artificer</div>
+            <div class="quest-node-action">implement</div>
+          </div>
+        </div>
+
+        <!-- Branch connector -->
+        <div class="quest-branch">
+          <div class="quest-branch-lines">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+
+        <div class="quest-connector" style="margin-top: 8px;">
+          <div class="quest-connector-line"></div>
+        </div>
+
+        <!-- Row 2: Parallel checks -->
+        <div class="quest-row">
+          <div class="quest-node">
+            <div class="quest-node-icon">&#128269;</div>
+            <div class="quest-node-title">Scout</div>
+            <div class="quest-node-action">review</div>
+          </div>
+          <div class="quest-node">
+            <div class="quest-node-icon">&#127993;</div>
+            <div class="quest-node-title">Ranger</div>
+            <div class="quest-node-action">test</div>
+          </div>
+          <div class="quest-node">
+            <div class="quest-node-icon">&#128481;&#65039;</div>
+            <div class="quest-node-title">Tracker</div>
+            <div class="quest-node-action">fix</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ============================================================
+       THE PARTY — Agent character cards
+       ============================================================ -->
+  <section class="the-party">
+    <div class="container">
+      <h2 class="section-heading fade-in">The Party</h2>
+      <p class="section-subtitle fade-in">Nine specialists. Each one knows their role.</p>
+
+      <div class="party-grid">
+        <div class="char-card fade-in">
+          <div class="char-card-header">
+            <span class="char-icon">&#129497;</span>
+            <div>
+              <span class="char-class">Sage</span>
+              <span class="char-name">advisor</span>
+            </div>
+          </div>
+          <p class="char-desc">Evaluates ideas and gives strategic direction. The first voice heard before any quest begins.</p>
+        </div>
+
+        <div class="char-card fade-in">
+          <div class="char-card-header">
+            <span class="char-icon">&#128220;</span>
+            <div>
+              <span class="char-class">Herald</span>
+              <span class="char-name">product-owner</span>
+            </div>
+          </div>
+          <p class="char-desc">Converts ideas into concrete tasks with clear acceptance criteria. The bridge between vision and work.</p>
+        </div>
+
+        <div class="char-card fade-in">
+          <div class="char-card-header">
+            <span class="char-icon">&#9876;&#65039;</span>
+            <div>
+              <span class="char-class">Strategist</span>
+              <span class="char-name">tech-lead</span>
+            </div>
+          </div>
+          <p class="char-desc">Defines technical approach and architecture. Plans the route so others can march with purpose.</p>
+        </div>
+
+        <div class="char-card fade-in">
+          <div class="char-card-header">
+            <span class="char-icon">&#128296;</span>
+            <div>
+              <span class="char-class">Artificer</span>
+              <span class="char-name">developer</span>
+            </div>
+          </div>
+          <p class="char-desc">Implements code following project conventions. Test-driven, disciplined, and precise in every commit.</p>
+        </div>
+
+        <div class="char-card fade-in">
+          <div class="char-card-header">
+            <span class="char-icon">&#128269;</span>
+            <div>
+              <span class="char-class">Scout</span>
+              <span class="char-name">code-reviewer</span>
+            </div>
+          </div>
+          <p class="char-desc">Reviews quality, patterns, and technical debt. Nothing ships without the Scout's keen eye.</p>
+        </div>
+
+        <div class="char-card fade-in">
+          <div class="char-card-header">
+            <span class="char-icon">&#127993;</span>
+            <div>
+              <span class="char-class">Ranger</span>
+              <span class="char-name">qa</span>
+            </div>
+          </div>
+          <p class="char-desc">Testing, edge cases, and regression. Hunts bugs before they reach the wild.</p>
+        </div>
+
+        <div class="char-card fade-in">
+          <div class="char-card-header">
+            <span class="char-icon">&#128481;&#65039;</span>
+            <div>
+              <span class="char-class">Tracker</span>
+              <span class="char-name">bugfix</span>
+            </div>
+          </div>
+          <p class="char-desc">Diagnosis and bug resolution. When something breaks, the Tracker follows the trail to the root cause.</p>
+        </div>
+
+        <div class="char-card fade-in">
+          <div class="char-card-header">
+            <span class="char-icon">&#128142;</span>
+            <div>
+              <span class="char-class">Arcanist</span>
+              <span class="char-name">db-migration</span>
+            </div>
+          </div>
+          <p class="char-desc">Schema changes and safe migrations. Handles the arcane art of evolving data without destruction.</p>
+        </div>
+
+        <div class="char-card fade-in">
+          <div class="char-card-header">
+            <span class="char-icon">&#128506;&#65039;</span>
+            <div>
+              <span class="char-class">Pathfinder</span>
+              <span class="char-name">platform-expert</span>
+            </div>
+          </div>
+          <p class="char-desc">Resolves Claude Code integration issues. Navigates the terrain where your tools meet the platform.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ============================================================
+       THE CODEX — Why Guild
+       ============================================================ -->
+  <section class="the-codex">
+    <div class="container">
+      <h2 class="section-heading fade-in">The Codex</h2>
+      <p class="section-subtitle fade-in">Why structure beats chaos</p>
+
+      <div class="codex-book fade-in">
+        <ul class="codex-entries">
+          <li class="codex-entry">
+            <h3>Structure Over Chaos</h3>
+            <p>Claude Code can do anything — which means it often does everything at once. Guild channels that power through specialized agents who each know their boundaries.</p>
+          </li>
+          <li class="codex-entry">
+            <h3>Agents = WHO, Skills = HOW</h3>
+            <p>Agents define identity and expertise. Skills define workflow and process. Clean separation, infinite composability. No framework lock-in, just plain Markdown.</p>
+          </li>
+          <li class="codex-entry">
+            <h3>State That Persists</h3>
+            <p>Every session reads <code>CLAUDE.md</code>, <code>PROJECT.md</code>, and <code>SESSION.md</code>. Context survives across sessions, branches, and team members.</p>
+          </li>
+          <li class="codex-entry">
+            <h3>Zero Infrastructure</h3>
+            <p>No servers. No APIs. No tokens to manage. Just Markdown files and Claude Code. Run <code>guild init</code> and you are ready. It works wherever Claude Code works.</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ============================================================
+       FOOTER
+       ============================================================ -->
+  <footer class="site-footer">
+    <div class="footer-links">
+      <a href="https://github.com/Guild-Agents/guild" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.npmjs.com/package/guild-agents" target="_blank" rel="noopener">npm</a>
+    </div>
+    <p class="footer-note">
+      Guild builds itself &mdash; this project uses its own agents for development.
+    </p>
+    <p class="footer-license">MIT License</p>
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT
+       ============================================================ -->
+  <script>
+    /* ==========================================================
+       1. COPY TO CLIPBOARD — quest scroll CTA
+       ========================================================== */
+    function copyCommand() {
+      var command = 'npx guild-agents init';
+      var hint = document.getElementById('copy-hint');
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(command).then(function() {
+          showCopied(hint);
+        }).catch(function() {
+          fallbackCopy(command, hint);
+        });
+      } else {
+        fallbackCopy(command, hint);
+      }
+    }
+
+    function fallbackCopy(text, hint) {
+      var textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showCopied(hint);
+      } catch (e) {
+        hint.textContent = 'copy failed';
+      }
+      document.body.removeChild(textarea);
+    }
+
+    function showCopied(hint) {
+      hint.textContent = 'copied to clipboard!';
+      hint.classList.add('copied');
+      setTimeout(function() {
+        hint.textContent = 'click to copy';
+        hint.classList.remove('copied');
+      }, 2000);
+    }
+
+    // Keyboard support for quest scroll
+    document.getElementById('quest-cta').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        copyCommand();
+      }
+    });
+
+    /* ==========================================================
+       2. INTERSECTION OBSERVER — fade-in on scroll
+       ========================================================== */
+    (function() {
+      var targets = document.querySelectorAll('.fade-in');
+
+      if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, {
+          threshold: 0.15,
+          rootMargin: '0px 0px -40px 0px'
+        });
+
+        targets.forEach(function(el) {
+          observer.observe(el);
+        });
+      } else {
+        // Fallback: show everything
+        targets.forEach(function(el) {
+          el.classList.add('visible');
+        });
+      }
+    })();
+
+    /* ==========================================================
+       3. FLOATING SPARK PARTICLES — canvas animation
+       ========================================================== */
+    (function() {
+      var canvas = document.getElementById('sparks-canvas');
+      var ctx = canvas.getContext('2d');
+      var sparks = [];
+      var SPARK_COUNT = 40;
+      var animationId;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+
+      // Spark constructor
+      function Spark() {
+        this.reset();
+        // Start at random Y so they don't all begin at the bottom
+        this.y = Math.random() * canvas.height;
+      }
+
+      Spark.prototype.reset = function() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + 10;
+        this.size = Math.random() * 2.5 + 0.5;
+        this.speedY = -(Math.random() * 0.6 + 0.15);
+        this.speedX = (Math.random() - 0.5) * 0.3;
+        this.opacity = Math.random() * 0.5 + 0.2;
+        this.fadeSpeed = Math.random() * 0.002 + 0.001;
+        this.wobbleAmplitude = Math.random() * 0.5 + 0.2;
+        this.wobbleSpeed = Math.random() * 0.02 + 0.005;
+        this.wobbleOffset = Math.random() * Math.PI * 2;
+        this.life = 0;
+        // Color: gold to orange to red-ish
+        var colorRand = Math.random();
+        if (colorRand < 0.5) {
+          this.r = 245; this.g = 200; this.b = 66;  // gold
+        } else if (colorRand < 0.8) {
+          this.r = 232; this.g = 122; this.b = 32;  // orange
+        } else {
+          this.r = 200; this.g = 80; this.b = 40;   // ember
+        }
+      };
+
+      Spark.prototype.update = function() {
+        this.life++;
+        this.y += this.speedY;
+        this.x += this.speedX + Math.sin(this.life * this.wobbleSpeed + this.wobbleOffset) * this.wobbleAmplitude;
+        this.opacity -= this.fadeSpeed;
+
+        if (this.opacity <= 0 || this.y < -20) {
+          this.reset();
+        }
+      };
+
+      Spark.prototype.draw = function(ctx) {
+        ctx.save();
+        ctx.globalAlpha = this.opacity;
+        ctx.fillStyle = 'rgb(' + this.r + ',' + this.g + ',' + this.b + ')';
+        ctx.shadowBlur = this.size * 4;
+        ctx.shadowColor = 'rgb(' + this.r + ',' + this.g + ',' + this.b + ')';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      };
+
+      // Initialize sparks
+      for (var i = 0; i < SPARK_COUNT; i++) {
+        sparks.push(new Spark());
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        for (var i = 0; i < sparks.length; i++) {
+          sparks[i].update();
+          sparks[i].draw(ctx);
+        }
+
+        animationId = requestAnimationFrame(animate);
+      }
+
+      // Only run when page is visible
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+          cancelAnimationFrame(animationId);
+        } else {
+          animate();
+        }
+      });
+
+      animate();
+    })();
+  </script>
+</body>
+</html>

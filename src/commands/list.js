@@ -6,26 +6,11 @@ import * as p from '@clack/prompts';
 import chalk from 'chalk';
 import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
-
-/**
- * Parses YAML frontmatter from a markdown file content.
- * Returns an object with key-value pairs from the frontmatter.
- */
-function parseFrontmatter(content) {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
-  if (!match) return {};
-  const fm = {};
-  for (const line of match[1].split('\n')) {
-    const colonIndex = line.indexOf(':');
-    if (colonIndex === -1) continue;
-    const key = line.slice(0, colonIndex).trim();
-    const value = line.slice(colonIndex + 1).trim().replace(/^["']|["']$/g, '');
-    if (key && value) fm[key] = value;
-  }
-  return fm;
-}
+import { ensureProjectRoot, parseFrontmatter } from '../utils/files.js';
 
 export async function runList() {
+  ensureProjectRoot();
+
   p.intro(chalk.bold.cyan('Guild — Agents & Skills'));
 
   // List agents

@@ -1,21 +1,21 @@
 ---
 name: build-feature
-description: "Pipeline completo: evaluacion -> spec -> implementacion -> review -> QA"
+description: "Full pipeline: evaluation -> spec -> implementation -> review -> QA"
 user-invocable: true
 ---
 
 # Build Feature
 
-Pipeline completo para construir una feature de punta a punta con todos los agentes del equipo. Cada fase invoca un agente especializado usando el tool `Task`.
+Full pipeline to build a feature end-to-end with all team agents. Each phase invokes a specialized agent using the `Task` tool.
 
-## Cuando usarlo
+## When to use
 
-- Para implementar una feature nueva que requiere el ciclo completo
-- Cuando quieres que la feature pase por evaluacion, especificacion, implementacion, review y QA
+- To implement a new feature that requires the complete cycle
+- When you want the feature to go through evaluation, specification, implementation, review, and QA
 
-## Uso
+## Usage
 
-`/build-feature [descripcion de la feature]`
+`/build-feature [feature description]`
 
 ## Parallel Execution: Worktree Isolation
 
@@ -33,90 +33,127 @@ git worktree remove .claude/worktrees/[branch-name]
 
 When running a single build-feature, a simple `git checkout -b` is sufficient.
 
-## Pipeline de 6 fases
+## 6-Phase Pipeline
 
-### Fase 1 — Evaluacion (Advisor)
+### Progress Display
 
-**Agente:** Lee `.claude/agents/advisor.md` via Task tool
-**Input:** La descripcion de la feature proporcionada por el usuario
-**Proceso:**
+At the start of each phase, display a progress indicator to the user before any agent output:
 
-1. El Advisor evalua la feature contra la vision del proyecto
-2. Identifica riesgos, dependencias y conflictos con funcionalidad existente
-3. Emite evaluacion: Aprobado / Rechazado / Requiere ajustes
+```text
+[1/6] Advisor — Evaluating feature...
+[2/6] Product Owner — Defining spec...
+[3/6] Tech Lead — Defining technical approach...
+[4/6] Developer — Implementing...
+[5/6] Code Reviewer — Reviewing changes...
+[6/6] QA — Validating acceptance criteria...
+```
 
-**Output:** Evaluacion con razonamiento y riesgos identificados
-**Condicion de salida:** Si el Advisor rechaza la feature, el pipeline se detiene aqui. Informa al usuario el motivo y sugiere ajustes si los hay.
+When a phase loops (review-fix or QA-review cycles), show the iteration:
 
-### Fase 2 — Especificacion (Product Owner)
+```text
+[5/6 · round 2] Code Reviewer — Re-reviewing after fixes...
+[4/6 · round 2] Developer — Fixing review blockers...
+```
 
-**Agente:** Lee `.claude/agents/product-owner.md` via Task tool
-**Input:** La feature aprobada por el Advisor + sus observaciones
-**Proceso:**
+This indicator MUST be displayed before spawning the agent for that phase.
 
-1. El Product Owner descompone la feature en tareas concretas
-2. Define criterios de aceptacion verificables para cada tarea
-3. Estima esfuerzo y sugiere orden de implementacion
+### Phase 1 — Evaluation (Advisor)
 
-**Output:** Lista de tareas con criterios de aceptacion, estimacion y orden
+**Progress:** `[1/6] Advisor — Evaluating feature...`
+**Agent:** Reads `.claude/agents/advisor.md` via Task tool
+**Input:** The feature description provided by the user
+**Process:**
 
-### Fase 3 — Approach tecnico (Tech Lead)
+1. The Advisor evaluates the feature against the project vision
+2. Identifies risks, dependencies, and conflicts with existing functionality
+3. Issues evaluation: Approved / Rejected / Requires adjustments
 
-**Agente:** Lee `.claude/agents/tech-lead.md` via Task tool
-**Input:** Tareas del Product Owner + criterios de aceptacion
-**Proceso:**
+**Output:** Evaluation with reasoning and identified risks
+**Trace data:** Verdict (Approved/Rejected/Approved with conditions), risks identified, conditions if any
+**Exit condition:** If the Advisor rejects the feature, the pipeline stops here. Inform the user of the reason and suggest adjustments if any.
 
-1. El Tech Lead define el approach de implementacion
-2. Identifica archivos a modificar, patrones a seguir, interfaces
-3. Anticipa riesgos tecnicos y propone mitigaciones
+### Phase 2 — Specification (Product Owner)
 
-**Output:** Plan tecnico con archivos, patrones, interfaces y riesgos
+**Progress:** `[2/6] Product Owner — Defining spec...`
+**Agent:** Reads `.claude/agents/product-owner.md` via Task tool
+**Input:** The feature approved by the Advisor + their observations
+**Process:**
 
-### Fase 4 — Implementacion (Developer)
+1. The Product Owner breaks the feature into concrete tasks
+2. Defines verifiable acceptance criteria for each task
+3. Estimates effort and suggests implementation order
 
-**Agente:** Lee `.claude/agents/developer.md` via Task tool
-**Input:** Plan tecnico del Tech Lead + criterios de aceptacion del PO
-**Proceso:**
+**Output:** Task list with acceptance criteria, estimation, and order
+**Trace data:** Tasks defined count, acceptance criteria count, estimated effort
 
-1. El Developer implementa siguiendo el plan tecnico
-2. Escribe tests unitarios como parte de la implementacion
-3. Hace commits atomicos con mensajes descriptivos
-4. Verifica que los tests pasan
+### Phase 3 — Technical Approach (Tech Lead)
 
-**Output:** Codigo implementado + tests + commits realizados
+**Progress:** `[3/6] Tech Lead — Defining technical approach...`
+**Agent:** Reads `.claude/agents/tech-lead.md` via Task tool
+**Input:** Product Owner tasks + acceptance criteria
+**Process:**
 
-### Gate pre-Review (obligatorio)
+1. The Tech Lead defines the implementation approach
+2. Identifies files to modify, patterns to follow, interfaces
+3. Anticipates technical risks and proposes mitigations
 
-Antes de avanzar a Fase 5, ejecutar verificacion automatizada:
+**Output:** Technical plan with files, patterns, interfaces, and risks
+**Trace data:** Key patterns identified, files to modify, technical risks
 
-1. Ejecuta los comandos de test del proyecto (ej: `npm test`) — si falla, el Developer debe corregir antes de avanzar
-2. Ejecuta los comandos de lint del proyecto (ej: `npm run lint`) — si falla, el Developer debe corregir antes de avanzar
-3. Solo hacer checkpoint commit **despues** de que ambos pasen
+### Phase 4 — Implementation (Developer)
 
-Este gate NO se puede saltar, incluso si el usuario solicito skip de fases. Los comandos concretos estan en la seccion "Comandos CLI" de CLAUDE.md.
+**Progress:** `[4/6] Developer — Implementing...`
+**Agent:** Reads `.claude/agents/developer.md` via Task tool
+**Input:** Tech Lead technical plan + PO acceptance criteria
+**Process:**
 
-### Fase 5 — Review (Code Reviewer)
+1. The Developer implements following the technical plan
+2. Writes unit tests as part of the implementation
+3. Makes atomic commits with descriptive messages
+4. Verifies that tests pass
 
-**Agente:** Lee `.claude/agents/code-reviewer.md` via Task tool
-**Input:** Los cambios implementados (git diff)
-**Proceso:**
+**Output:** Implemented code + tests + commits made
+**Trace data:** Files created/modified, tests added, commits made
 
-1. El Code Reviewer revisa calidad, patrones, seguridad y tests
-2. Clasifica hallazgos como Blocker, Warning o Suggestion
+### Pre-Review Gate (mandatory)
 
-**Output:** Reporte de review con hallazgos clasificados
-**Condicion de loop:** Si hay hallazgos de tipo Blocker, vuelve a **Fase 4** para que el Developer los corrija. Maximo 2 iteraciones de review-fix.
+Before advancing to Phase 5, run automated verification:
 
-### Fase 6 — QA (delega a /qa-cycle)
+1. Run the project test commands (e.g., `npm test`) — if it fails, the Developer must fix before advancing
+2. Run the project lint commands (e.g., `npm run lint`) — if it fails, the Developer must fix before advancing
+3. Only make a checkpoint commit **after** both pass
 
-Ejecuta el skill `/qa-cycle` pasandole los criterios de aceptacion del PO como contexto. El qa-cycle se encarga de:
+This gate CANNOT be skipped, even if the user requested phase skipping. The specific commands are in the "CLI commands" section of CLAUDE.md.
 
-1. Ejecutar tests y lint del proyecto
-2. Validar criterios de aceptacion
-3. Probar edge cases y escenarios de error
-4. Ciclo bugfix si hay problemas (maximo 3 ciclos)
+**Trace data:** Tests pass/fail, lint pass/fail
 
-**Condicion de loop adicional:** Si el bugfix del qa-cycle introduce cambios significativos, vuelve a **Fase 5** (Review) para verificar. Maximo 2 ciclos de review-QA.
+### Phase 5 — Review (Code Reviewer)
+
+**Progress:** `[5/6] Code Reviewer — Reviewing changes...`
+**Agent:** Reads `.claude/agents/code-reviewer.md` via Task tool
+**Input:** The implemented changes (git diff)
+**Process:**
+
+1. The Code Reviewer reviews quality, patterns, security, and tests
+2. Classifies findings as Blocker, Warning, or Suggestion
+
+**Output:** Review report with classified findings
+**Trace data:** Blockers count, warnings count, suggestions count, review-fix loops
+**Loop condition:** If there are Blocker findings, return to **Phase 4** for the Developer to fix them. Maximum 2 review-fix iterations.
+
+### Phase 6 — QA (delegates to /qa-cycle)
+
+**Progress:** `[6/6] QA — Validating acceptance criteria...`
+
+Runs the `/qa-cycle` skill passing the PO acceptance criteria as context. The qa-cycle handles:
+
+1. Running project tests and lint
+2. Validating acceptance criteria
+3. Testing edge cases and error scenarios
+4. Bugfix cycle if issues arise (maximum 3 cycles)
+
+**Trace data:** Acceptance criteria verified count, bugs found, QA cycles
+**Additional loop condition:** If the qa-cycle bugfix introduces significant changes, return to **Phase 5** (Review) for verification. Maximum 2 review-QA cycles.
 
 ## Checkpoint Commits
 
@@ -132,7 +169,7 @@ Pattern for each phase:
 - After Phase 1: `wip: [feature] phase 1 — advisor approved`
 - After Phase 2: `wip: [feature] phase 2 — PO spec ready`
 - After Phase 3: `wip: [feature] phase 3 — tech approach defined`
-- After Phase 4: `wip: [feature] phase 4 — implementation done`
+- After Phase 4: `wip: [feature] phase 4 — implementation done` -- also write partial trace (phases 1-4) to spec and update status to `implementing`
 - After Phase 5: `wip: [feature] phase 5 — review passed`
 - After Phase 6: `wip: [feature] phase 6 — QA passed`
 
@@ -142,33 +179,141 @@ Also update SESSION.md at each phase transition:
 - [timestamp] | build-feature | Phase N ([phase-name]) complete for [feature]
 ```
 
-## Gate final (obligatorio antes de Finalizacion)
+## Pipeline Trace
 
-Antes de declarar el pipeline como completado, ejecutar verificacion final:
+After pipeline completion, append a `## Pipeline Trace` section to the feature's spec file in `docs/specs/`. This provides a structured record of what happened in each phase.
 
-1. Ejecuta tests del proyecto — si falla, volver a Fase 6 (QA/Bugfix)
-2. Ejecuta lint del proyecto — si falla, volver a Fase 4 (Developer)
-3. Ambos deben pasar con exit code 0
+### Spec file discovery
 
-Este gate es la ultima red de seguridad. NO se puede saltar bajo ninguna circunstancia.
+1. Search `docs/specs/` for a file whose `spec-id` frontmatter matches the feature name (kebab-case)
+2. If no matching spec exists, auto-create a minimal spec file at `docs/specs/[feature-name].md`
 
-## Finalizacion
+### Auto-created spec format
 
-Al completar todas las fases y el gate final exitosamente:
+When no prior council spec exists, create a minimal spec:
 
-1. Presenta resumen del pipeline:
-   - Feature implementada
-   - Archivos modificados/creados
-   - Tests ejecutados y resultado
-   - Issues de review resueltos
-   - Resultado QA final
+````markdown
+---
+spec-id: [feature-name]
+status: implementing
+date: [YYYY-MM-DD]
+council-type: none (pipeline-generated)
+---
 
-2. Actualiza `SESSION.md` con:
-   - Feature completada
-   - Decisiones tomadas durante el pipeline
-   - Proximos pasos si los hay
+# Spec: [Feature Name]
 
-3. Close the GitHub Issue (if applicable):
+## Context
+
+Spec auto-generated by /build-feature pipeline. No prior council session.
+
+## Pipeline Trace
+
+[trace content appended here]
+````
+
+### Status field updates
+
+- At Phase 4 checkpoint: set `status: implementing`
+- At pipeline completion: set `status: implemented`
+
+### Trace section format
+
+Append this section to the spec file:
+
+````markdown
+## Pipeline Trace
+
+pipeline-start: [YYYY-MM-DD]
+pipeline-end: [YYYY-MM-DD]
+phases-completed: [N]/6
+review-fix-loops: [N]
+qa-cycles: [N]
+final-gate: pass | fail
+
+### Phase 1 — Evaluation
+
+- **Verdict**: [Approved/Rejected/Approved with conditions]
+- **Risks identified**: [list or "None"]
+
+### Phase 2 — Specification
+
+- **Tasks defined**: [N]
+- **Acceptance criteria**: [N]
+- **Estimated effort**: [summary]
+
+### Phase 3 — Technical Approach
+
+- **Key patterns**: [list]
+- **Files to modify**: [list]
+- **Technical risks**: [list or "None"]
+
+### Phase 4 — Implementation
+
+- **Files created/modified**: [list]
+- **Tests added**: [N]
+- **Commits**: [list of commit summaries]
+
+### Pre-Review Gate
+
+- **Tests**: pass | fail
+- **Lint**: pass | fail
+
+### Phase 5 — Review
+
+- **Blockers**: [N]
+- **Warnings**: [N]
+- **Suggestions**: [N]
+- **Review-fix loops**: [N]
+
+### Phase 6 — QA
+
+- **Acceptance criteria verified**: [N]/[total]
+- **Bugs found**: [N]
+- **QA cycles**: [N]
+
+### Final Gate
+
+- **Tests**: pass | fail
+- **Lint**: pass | fail
+- **Result**: pass | fail
+````
+
+### When to write the trace
+
+- **Phase 4 checkpoint:** Write a partial trace covering phases 1-4 to the spec file. Set status to `implementing`. Include the spec file in the checkpoint commit.
+- **Pipeline completion:** Write the complete trace (all phases) to the spec file. Set status to `implemented`. Include the spec file in the final checkpoint commit.
+
+## Final Gate (mandatory before Completion)
+
+Before declaring the pipeline as complete, run final verification:
+
+1. Run project tests — if it fails, return to Phase 6 (QA/Bugfix)
+2. Run project lint — if it fails, return to Phase 4 (Developer)
+3. Both must pass with exit code 0
+
+This gate is the last safety net. It CANNOT be skipped under any circumstances.
+
+**Trace data:** Tests pass/fail, lint pass/fail, result (pass/fail)
+
+## Completion
+
+Upon successfully completing all phases and the final gate:
+
+1. Write the complete Pipeline Trace to the spec file (see "Pipeline Trace" section above). Update the spec status to `implemented`. Include the spec file in the final checkpoint commit.
+
+2. Present pipeline summary:
+   - Feature implemented
+   - Files modified/created
+   - Tests run and result
+   - Review issues resolved
+   - Final QA result
+
+3. Update `SESSION.md` with:
+   - Feature completed
+   - Decisions made during the pipeline
+   - Next steps if any
+
+4. Close the GitHub Issue (if applicable):
    - Do NOT use `Closes #N` in PR description (only works when merging to default branch)
    - After the PR is merged, run: `gh issue close N --comment "Resolved in PR #X"`
 
@@ -197,18 +342,29 @@ Task tool with:
 ```text
 User: /build-feature add dark mode toggle to settings page
 
-Phase 1 — Advisor: Approved. Low risk, aligns with UX roadmap.
-Phase 2 — PO: 3 tasks defined with acceptance criteria.
-Phase 3 — Tech Lead: Use CSS variables + context provider pattern.
-Phase 4 — Developer: Implemented ThemeContext, toggle component, CSS vars.
-Phase 5 — Review: Passed. 1 suggestion (memoize context value).
-Phase 6 — QA: All 3 acceptance criteria verified. 0 bugs.
+[1/6] Advisor — Evaluating feature...
+  Approved. Low risk, aligns with UX roadmap.
+
+[2/6] Product Owner — Defining spec...
+  3 tasks defined with acceptance criteria.
+
+[3/6] Tech Lead — Defining technical approach...
+  Use CSS variables + context provider pattern.
+
+[4/6] Developer — Implementing...
+  Implemented ThemeContext, toggle component, CSS vars.
+
+[5/6] Code Reviewer — Reviewing changes...
+  Passed. 1 suggestion (memoize context value).
+
+[6/6] QA — Validating acceptance criteria...
+  All 3 acceptance criteria verified. 0 bugs.
 
 Feature complete. PR ready for merge.
 ```
 
-## Notas
+## Notes
 
-- Si el usuario quiere saltar fases (ej: "ya la evaluo, implementa directo"), permite saltar a Fase 4 pero advierte que se pierde validacion. Los gates de verificacion (pre-Review y final) NUNCA se saltan
-- El pipeline es secuencial: cada fase depende del output de la anterior
-- Los loops de review/QA tienen limite para evitar ciclos infinitos
+- If the user wants to skip phases (e.g., "already evaluated, implement directly"), allow skipping to Phase 4 but warn that validation is lost. Verification gates (pre-Review and final) are NEVER skipped
+- The pipeline is sequential: each phase depends on the output of the previous one
+- Review/QA loops have limits to prevent infinite cycles

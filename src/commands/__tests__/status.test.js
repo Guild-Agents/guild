@@ -18,15 +18,15 @@ describe('runStatus', () => {
     rmSync(tempDir, { recursive: true, force: true });
   });
 
-  it('should throw when PROJECT.md does not exist', async () => {
+  it('should throw when no Guild project found', async () => {
     process.chdir(tempDir);
     const { runStatus } = await import('../status.js');
-    await expect(runStatus()).rejects.toThrow('Guild no esta instalado');
+    await expect(runStatus()).rejects.toThrow('Guild project not found');
   });
 
   it('should not throw when PROJECT.md exists', async () => {
     process.chdir(tempDir);
-    writeFileSync(join(tempDir, 'PROJECT.md'), '**Nombre:** TestProject\n**Stack:** Node.js');
+    writeFileSync(join(tempDir, 'PROJECT.md'), '**Name:** TestProject\n**Stack:** Node.js');
     mkdirSync(join(tempDir, '.claude', 'agents'), { recursive: true });
     mkdirSync(join(tempDir, '.claude', 'skills'), { recursive: true });
     const { runStatus } = await import('../status.js');

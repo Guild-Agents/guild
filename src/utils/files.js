@@ -1,8 +1,8 @@
 /**
- * files.js — Utilidades de sistema de archivos para Guild v1
+ * files.js — File system utilities for Guild v1
  */
 
-import { mkdirSync, copyFileSync, existsSync, readdirSync, readFileSync } from 'fs';
+import { mkdirSync, copyFileSync, existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -12,24 +12,60 @@ const AGENTS_DIR = join('.claude', 'agents');
 const SKILLS_DIR = join('.claude', 'skills');
 
 /**
- * Lista los nombres de los 9 agentes v1.
+ * Returns the names of the v1 agents by reading the templates directory.
+ * Adding a new .md file to src/templates/agents/ automatically includes it.
  */
 export function getAgentNames() {
-  return [
-    'advisor',
-    'product-owner',
-    'tech-lead',
-    'developer',
-    'code-reviewer',
-    'qa',
-    'bugfix',
-    'db-migration',
-    'platform-expert',
-  ];
+  const agentsDir = join(TEMPLATES_DIR, 'agents');
+  if (!existsSync(agentsDir)) {
+    return [];
+  }
+  return readdirSync(agentsDir)
+    .filter(f => f.endsWith('.md'))
+    .map(f => f.replace('.md', ''))
+    .sort();
 }
 
 /**
- * Copia los templates de agentes y skills al proyecto del usuario.
+ * Returns the names of the v1 skills by reading the templates directory.
+ * Adding a new directory to src/templates/skills/ automatically includes it.
+ */
+export function getSkillNames() {
+  const skillsDir = join(TEMPLATES_DIR, 'skills');
+  if (!existsSync(skillsDir)) {
+    return [];
+  }
+  return readdirSync(skillsDir, { withFileTypes: true })
+    .filter(d => d.isDirectory())
+    .map(d => d.name)
+    .sort();
+}
+
+/**
+ * Parses YAML frontmatter from markdown content.
+ * Returns an object with { name, description, ...other fields } or empty object if no frontmatter.
+ */
+export function parseFrontmatter(content) {
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return {};
+
+  const frontmatter = {};
+  for (const line of match[1].split('\n')) {
+    const colonIndex = line.indexOf(':');
+    if (colonIndex === -1) continue;
+    const key = line.slice(0, colonIndex).trim();
+    let value = line.slice(colonIndex + 1).trim();
+    // Remove surrounding quotes
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    if (key) frontmatter[key] = value;
+  }
+  return frontmatter;
+}
+
+/**
+ * Copies agent and skill templates to the user's project.
  */
 export async function copyTemplates() {
   mkdirSync(AGENTS_DIR, { recursive: true });
@@ -42,6 +78,14 @@ export async function copyTemplates() {
     if (existsSync(src)) {
       copyFileSync(src, dest);
     }
+  }
+
+  // Create docs/specs/ directory with .gitkeep
+  const specsDir = join('docs', 'specs');
+  mkdirSync(specsDir, { recursive: true });
+  const gitkeep = join(specsDir, '.gitkeep');
+  if (!existsSync(gitkeep)) {
+    writeFileSync(gitkeep, '', 'utf8');
   }
 
   // Copy skill directories with SKILL.md
@@ -65,7 +109,7 @@ export async function copyTemplates() {
 }
 
 /**
- * Lee el contenido de PROJECT.md si existe.
+ * Reads the contents of PROJECT.md if it exists.
  */
 export function readProjectMd() {
   const path = 'PROJECT.md';
@@ -74,7 +118,7 @@ export function readProjectMd() {
 }
 
 /**
- * Lee el contenido de SESSION.md si existe.
+ * Reads the contents of SESSION.md if it exists.
  */
 export function readSessionMd() {
   const path = 'SESSION.md';
@@ -83,9 +127,9 @@ export function readSessionMd() {
 }
 
 /**
- * Resuelve la raiz del proyecto Guild caminando hacia arriba desde startDir.
- * Busca .claude/ o PROJECT.md como marcadores de un proyecto Guild.
- * Retorna la ruta absoluta del proyecto o null si no se encuentra.
+ * Resolves the Guild project root by walking up from startDir.
+ * Looks for .claude/ or PROJECT.md as markers of a Guild project.
+ * Returns the absolute path to the project or null if not found.
  */
 export function resolveProjectRoot(startDir = process.cwd()) {
   let dir = resolve(startDir);
@@ -100,4 +144,18 @@ export function resolveProjectRoot(startDir = process.cwd()) {
     }
     dir = parent;
   }
+}
+
+/**
+ * Resolves the Guild project root and changes the working directory to it.
+ * Throws if no Guild project is found.
+ * Returns the absolute path to the project root.
+ */
+export function ensureProjectRoot() {
+  const root = resolveProjectRoot();
+  if (!root) {
+    throw new Error('Guild project not found. Run `guild init` to initialize.');
+  }
+  process.chdir(root);
+  return root;
 }

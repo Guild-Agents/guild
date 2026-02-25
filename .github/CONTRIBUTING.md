@@ -5,7 +5,7 @@ Thanks for your interest in contributing. This document explains the process dep
 ## Types of Contribution
 
 | Type | What it covers | Process |
-|---|---|---|
+| --- | --- | --- |
 | **Templates** | `src/templates/agents/`, `src/templates/skills/` | Content-focused — improve agent definitions or skill workflows |
 | **CLI** | `src/`, `bin/`, `package.json`, tests | Full process — requires tests and technical review |
 
@@ -36,7 +36,7 @@ node bin/guild.js --version
 
 Guild uses simplified GitFlow:
 
-```
+```text
 main      ← production, always stable, tagged with npm versions
 develop   ← integration, all PRs target this branch
 ```
@@ -58,7 +58,7 @@ For files in `src/templates/agents/` and `src/templates/skills/`.
 
 Each agent is a flat `.md` file that defines identity, responsibilities, and process. The 9 agents live in `src/templates/agents/`:
 
-```
+```text
 advisor.md, product-owner.md, tech-lead.md, developer.md,
 code-reviewer.md, qa.md, bugfix.md, db-migration.md, platform-expert.md
 ```
@@ -69,11 +69,11 @@ When improving an agent, focus on making instructions clear and actionable. Agen
 
 Each skill is a `SKILL.md` file inside `src/templates/skills/<skill-name>/`. Skills define workflows that orchestrate agents through structured processes.
 
-The 10 skills:
+The 11 skills:
 
-```
-guild-specialize, build-feature, new-feature, council, qa-cycle,
-review, dev-flow, status, session-start, session-end
+```text
+guild-specialize, build-feature, new-feature, create-pr, council,
+qa-cycle, review, dev-flow, status, session-start, session-end
 ```
 
 When improving a skill, focus on the workflow steps, agent coordination, and clear exit criteria.
@@ -128,7 +128,7 @@ git push origin feature/descriptive-name
 
 Guild uses [Conventional Commits](https://www.conventionalcommits.org/) for a clean history and automatic changelog generation.
 
-```
+```text
 feat: add guild status command
 fix: handle missing git config gracefully in init
 docs: rewrite README for v1 architecture

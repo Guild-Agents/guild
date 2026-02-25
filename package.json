@@ -1,14 +1,14 @@
 {
   "name": "guild-agents",
-  "version": "0.2.6",
-  "description": "A multi-agent framework for Claude Code — specialized AI teams for every project",
+  "version": "0.3.1",
+  "description": "Specification-driven development CLI for Claude Code — think before you build",
   "type": "module",
   "files": [
     "bin/",
     "src/commands/",
     "src/templates/",
     "src/utils/",
-    "!src/utils/__tests__/"
+    "!src/**/__tests__/"
   ],
   "bin": {
     "guild": "bin/guild.js"
@@ -17,35 +17,43 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "lint": "eslint src/ && markdownlint-cli2 'src/templates/**/*.md'",
-    "lint:js": "eslint src/",
+    "lint": "eslint src/ scripts/ && markdownlint-cli2 'src/templates/**/*.md'",
+    "lint:js": "eslint src/ scripts/",
     "lint:md": "markdownlint-cli2 'src/templates/**/*.md'",
     "dev": "node bin/guild.js",
-    "prepublishOnly": "npm test && npm run lint"
+    "prepublishOnly": "npm test && npm run lint",
+    "version:snapshot": "node scripts/version-snapshot.js",
+    "version:beta": "node scripts/version-beta.js",
+    "version:stable": "node scripts/version-stable.js",
+    "publish:snapshot": "npm run version:snapshot && npm publish --tag snapshot",
+    "publish:beta": "npm run version:beta && npm publish --tag beta",
+    "publish:stable": "npm run version:stable && npm publish --tag latest",
+    "publish:promote-beta": "npm dist-tag add guild-agents@$(node --input-type=commonjs -p \"require('./package.json').version\") beta"
   },
   "keywords": [
     "claude",
     "claude-code",
+    "anthropic",
+    "specification-driven",
+    "spec-driven",
+    "spec-first",
+    "design-docs",
+    "developer-tools",
+    "cli",
     "agents",
     "ai",
     "workflow",
-    "multi-agent",
-    "developer-tools",
-    "cli",
-    "framework",
-    "anthropic",
-    "ai-agents",
     "automation",
     "code-review",
     "nodejs"
   ],
-  "author": "",
+  "author": "Guild Agents <guild-agents@users.noreply.github.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/guild-agents/guild.git"
   },
-  "homepage": "https://github.com/guild-agents/guild",
+  "homepage": "https://guildagents.dev",
   "bugs": {
     "url": "https://github.com/guild-agents/guild/issues"
   },
@@ -53,7 +61,7 @@
     "@clack/prompts": "^1.0.1",
     "chalk": "^5.3.0",
     "commander": "^14.0.3",
-    "picocolors": "^1.0.0"
+    "guild-agents": "^0.3.0"
   },
   "engines": {
     "node": ">=20.0.0"

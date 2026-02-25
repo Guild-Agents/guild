@@ -3,28 +3,39 @@
 /**
  * Guild v1 — CLI entry point
  * Usage:
- *   guild init           — onboarding interactivo v1
- *   guild new-agent      — crear un nuevo agente
- *   guild status         — ver estado del proyecto
+ *   guild init           — interactive onboarding v1
+ *   guild new-agent      — create a new agent
+ *   guild status         — view project status
+ *   guild doctor         — verify setup and report issues
+ *   guild list           — list installed agents and skills
  */
 
 import { program } from 'commander';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import chalk from 'chalk';
+import { parseVersion, getPreReleaseWarning } from '../src/utils/version.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8'));
 
+const { channel } = parseVersion(pkg.version);
+const prereleaseWarning = getPreReleaseWarning(pkg.version);
+if (prereleaseWarning) {
+  const color = channel === 'snapshot' ? chalk.red : chalk.yellow;
+  console.error(color(`Guild v${pkg.version} -- ${prereleaseWarning}`));
+}
+
 program
   .name('guild')
-  .description('Multi-agent framework for Claude Code')
+  .description('Specification-driven development CLI for Claude Code')
   .version(pkg.version);
 
 // guild init
 program
   .command('init')
-  .description('Inicializar Guild v1 en el proyecto actual')
+  .description('Initialize Guild v1 in the current project')
   .action(async () => {
     try {
       const { runInit } = await import('../src/commands/init.js');
@@ -38,8 +49,8 @@ program
 // guild new-agent
 program
   .command('new-agent')
-  .description('Crear un nuevo agente')
-  .argument('<name>', 'Nombre del agente (lowercase, guiones)')
+  .description('Create a new agent')
+  .argument('<name>', 'Agent name (lowercase, hyphens)')
   .action(async (name) => {
     try {
       const { runNewAgent } = await import('../src/commands/new-agent.js');
@@ -53,7 +64,7 @@ program
 // guild status
 program
   .command('status')
-  .description('Ver estado del proyecto Guild')
+  .description('View Guild project status')
   .action(async () => {
     try {
       const { runStatus } = await import('../src/commands/status.js');

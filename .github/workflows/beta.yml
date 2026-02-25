@@ -1,0 +1,63 @@
+name: Publish Beta
+
+on:
+  workflow_dispatch:
+    inputs:
+      description:
+        description: 'What is included in this beta?'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  publish-beta:
+    name: Publish Beta
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.x
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Set beta version
+        run: npm run version:beta
+
+      - name: Read version
+        id: version
+        run: |
+          VERSION=$(node --input-type=commonjs -p "require('./package.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Publish beta
+        run: npm publish --tag beta
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub pre-release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          prerelease: true
+          body: |
+            ## Beta Release
+            ${{ github.event.inputs.description }}
+
+            Install: `npm install -g guild-agents@beta`
+          generate_release_notes: true

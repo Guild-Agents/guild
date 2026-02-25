@@ -1,84 +1,84 @@
 /**
- * guild init — Onboarding interactivo v1
+ * guild init — Interactive onboarding v1
  *
- * Flujo:
- * 1. Verificar que no existe ya una instalacion de Guild
- * 2. Recopilar: nombre, tipo, stack, GitHub, codigo existente
- * 3. Generar PROJECT.md, CLAUDE.md, SESSION.md
- * 4. Copiar agentes y skills
- * 5. Instrucciones para /guild-specialize
+ * Flow:
+ * 1. Verify that a Guild installation does not already exist
+ * 2. Collect: name, type, stack, GitHub, existing code
+ * 3. Generate PROJECT.md, CLAUDE.md, SESSION.md
+ * 4. Copy agents and skills
+ * 5. Instructions for /guild-specialize
  */
 
 import * as p from '@clack/prompts';
 import chalk from 'chalk';
 import { existsSync } from 'fs';
 import { generateProjectMd, generateSessionMd, generateClaudeMd } from '../utils/generators.js';
-import { copyTemplates } from '../utils/files.js';
+import { copyTemplates, getAgentNames, getSkillNames } from '../utils/files.js';
 
 export async function runInit() {
   console.log('');
-  p.intro(chalk.bold.cyan('Guild v1 — Nuevo proyecto'));
+  p.intro(chalk.bold.cyan('Guild v1 — New project'));
 
-  // Verificar instalacion existente
+  // Check for existing installation
   if (existsSync('.claude/agents')) {
     const overwrite = await p.confirm({
-      message: 'Guild ya esta instalado en este proyecto. Reinicializar?',
+      message: 'Guild is already installed in this project. Reinitialize?',
       initialValue: false,
     });
 
     if (p.isCancel(overwrite) || !overwrite) {
-      p.cancel('Cancelado.');
+      p.cancel('Cancelled.');
       return;
     }
   }
 
-  // ─── Nombre ─────────────────────────────────────────────────────────────────
+  // ─── Name ─────────────────────────────────────────────────────────────────
   const name = await p.text({
-    message: 'Nombre del proyecto:',
-    placeholder: 'mi-proyecto',
+    message: 'Project name:',
+    placeholder: 'my-project',
     validate: (val) => {
-      if (!val) return 'El nombre es requerido';
+      if (!val) return 'Name is required';
     },
   });
-  if (p.isCancel(name)) { p.cancel('Cancelado.'); return; }
+  if (p.isCancel(name)) { p.cancel('Cancelled.'); return; }
 
-  // ─── Tipo ───────────────────────────────────────────────────────────────────
+  // ─── Type ───────────────────────────────────────────────────────────────────
   const type = await p.select({
-    message: 'Tipo de proyecto:',
+    message: 'Project type:',
     options: [
       { value: 'webapp', label: 'Web app (React/Vue/Angular)' },
       { value: 'api', label: 'API / Backend service' },
       { value: 'cli', label: 'CLI tool' },
       { value: 'mobile', label: 'Mobile (React Native)' },
-      { value: 'fullstack', label: 'Otro / Fullstack' },
+      { value: 'fullstack', label: 'Other / Fullstack' },
     ],
   });
-  if (p.isCancel(type)) { p.cancel('Cancelado.'); return; }
+  if (p.isCancel(type)) { p.cancel('Cancelled.'); return; }
 
   // ─── Stack ──────────────────────────────────────────────────────────────────
   const stack = await p.text({
-    message: 'Stack principal:',
-    placeholder: 'ej: Next.js, Supabase, Vercel',
+    message: 'Main stack:',
+    placeholder: 'e.g.: Next.js, Supabase, Vercel',
     validate: (val) => {
-      if (!val) return 'El stack es requerido';
+      if (!val) return 'Stack is required';
     },
   });
-  if (p.isCancel(stack)) { p.cancel('Cancelado.'); return; }
+  if (p.isCancel(stack)) { p.cancel('Cancelled.'); return; }
 
   // ─── GitHub ─────────────────────────────────────────────────────────────────
   let github = null;
   const hasRepo = await p.confirm({
-    message: 'Tiene repositorio GitHub?',
+    message: 'Has a GitHub repository?',
     initialValue: true,
   });
 
   if (!p.isCancel(hasRepo) && hasRepo) {
     const repoUrl = await p.text({
-      message: 'URL del repositorio:',
+      message: 'Repository URL:',
       placeholder: 'https://github.com/org/repo',
       validate: (val) => {
-        if (!val) return 'La URL es requerida';
-        if (!val.includes('github.com')) return 'Debe ser una URL de GitHub';
+        if (!val) return 'URL is required';
+        if (!val.includes('github.com')) return 'Must be a GitHub URL';
       },
     });
     if (!p.isCancel(repoUrl)) {
@@ -86,15 +86,15 @@ export async function runInit() {
     }
   }
 
-  // ─── Codigo existente ───────────────────────────────────────────────────────
+  // ─── Existing code ────────────────────────────────────────────────────────
   const hasExistingCode = await p.confirm({
-    message: 'Tiene codigo existente?',
+    message: 'Has existing code?',
     initialValue: true,
   });
 
-  // ─── Generacion ─────────────────────────────────────────────────────────────
+  // ─── Generation ───────────────────────────────────────────────────────────
   const spinner = p.spinner();
-  spinner.start('Generando estructura Guild v1...');
+  spinner.start('Generating Guild v1 structure...');
 
   const projectData = {
     name,
@@ -106,35 +106,40 @@ export async function runInit() {
 
   try {
     await copyTemplates();
-    spinner.message('Generando CLAUDE.md...');
+    spinner.message('Generating CLAUDE.md...');
     await generateClaudeMd(projectData);
 
-    spinner.message('Generando PROJECT.md...');
+    spinner.message('Generating PROJECT.md...');
     await generateProjectMd(projectData);
 
-    spinner.message('Generando SESSION.md...');
+    spinner.message('Generating SESSION.md...');
     await generateSessionMd();
 
-    spinner.stop('Estructura creada.');
+    spinner.stop('Structure created.');
   } catch (error) {
-    spinner.stop('Error durante la inicializacion.');
+    spinner.stop('Error during initialization.');
     throw error;
   }
 
-  // ─── Resumen ────────────────────────────────────────────────────────────────
-  p.log.success('CLAUDE.md');
-  p.log.success('PROJECT.md');
-  p.log.success('SESSION.md');
-  p.log.success('.claude/agents/    (8 agentes base)');
-  p.log.success('.claude/skills/    (10 skills)');
+  // ─── Summary ──────────────────────────────────────────────────────────────
+  const agentCount = getAgentNames().length;
+  const skillCount = getSkillNames().length;
+  p.log.success(`Created: CLAUDE.md, PROJECT.md, SESSION.md, ${agentCount} agents, ${skillCount} skills`);
 
-  p.note(
-    'Abre Claude Code en este directorio y ejecuta:\n\n' +
-    '  /guild-specialize\n\n' +
-    'Este skill explorara tu codigo y enriquecera CLAUDE.md\n' +
-    'con la informacion real del proyecto.',
-    'Siguiente paso'
-  );
+  const relevantSkills = projectData.hasExistingCode
+    ? ['/guild-specialize', '/council', '/build-feature']
+    : ['/council', '/build-feature', '/new-feature'];
+  p.log.info(`Start with: ${relevantSkills.join('  ')}`);
 
-  p.outro(chalk.bold.cyan('Guild v1 listo.'));
+  const quickStart = projectData.hasExistingCode
+    ? '1. Run /guild-specialize to analyze your codebase\n' +
+      '2. Run /council to spec your first feature\n' +
+      '3. Build it with /build-feature'
+    : '1. Run /council to spec your first feature\n' +
+      '2. Build it with /build-feature\n' +
+      '3. Run /guild-specialize once you have code';
+
+  p.note(quickStart, 'Quick start');
+
+  p.outro(chalk.bold.cyan('Guild ready — spec before you build.'));
 }
