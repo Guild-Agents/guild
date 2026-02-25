@@ -2,10 +2,9 @@
 
 ## Active session
 - **Date:** 2026-02-25
-- **Current task:** v1.x Core Infrastructure — `/build-feature` Phase 4 (Developer)
-- **Active agent:** Developer
+- **Current task:** v1.x Core Infrastructure — `/build-feature` pipeline complete
 - **Branch:** `feature/v1x-core-infrastructure`
-- **Status:** Implementation in progress — T1+T3 done, T4 next
+- **Status:** All 6 phases complete — ready for PR
 
 ## What happened this session
 
@@ -21,38 +20,44 @@
   - `docs/specs/spec-logging-system.md` (952 lines)
 
 ### `/build-feature` pipeline — v1.x Core Infrastructure
-Currently in Phase 4 (Developer). Pipeline progress:
 
 | Phase | Status | Result |
 |-------|--------|--------|
 | 1. Advisor | Done | Approved with 5 conditions |
 | 2. Product Owner | Done | 6 tasks, 87 acceptance criteria |
 | 3. Tech Lead | Done | Full technical plan (import graph, function signatures, test strategy) |
-| 4. Developer | **In progress** | T1+T3 done, T4 next |
-| 5. Code Review | Pending | — |
-| 6. QA | Pending | — |
+| 4. Developer | Done | All 6 tasks implemented (T1-T6) |
+| 5. Code Review | Done | 2 blockers fixed, 4 warnings fixed, 1 review-fix loop |
+| 6. QA | Done | 42/42 criteria verified, 1 bug fixed, approved |
 
-### Implementation progress (6 tasks)
+### Implementation summary (6 tasks)
 
 | Task | Status | Details |
 |------|--------|---------|
-| T1: dispatch-protocol.js + dispatch.js | **Done** | Constants, validation, tier resolution. 28 tests |
-| T2: yaml + workflow-parser.js + skill-loader.js | Pending | Blocked by T1 (now unblocked) |
-| T3: trace.js | **Done** | 3-level logging, pure rendering. 29 tests |
-| T4: Add default-tier to 8 agent templates | **Next** | Was starting when session paused |
-| T5: Migrate 4 Skills to declarative format | Pending | Depends on T1, T2, T4 |
-| T6: doctor.js integration + CLI flags | Pending | Depends on all above |
+| T1: dispatch-protocol.js + dispatch.js | Done | Constants, validation, tier resolution. 46 tests |
+| T2: yaml + workflow-parser.js + skill-loader.js | Done | YAML parser, skill loader. 50 tests |
+| T3: trace.js | Done | 3-level logging, pure rendering. 31 tests |
+| T4: Add default-tier to 10 agent templates | Done | All templates + .claude/agents/ updated |
+| T5: Migrate 4 Skills to declarative format | Done | build-feature, council, review, qa-cycle |
+| T6: doctor.js integration + CLI flags | Done | Workflow validation + --verbose/--debug |
 
 ### Files created this session
 - `src/utils/dispatch-protocol.js` — Constants (tiers, strategies, profiles, fallback chain)
 - `src/utils/dispatch.js` — validateStepConfig, resolveAgentMetadata, resolveEffectiveTier, resolveModel
+- `src/utils/workflow-parser.js` — extractFrontmatterBlock, parseYamlFrontmatter, parseSkill, validateWorkflow, resolveExecutionPlan
+- `src/utils/skill-loader.js` — loadSkill, loadAllSkills
 - `src/utils/trace.js` — createTrace, recordStep, finalizeTrace, renderTrace, listTraces, cleanTraces
-- `src/utils/__tests__/dispatch-protocol.test.js` — 15 tests
-- `src/utils/__tests__/dispatch.test.js` — 13 tests (+ integration with real agent files)
-- `src/utils/__tests__/trace.test.js` — 29 tests
-- `docs/specs/spec-guild-dispatch.md` — 706 lines
-- `docs/specs/spec-declarative-workflows.md` — 934 lines
-- `docs/specs/spec-logging-system.md` — 952 lines
+- `src/templates/agents/learnings-extractor.md` — New agent template (routine tier)
+- `docs/specs/v1x-core-infrastructure.md` — Pipeline trace
+- 6 test files (250 total tests)
+
+### Files modified this session
+- `bin/guild.js` — Added --verbose and --debug global options
+- `src/commands/doctor.js` — Added workflow validation + agent reference checks
+- 10 agent templates — Added `default-tier` frontmatter field
+- 4 skill templates — Added declarative workflow YAML frontmatter
+- `.gitignore` — Added `.claude/guild/traces/`
+- `package.json` — Added `yaml` dependency
 
 ## Key decisions made this session
 
@@ -70,9 +75,14 @@ Currently in Phase 4 (Developer). Pipeline progress:
 ### 3. Tech Lead: single import graph
 - dispatch-protocol.js is the leaf (zero deps)
 - dispatch.js and workflow-parser.js both import from dispatch-protocol
-- trace.js imports from dispatch-protocol for types
+- trace.js is independent (no cross-module imports)
 - skill-loader.js imports from workflow-parser
 - doctor.js imports from dispatch + skill-loader
+
+### 4. Code Review B1 fix: unified failure vocabulary
+- Changed FAILURE_STRATEGIES from ['stop', 'continue', 'retry'] to ['abort', 'continue']
+- Added goto:<step-id> support in dispatch.js validation
+- workflow-parser.js imports from dispatch-protocol (single source of truth)
 
 ## Pending items
 
@@ -84,17 +94,17 @@ Snapshot workflow triggers on push to `dev`. Branch needs to be created when ado
 
 ## Technical context
 - **Version**: 0.3.1 (published to npm)
-- **Tests**: 195 passing (12 test files)
-- **Agents**: 9 templates (default-tier pending addition)
-- **Skills**: 11 templates (4 pending migration to declarative format)
+- **Tests**: 250 passing (14 test files)
+- **Agents**: 10 templates (all with default-tier)
+- **Skills**: 11 templates (4 migrated to declarative workflows)
 - **Node**: v24.12.0 local, CI matrix 20.x/22.x
-- **Branch**: feature/v1x-core-infrastructure (2 commits ahead of main)
+- **Branch**: feature/v1x-core-infrastructure (ahead of main)
 
 ## Next steps
-1. **Resume T4** — Add `default-tier` to 8 agent templates (trivial, ~10 min)
-2. **Implement T2** — Install `yaml`, create `workflow-parser.js` + `skill-loader.js` (largest task)
-3. **Implement T5** — Migrate 4 Skills to declarative workflow frontmatter
-4. **Implement T6** — doctor.js dispatch checks + `--verbose`/`--debug` CLI flags
-5. Continue `/build-feature` pipeline: Phase 5 (Code Review) → Phase 6 (QA)
+1. **Create PR** — `/create-pr` for feature/v1x-core-infrastructure → main
+2. **Remaining 7 skill migrations** — guild-specialize, new-feature, dev-flow, session-start, session-end, status, build-feature (if needed)
+3. **Wire --verbose/--debug to commands** — Pass trace level through to command handlers
+4. **`guild logs` command** — Future CLI command for viewing/cleaning traces
+5. **Compound Learning spec** — Next P1 from roadmap
 
-**Resume with:** Continue `/build-feature` from T4. All context is in this file and the task list.
+**Resume with:** Create PR with `/create-pr`, or continue with next roadmap item.
