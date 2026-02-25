@@ -101,6 +101,29 @@ describe('createTrace', () => {
 
     expect(existsSync(tracesDir)).toBe(true);
   });
+
+  it('creates a .gitignore inside the traces directory', () => {
+    const tracesDir = join(tempDir, 'traces-gitignore');
+    createTrace('test-workflow', 'default', tracesDir);
+
+    const gitignorePath = join(tracesDir, '.gitignore');
+    expect(existsSync(gitignorePath)).toBe(true);
+    const content = readFileSync(gitignorePath, 'utf8');
+    expect(content).toContain('*');
+    expect(content).toContain('!.gitignore');
+  });
+
+  it('does not overwrite existing .gitignore', () => {
+    const tracesDir = join(tempDir, 'traces-existing');
+    mkdirSync(tracesDir, { recursive: true });
+    const gitignorePath = join(tracesDir, '.gitignore');
+    writeFileSync(gitignorePath, 'custom-content\n', 'utf8');
+
+    createTrace('test-workflow', 'default', tracesDir);
+
+    const content = readFileSync(gitignorePath, 'utf8');
+    expect(content).toBe('custom-content\n');
+  });
 });
 
 // --- recordStep ---

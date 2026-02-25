@@ -89,6 +89,12 @@ export function createTrace(workflowName, level, tracesDir) {
   const dir = tracesDir || join('.claude', 'guild', 'traces');
   mkdirSync(dir, { recursive: true });
 
+  // Ensure traces directory is gitignored (local-only artifacts)
+  const gitignorePath = join(dir, '.gitignore');
+  if (!existsSync(gitignorePath)) {
+    writeFileSync(gitignorePath, '*\n!.gitignore\n', 'utf8');
+  }
+
   const now = new Date();
   const timestamp = now.toISOString()
     .replace(/[-:]/g, '')
