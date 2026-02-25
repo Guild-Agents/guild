@@ -17,11 +17,18 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "lint": "eslint src/ && markdownlint-cli2 'src/templates/**/*.md'",
-    "lint:js": "eslint src/",
+    "lint": "eslint src/ scripts/ && markdownlint-cli2 'src/templates/**/*.md'",
+    "lint:js": "eslint src/ scripts/",
     "lint:md": "markdownlint-cli2 'src/templates/**/*.md'",
     "dev": "node bin/guild.js",
-    "prepublishOnly": "npm test && npm run lint"
+    "prepublishOnly": "npm test && npm run lint",
+    "version:snapshot": "node scripts/version-snapshot.js",
+    "version:beta": "node scripts/version-beta.js",
+    "version:stable": "node scripts/version-stable.js",
+    "publish:snapshot": "npm run version:snapshot && npm publish --tag snapshot",
+    "publish:beta": "npm run version:beta && npm publish --tag beta",
+    "publish:stable": "npm run version:stable && npm publish --tag latest",
+    "publish:promote-beta": "npm dist-tag add guild-agents@$(node --input-type=commonjs -p \"require('./package.json').version\") beta"
   },
   "keywords": [
     "claude",
