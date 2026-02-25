@@ -2,109 +2,73 @@
 
 ## Active session
 - **Date:** 2026-02-25
-- **Current task:** v1.x Core Infrastructure — `/build-feature` pipeline complete
-- **Branch:** `feature/v1x-core-infrastructure`
-- **Status:** All 6 phases complete — ready for PR
+- **Current task:** All specs implemented — 2 feature branches ready for PR
+- **Branch:** `feature/compound-learning` (based on `feature/v1x-core-infrastructure`)
+- **Status:** Both pipelines complete
 
 ## What happened this session
 
-### Roadmap review
-- Read `guild-roadmap.docx` (3 horizons: v1.x, v2-exp, v3+)
-- `/council` Feature-Scope: Advisor + Product Owner + Tech Lead — all 3 approved
-- Council observations recorded (no roadmap modifications)
+### Pipeline 1: v1.x Core Infrastructure (feature/v1x-core-infrastructure)
+Completed all 6 phases. Implements dispatch protocol, declarative workflows, logging system.
+- 250 tests, 0 lint errors
+- Ready for PR to main
 
-### Spec generation
-- Generated 3 technical specs via parallel council agents (2,592 lines total):
-  - `docs/specs/spec-guild-dispatch.md` (706 lines)
-  - `docs/specs/spec-declarative-workflows.md` (934 lines)
-  - `docs/specs/spec-logging-system.md` (952 lines)
+### Pipeline 2: Compound Learning Pattern (feature/compound-learning)
+Completed all 6 phases. Implements learnings module, I/O layer, CLI reset command.
+- 308 tests, 0 lint errors
+- Based on v1x-core-infrastructure branch
 
-### `/build-feature` pipeline — v1.x Core Infrastructure
+### Implementation summary
 
-| Phase | Status | Result |
-|-------|--------|--------|
-| 1. Advisor | Done | Approved with 5 conditions |
-| 2. Product Owner | Done | 6 tasks, 87 acceptance criteria |
-| 3. Tech Lead | Done | Full technical plan (import graph, function signatures, test strategy) |
-| 4. Developer | Done | All 6 tasks implemented (T1-T6) |
-| 5. Code Review | Done | 2 blockers fixed, 4 warnings fixed, 1 review-fix loop |
-| 6. QA | Done | 42/42 criteria verified, 1 bug fixed, approved |
+| Feature | Branch | Tests | Status |
+|---------|--------|-------|--------|
+| v1.x Core Infrastructure | feature/v1x-core-infrastructure | 250 | Complete |
+| Compound Learning | feature/compound-learning | 308 | Complete |
 
-### Implementation summary (6 tasks)
+### Files created across both pipelines
+- `src/utils/dispatch-protocol.js` — Constants (tiers, strategies, profiles)
+- `src/utils/dispatch.js` — Validation, resolution utilities
+- `src/utils/workflow-parser.js` — YAML workflow parser
+- `src/utils/skill-loader.js` — Skill loading from disk
+- `src/utils/trace.js` — Structured trace/logging
+- `src/utils/learnings.js` — Pure functions for compound learning
+- `src/utils/learnings-io.js` — I/O layer for learnings
+- `src/commands/reset-learnings.js` — CLI command
+- `src/templates/agents/learnings-extractor.md` — New agent
+- 9 test files
 
-| Task | Status | Details |
-|------|--------|---------|
-| T1: dispatch-protocol.js + dispatch.js | Done | Constants, validation, tier resolution. 46 tests |
-| T2: yaml + workflow-parser.js + skill-loader.js | Done | YAML parser, skill loader. 50 tests |
-| T3: trace.js | Done | 3-level logging, pure rendering. 31 tests |
-| T4: Add default-tier to 10 agent templates | Done | All templates + .claude/agents/ updated |
-| T5: Migrate 4 Skills to declarative format | Done | build-feature, council, review, qa-cycle |
-| T6: doctor.js integration + CLI flags | Done | Workflow validation + --verbose/--debug |
+## Key decisions
 
-### Files created this session
-- `src/utils/dispatch-protocol.js` — Constants (tiers, strategies, profiles, fallback chain)
-- `src/utils/dispatch.js` — validateStepConfig, resolveAgentMetadata, resolveEffectiveTier, resolveModel
-- `src/utils/workflow-parser.js` — extractFrontmatterBlock, parseYamlFrontmatter, parseSkill, validateWorkflow, resolveExecutionPlan
-- `src/utils/skill-loader.js` — loadSkill, loadAllSkills
-- `src/utils/trace.js` — createTrace, recordStep, finalizeTrace, renderTrace, listTraces, cleanTraces
-- `src/templates/agents/learnings-extractor.md` — New agent template (routine tier)
-- `docs/specs/v1x-core-infrastructure.md` — Pipeline trace
-- 6 test files (250 total tests)
-
-### Files modified this session
-- `bin/guild.js` — Added --verbose and --debug global options
-- `src/commands/doctor.js` — Added workflow validation + agent reference checks
-- 10 agent templates — Added `default-tier` frontmatter field
-- 4 skill templates — Added declarative workflow YAML frontmatter
-- `.gitignore` — Added `.claude/guild/traces/`
-- `package.json` — Added `yaml` dependency
-
-## Key decisions made this session
-
-### 1. New roadmap established (guild-roadmap.docx)
-- Three horizons: v1.x (shippable), v2-experimental (Agent Teams research), v3+ (Guild-sobre-Guild vision)
-- Tesis: Agent Teams es Kubernetes, Guild es Heroku
-
-### 2. Advisor conditions for implementation
-- **Merge dispatch + workflows** — workflow frontmatter is canonical format; no separate guild-dispatch fenced blocks in SKILL bodies
-- **trace.js as pure utilities** — rendering functions have no I/O; orchestrator writes trace data via Skill prose
-- **Add `yaml` npm package** — for parsing nested YAML frontmatter in workflow definitions
-- **Limit Skill migration to 4** — build-feature, council, review, qa-cycle
-- **Phased implementation** — working commits after each module
-
-### 3. Tech Lead: single import graph
-- dispatch-protocol.js is the leaf (zero deps)
-- dispatch.js and workflow-parser.js both import from dispatch-protocol
-- trace.js is independent (no cross-module imports)
-- skill-loader.js imports from workflow-parser
-- doctor.js imports from dispatch + skill-loader
-
-### 4. Code Review B1 fix: unified failure vocabulary
-- Changed FAILURE_STRATEGIES from ['stop', 'continue', 'retry'] to ['abort', 'continue']
-- Added goto:<step-id> support in dispatch.js validation
-- workflow-parser.js imports from dispatch-protocol (single source of truth)
+1. **Merge dispatch + workflows** — workflow frontmatter is canonical format
+2. **Pure/IO split** — learnings.js (zero deps) + learnings-io.js (fs operations)
+3. **File locking deferred to v2** — concurrent workflows not supported yet
+4. **No config.yaml** — out of scope
+5. **Token estimation heuristic** — words × 1.35, no external tokenizer
 
 ## Pending items
 
+### Branches need merging
+Two stacked branches:
+1. `feature/v1x-core-infrastructure` → main (PR first)
+2. `feature/compound-learning` → main (after v1x merges, or rebase)
+
 ### `dev` branch does not exist yet
-Snapshot workflow triggers on push to `dev`. Branch needs to be created when adopting the branching strategy.
+Snapshot workflow triggers on push to `dev`.
 
 ### OG image PNG not regenerated
-`docs/og-image.svg` was updated but `docs/og-image.png` was not regenerated.
 
 ## Technical context
-- **Version**: 0.3.1 (published to npm)
-- **Tests**: 250 passing (14 test files)
-- **Agents**: 10 templates (all with default-tier)
-- **Skills**: 11 templates (4 migrated to declarative workflows)
+- **Version**: 0.3.1
+- **Tests**: 308 passing (17 files)
+- **Agents**: 10 templates
+- **Skills**: 11 templates (4 with declarative workflows)
 - **Node**: v24.12.0 local, CI matrix 20.x/22.x
-- **Branch**: feature/v1x-core-infrastructure (ahead of main)
 
 ## Next steps
-1. **Create PR** — `/create-pr` for feature/v1x-core-infrastructure → main
-2. **Remaining 7 skill migrations** — guild-specialize, new-feature, dev-flow, session-start, session-end, status, build-feature (if needed)
-3. **Wire --verbose/--debug to commands** — Pass trace level through to command handlers
-4. **`guild logs` command** — Future CLI command for viewing/cleaning traces
-5. **Compound Learning spec** — Next P1 from roadmap
+1. **Create PRs** — v1x-core-infrastructure first, then compound-learning
+2. **Runtime orchestrator** — executes declarative workflows, wires learnings injection
+3. **Remaining skill migrations** — 7 skills pending declarative format
+4. **`guild logs` command** — view/clean traces
+5. **Wire --verbose/--debug** — pass trace level to commands
 
-**Resume with:** Create PR with `/create-pr`, or continue with next roadmap item.
+**Resume with:** Create PRs with `/create-pr`, or continue with orchestrator.
