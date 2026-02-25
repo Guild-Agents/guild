@@ -493,11 +493,11 @@ npm token create --read-only=false
 ## Pipeline Trace
 
 pipeline-start: 2026-02-25
-pipeline-end: (in progress)
-phases-completed: 4/6
-review-fix-loops: 0
-qa-cycles: 0
-final-gate: pending
+pipeline-end: 2026-02-25
+phases-completed: 6/6
+review-fix-loops: 1
+qa-cycles: 1
+final-gate: pass
 
 ### Phase 1 — Evaluation
 
@@ -522,3 +522,27 @@ final-gate: pending
 - **Files modified**: bin/guild.js, package.json, .github/workflows/ci.yml, .github/workflows/release.yml
 - **Tests added**: 19 (123 total)
 - **Commits**: wip: prerelease-publishing phase 4 — implementation done
+
+### Pre-Review Gate
+
+- **Tests**: pass (123/123)
+- **Lint**: pass (0 errors)
+
+### Phase 5 — Review
+
+- **Blockers**: 3 (require() in ESM context, publish:promote-beta, dev branch naming)
+- **Warnings**: 7 (prepublishOnly double-run, publish before commit, beta/snapshot version persistence, version:stable unconditional, scripts in files, no script tests)
+- **Suggestions**: 4 (rc.1 as stable, channel detection duplication, dev branch docs, --provenance)
+- **Review-fix loops**: 1
+
+### Phase 6 — QA
+
+- **Acceptance criteria verified**: 12/12
+- **Bugs found**: 0
+- **QA cycles**: 1
+
+### Final Gate
+
+- **Tests**: pass (123/123)
+- **Lint**: pass (0 errors)
+- **Result**: pass
