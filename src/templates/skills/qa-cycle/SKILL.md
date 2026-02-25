@@ -2,6 +2,38 @@
 name: qa-cycle
 description: "QA + bugfix cycle until it passes"
 user-invocable: true
+workflow:
+  version: 1
+  steps:
+    - id: gate-pre-qa
+      role: system
+      intent: "Run project tests and lint before QA validation."
+      commands: [npm test, npm run lint]
+      gate: true
+      produces: [test-result, lint-result]
+    - id: qa-validate
+      role: qa
+      intent: "Validate the implementation against acceptance criteria. Test edge cases and error scenarios. Report bugs found."
+      requires: [acceptance-criteria, test-result, lint-result]
+      produces: [qa-report]
+      model-tier: execution
+      retry:
+        max: 3
+        on: has-bugs
+    - id: bugfix
+      role: bugfix
+      intent: "Diagnose and fix bugs reported by QA. Run tests after fixing."
+      requires: [qa-report]
+      produces: [bugfix-result]
+      model-tier: execution
+      condition: step.qa-validate.has-bugs
+      on-failure: goto:qa-validate
+    - id: gate-post-qa
+      role: system
+      intent: "Run project tests and lint after QA cycle completes."
+      commands: [npm test, npm run lint]
+      gate: true
+      produces: [final-test-result, final-lint-result]
 ---
 
 # QA Cycle

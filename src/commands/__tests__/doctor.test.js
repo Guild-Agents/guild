@@ -3,6 +3,50 @@ import { mkdirSync, rmSync, mkdtempSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
+// Unit test for the dual-format detection heuristic
+// Must match the regex in doctor.js: /^#{1,3}\s+(Step|Phase)\s+\d/im
+describe('dual-format detection heuristic', () => {
+  const STEP_PHASE_RE = /^#{1,3}\s+(Step|Phase)\s+\d/im;
+
+  it('matches heading with "Step N"', () => {
+    expect(STEP_PHASE_RE.test('### Step 1 — Evaluate')).toBe(true);
+  });
+
+  it('matches heading with "Phase N"', () => {
+    expect(STEP_PHASE_RE.test('## Phase 2 — Implementation')).toBe(true);
+  });
+
+  it('is case insensitive', () => {
+    expect(STEP_PHASE_RE.test('### STEP 1')).toBe(true);
+    expect(STEP_PHASE_RE.test('### phase 3')).toBe(true);
+  });
+
+  it('matches H1, H2, and H3', () => {
+    expect(STEP_PHASE_RE.test('# Step 1')).toBe(true);
+    expect(STEP_PHASE_RE.test('## Step 1')).toBe(true);
+    expect(STEP_PHASE_RE.test('### Step 1')).toBe(true);
+  });
+
+  it('does not match H4+', () => {
+    expect(STEP_PHASE_RE.test('#### Step 1')).toBe(false);
+  });
+
+  it('does not match plain text with step', () => {
+    expect(STEP_PHASE_RE.test('This step is important')).toBe(false);
+  });
+
+  it('does not match unrelated headings containing step/phase', () => {
+    expect(STEP_PHASE_RE.test('## Troubleshooting Steps')).toBe(false);
+    expect(STEP_PHASE_RE.test('## A multistep approach')).toBe(false);
+    expect(STEP_PHASE_RE.test('## Debugging the deployment phase')).toBe(false);
+  });
+
+  it('matches within multiline content', () => {
+    const body = '## Process\n\nSome text.\n\n### Step 1 — Do something\n\nMore text.';
+    expect(STEP_PHASE_RE.test(body)).toBe(true);
+  });
+});
+
 describe('runDoctor', () => {
   let tempDir;
   let originalCwd;

@@ -2,79 +2,83 @@
 
 ## Active session
 - **Date:** 2026-02-25
-- **Current task:** Pre-release publishing — pipeline complete
-- **Active agent:** None
-- **Status:** Feature implemented on `feature/prerelease-publishing`, ready for merge/PR
+- **Current task:** All specs + refinements implemented — 3 feature branches ready for PR
+- **Branch:** `feature/spec-refinements` (based on `feature/compound-learning`)
+- **Status:** All pipelines complete
 
 ## What happened this session
 
-### Housekeeping
-1. Deleted 10 stale spec files from `docs/specs/` (kept only `spec-prerelease-publishing.md`)
-2. Cleaned up 16 stale branches (8 worktree, 6 feature/fix, 2 claude/)
-3. Removed 2 orphaned worktrees
-4. Branch state: only `main` + `feature/prerelease-publishing`
+### Pipeline 1: v1.x Core Infrastructure (feature/v1x-core-infrastructure)
+Completed all 6 phases. Implements dispatch protocol, declarative workflows, logging system.
+- 250 tests, 0 lint errors
+- Ready for PR to main
 
-### Pre-release & Snapshot Publishing (build-feature pipeline)
+### Pipeline 2: Compound Learning Pattern (feature/compound-learning)
+Completed all 6 phases. Implements learnings module, I/O layer, CLI reset command.
+- 308 tests, 0 lint errors
+- Based on v1x-core-infrastructure branch
 
-Full 6-phase pipeline completed:
+### Pipeline 3: Spec Refinements (feature/spec-refinements)
+Completed all 6 phases. Implements 3 post-implementation adjustments:
+- T1: `extractDispatchConfigs()` — workflow > null precedence in dispatch.js
+- T2: `guild doctor` dual-format warning (workflow + body step/phase headings)
+- T3+T4: `generateExecutionSummary()` in trace.js (500 token budget) + wired into `finalizeTrace()`
+- T5: `parallel` documented as v1.x best-effort in skill templates
+- 336 tests, 0 lint errors
+- Based on compound-learning branch
 
-| Phase | Result |
-|-------|--------|
-| 1. Advisor | Approved (user override) |
-| 2. Product Owner | 7 stories, 38 acceptance criteria |
-| 3. Tech Lead | ESModule architecture, centralized version logic |
-| 4. Developer | 11 files changed, 19 new tests |
-| 5. Code Review | 3 blockers fixed (ESM require, promote-beta, channel detection) |
-| 6. QA | 12/12 acceptance criteria pass, 0 bugs |
+### Implementation summary
 
-### What was implemented
+| Feature | Branch | Tests | Status |
+|---------|--------|-------|--------|
+| v1.x Core Infrastructure | feature/v1x-core-infrastructure | 250 | Complete |
+| Compound Learning | feature/compound-learning | 308 | Complete |
+| Spec Refinements | feature/spec-refinements | 336 | Complete |
 
-1. **`src/utils/version.js`** — parseVersion, getPreReleaseWarning, computeSnapshot/Beta/StableVersion
-2. **`scripts/version-{snapshot,beta,stable}.js`** — thin ESModule wrappers
-3. **`package.json`** — 7 new npm scripts (version:*, publish:*, publish:promote-beta)
-4. **`bin/guild.js`** — pre-release indicator (yellow for beta, red for snapshot, on stderr)
-5. **`.github/workflows/snapshot.yml`** — auto-publish on push to `dev`
-6. **`.github/workflows/beta.yml`** — manual trigger with description input
-7. **`.github/workflows/release.yml`** — added workflow_dispatch with bump type (kept tag trigger)
-8. **`.github/workflows/ci.yml`** — added `dev` to branch triggers
+### Files created/modified in spec-refinements pipeline
+- `src/utils/dispatch.js` — added extractDispatchConfigs()
+- `src/utils/trace.js` — added generateExecutionSummary(), EXECUTION_SUMMARY_BUDGET, updated finalizeTrace()
+- `src/commands/doctor.js` — added dual-format warning check
+- `src/templates/skills/council/SKILL.md` — parallel v1.x note
+- `src/templates/skills/build-feature/SKILL.md` — parallel v1.x note
+- `docs/specs/spec-refinements.md` — pipeline trace
 
-## Key decisions made this session
+## Key decisions
 
-### 1. Backlog reset
-- Previous v0.4-v1.0 roadmap on hold
-- User will provide new backlog direction
-
-### 2. Spec implemented as-is
-- Advisor concerns overridden by user directive
-- ESM/package-name issues fixed during implementation
-
-### 3. Version computation centralized
-- All logic in `src/utils/version.js` (pure, testable functions)
-- Scripts are thin wrappers (read pkg → compute → write pkg)
-
-### 4. Backward-compatible release workflow
-- Kept `v*` tag trigger alongside new `workflow_dispatch`
-- Tag-triggered releases skip version bump (already correct)
+1. **Merge dispatch + workflows** — workflow frontmatter is canonical format
+2. **Pure/IO split** — learnings.js (zero deps) + learnings-io.js (fs operations)
+3. **File locking deferred to v2** — concurrent workflows not supported yet
+4. **No config.yaml** — out of scope
+5. **Token estimation heuristic** — words × 1.35, no external tokenizer
+6. **Dispatch precedence** — workflow steps > null (no "dispatch blocks" format yet)
+7. **Execution summary budget** — 500 tokens, compact digest for learnings-extractor
+8. **Dual-format regex** — `Step N`/`Phase N` pattern, requires digit after keyword
 
 ## Pending items
 
-### Feature branch ready for merge
-`feature/prerelease-publishing` has 4 commits ready for merge to main.
-
-### OG image PNG not regenerated
-`docs/og-image.svg` was updated but `docs/og-image.png` was not regenerated.
+### Branches need merging (stacked)
+Three stacked branches:
+1. `feature/v1x-core-infrastructure` → main (PR first)
+2. `feature/compound-learning` → main (after v1x merges)
+3. `feature/spec-refinements` → main (after compound-learning merges)
 
 ### `dev` branch does not exist yet
-Snapshot workflow triggers on push to `dev`. Branch needs to be created when adopting the branching strategy.
+Snapshot workflow triggers on push to `dev`.
+
+### OG image PNG not regenerated
 
 ## Technical context
-- **Version**: 0.3.1 (on main)
-- **Tests**: 123 passing (9 test files)
-- **Agents**: 9 templates + SDD Methodologist (local only)
-- **Skills**: 11 templates (including create-pr)
+- **Version**: 0.3.1
+- **Tests**: 336 passing (17 files)
+- **Agents**: 10 templates
+- **Skills**: 11 templates (4 with declarative workflows)
 - **Node**: v24.12.0 local, CI matrix 20.x/22.x
 
 ## Next steps
-1. Merge `feature/prerelease-publishing` to main (or create PR)
-2. Receive new backlog from user
-3. Regenerate `docs/og-image.png`
+1. **Create PRs** — v1x-core-infrastructure first, then compound-learning, then spec-refinements
+2. **Runtime orchestrator** — executes declarative workflows, wires learnings injection
+3. **Remaining skill migrations** — 7 skills pending declarative format
+4. **`guild logs` command** — view/clean traces
+5. **Wire --verbose/--debug** — pass trace level to commands
+
+**Resume with:** Create PRs with `/create-pr`, or continue with orchestrator.

@@ -3,6 +3,7 @@ name: product-owner
 description: "Converts approved ideas into concrete, implementable tasks"
 tools: Read, Glob, Grep
 permissionMode: plan
+default-tier: reasoning
 ---
 
 # Product Owner

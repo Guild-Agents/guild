@@ -61,7 +61,8 @@
     "@clack/prompts": "^1.0.1",
     "chalk": "^5.3.0",
     "commander": "^14.0.3",
-    "guild-agents": "^0.3.0"
+    "guild-agents": "^0.3.0",
+    "yaml": "^2.8.2"
   },
   "engines": {
     "node": ">=20.0.0"

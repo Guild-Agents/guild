@@ -3,6 +3,7 @@ name: bugfix
 description: "Bug diagnosis and resolution"
 tools: Read, Write, Edit, Bash, Glob, Grep
 permissionMode: bypassPermissions
+default-tier: execution
 ---
 
 # Bugfix
