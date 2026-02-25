@@ -580,6 +580,66 @@ describe('validateWorkflow — council workflow with parallel', () => {
   });
 });
 
+describe('validateWorkflow — qa-cycle workflow', () => {
+  it('validates the qa-cycle workflow (4 steps with retry and condition)', () => {
+    const content = [
+      '---',
+      'name: qa-cycle',
+      'description: "QA + bugfix cycle"',
+      'user-invocable: true',
+      'workflow:',
+      '  version: 1',
+      '  steps:',
+      '    - id: gate-pre-qa',
+      '      role: system',
+      '      intent: "Run tests and lint before QA"',
+      '      commands: [npm test, npm run lint]',
+      '      gate: true',
+      '      produces: [test-result, lint-result]',
+      '    - id: qa-validate',
+      '      role: qa',
+      '      intent: "Validate against acceptance criteria"',
+      '      requires: [acceptance-criteria, test-result, lint-result]',
+      '      produces: [qa-report]',
+      '      model-tier: execution',
+      '      retry:',
+      '        max: 3',
+      '        on: has-bugs',
+      '    - id: bugfix',
+      '      role: bugfix',
+      '      intent: "Fix bugs reported by QA"',
+      '      requires: [qa-report]',
+      '      produces: [bugfix-result]',
+      '      model-tier: execution',
+      '      condition: step.qa-validate.has-bugs',
+      '      on-failure: goto:qa-validate',
+      '    - id: gate-post-qa',
+      '      role: system',
+      '      intent: "Final tests and lint"',
+      '      commands: [npm test, npm run lint]',
+      '      gate: true',
+      '      produces: [final-test-result, final-lint-result]',
+      '---',
+      '',
+    ].join('\n');
+
+    const skill = parseSkill(content);
+    expect(skill.workflow).not.toBeNull();
+    expect(skill.workflow.steps).toHaveLength(4);
+
+    const errors = validateWorkflow(skill.workflow);
+    expect(errors).toEqual([]);
+
+    // Verify retry and condition
+    const qaStep = skill.workflow.steps[1];
+    expect(qaStep.retry).toEqual({ max: 3, on: 'has-bugs' });
+
+    const bugfixStep = skill.workflow.steps[2];
+    expect(bugfixStep.condition).toBe('step.qa-validate.has-bugs');
+    expect(bugfixStep.onFailure).toBe('goto:qa-validate');
+  });
+});
+
 describe('validateWorkflow — create-pr workflow', () => {
   it('validates the create-pr workflow (5 system steps)', () => {
     const content = [
@@ -922,7 +982,6 @@ describe('validateWorkflow — status workflow', () => {
       '      role: system',
       '      intent: "List available agents and skills"',
       '      commands: [ls .claude/agents/, ls .claude/skills/]',
-      '      requires: [claude-md]',
       '      produces: [agent-list, skill-list]',
       '    - id: present-status',
       '      role: system',

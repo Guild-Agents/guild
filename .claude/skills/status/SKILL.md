@@ -14,7 +14,6 @@ workflow:
       role: system
       intent: "List available agents and skills from .claude/ directories."
       commands: [ls .claude/agents/, ls .claude/skills/]
-      requires: [claude-md]
       produces: [agent-list, skill-list]
     - id: present-status
       role: system
