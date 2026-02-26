@@ -160,7 +160,7 @@ This indicator MUST be displayed before spawning the agent for that phase.
 ### Phase 1 — Evaluation (Advisor)
 
 **Progress:** `[1/6] Advisor (opus) — Evaluating feature...`
-**Agent:** Reads `.claude/agents/advisor.md` via Task tool
+**Agent:** Reads `.claude/agents/advisor.md` via Task tool with `model: "opus"`
 **Input:** The feature description provided by the user
 **Process:**
 
@@ -175,7 +175,7 @@ This indicator MUST be displayed before spawning the agent for that phase.
 ### Phase 2 — Specification (Product Owner)
 
 **Progress:** `[2/6] Product Owner (opus) — Defining spec...`
-**Agent:** Reads `.claude/agents/product-owner.md` via Task tool
+**Agent:** Reads `.claude/agents/product-owner.md` via Task tool with `model: "opus"`
 **Input:** The feature approved by the Advisor + their observations
 **Process:**
 
@@ -189,7 +189,7 @@ This indicator MUST be displayed before spawning the agent for that phase.
 ### Phase 3 — Technical Approach (Tech Lead)
 
 **Progress:** `[3/6] Tech Lead (opus) — Defining technical approach...`
-**Agent:** Reads `.claude/agents/tech-lead.md` via Task tool
+**Agent:** Reads `.claude/agents/tech-lead.md` via Task tool with `model: "opus"`
 **Input:** Product Owner tasks + acceptance criteria
 **Process:**
 
@@ -203,7 +203,7 @@ This indicator MUST be displayed before spawning the agent for that phase.
 ### Phase 4 — Implementation (Developer)
 
 **Progress:** `[4/6] Developer (sonnet) — Implementing...`
-**Agent:** Reads `.claude/agents/developer.md` via Task tool
+**Agent:** Reads `.claude/agents/developer.md` via Task tool with `model: "sonnet"`
 **Input:** Tech Lead technical plan + PO acceptance criteria
 **Process:**
 
@@ -230,7 +230,7 @@ This gate CANNOT be skipped, even if the user requested phase skipping. The spec
 ### Phase 5 — Review (Code Reviewer)
 
 **Progress:** `[5/6] Code Reviewer (opus) — Reviewing changes...`
-**Agent:** Reads `.claude/agents/code-reviewer.md` via Task tool
+**Agent:** Reads `.claude/agents/code-reviewer.md` via Task tool with `model: "opus"`
 **Input:** The implemented changes (git diff)
 **Process:**
 
