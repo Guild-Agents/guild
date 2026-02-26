@@ -58,7 +58,7 @@ Note: The Code Reviewer does not have access to Bash (only Read, Glob, Grep), so
 
 ### Step 2 — Invoke Code Reviewer
 
-Invoke the Code Reviewer agent using Task tool:
+Invoke the Code Reviewer agent using Task tool with `model: "opus"` (reasoning tier):
 
 1. Read `.claude/agents/code-reviewer.md` to assume the role
 2. Read CLAUDE.md to understand the project conventions
@@ -86,6 +86,7 @@ If there are blockers, suggest fixing them and running `/review` again.
 User: /review
 
 Reviewing diff: 4 files changed, +127 -34
+Code Reviewer (opus) — Reviewing changes...
 
 Findings:
 - [Warning] src/api/users.js:45 — No input validation on email parameter
