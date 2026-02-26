@@ -62,7 +62,7 @@ Before invoking the QA agent, run the project verification commands. The specifi
 
 ### Step 2 — QA Validation
 
-Invoke the QA agent using Task tool:
+Invoke the QA agent using Task tool with `model: "sonnet"` (execution tier):
 
 1. Read `.claude/agents/qa.md` to assume the QA role
 2. Read CLAUDE.md and SESSION.md for context
@@ -74,7 +74,7 @@ Invoke the QA agent using Task tool:
 
 ### Step 3 — Bugfix (if there are bugs)
 
-If QA reports bugs (including test/lint failures), invoke the Bugfix agent using Task tool:
+If QA reports bugs (including test/lint failures), invoke the Bugfix agent using Task tool with `model: "sonnet"` (execution tier):
 
 1. Read `.claude/agents/bugfix.md` to assume the Bugfix role
 2. Receive the QA bug report as input
@@ -103,9 +103,9 @@ Update SESSION.md with the QA cycle result.
 ```text
 User: /qa-cycle
 
-QA Cycle 1: 2 of 5 criteria pass. Bug: form validation missing on email field.
-Bugfix: Added email regex validation to UserForm component.
-QA Cycle 2: 5 of 5 criteria pass. 0 bugs.
+QA (sonnet) — Cycle 1: 2 of 5 criteria pass. Bug: form validation missing on email field.
+Bugfix (sonnet) — Added email regex validation to UserForm component.
+QA (sonnet) — Cycle 2: 5 of 5 criteria pass. 0 bugs.
 
 Result: Approved.
 ```
@@ -113,3 +113,14 @@ Result: Approved.
 ## Subagent Configuration
 
 When spawning QA or Bugfix agents via the Task tool, always use `subagent_type: "general-purpose"`. Guild agent role names are NOT valid Claude Code subagent_types.
+
+Example:
+
+```text
+Task tool with:
+  subagent_type: "general-purpose"
+  model: "sonnet"
+  prompt: "Read .claude/agents/qa.md and assume that role. Then: [task description]"
+```
+
+The `model` parameter is resolved from the step's `model-tier`: qa-validate and bugfix use execution→`"sonnet"`.

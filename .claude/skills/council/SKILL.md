@@ -114,7 +114,7 @@ Analyze the user's question and determine which council type applies:
 
 ### Step 2 — Convene agents
 
-Invoke the 3 corresponding agents IN PARALLEL using Task tool. Each agent:
+Invoke the 3 corresponding agents IN PARALLEL using Task tool with `model: "opus"` (all council agents use reasoning tier). Each agent:
 
 1. Reads their `.claude/agents/[name].md` file to assume their role
 2. Reads `CLAUDE.md` and `SESSION.md` for project context
@@ -190,8 +190,11 @@ Example:
 ```text
 Task tool with:
   subagent_type: "general-purpose"
+  model: "opus"
   prompt: "Read .claude/agents/tech-lead.md and assume that role. Then: [debate question]"
 ```
+
+The `model` parameter is resolved from the step's `model-tier`: all council agents use reasoning→`"opus"`.
 
 ## Example Session
 
@@ -200,9 +203,9 @@ User: /council Should we migrate from REST to GraphQL?
 
 Council: Architecture
 
-Tech Lead — Recommends GraphQL for complex queries, keep REST for simple CRUD.
-Advisor — Risk is high mid-project. Suggests incremental adoption.
-Developer — Prefers REST simplicity. GraphQL adds tooling overhead.
+Tech Lead (opus) — Recommends GraphQL for complex queries, keep REST for simple CRUD.
+Advisor (opus) — Risk is high mid-project. Suggests incremental adoption.
+Developer (opus) — Prefers REST simplicity. GraphQL adds tooling overhead.
 
 Consensus: Incremental adoption. New endpoints in GraphQL, existing stay REST.
 ```
