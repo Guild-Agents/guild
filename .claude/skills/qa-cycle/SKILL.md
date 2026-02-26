@@ -103,9 +103,9 @@ Update SESSION.md with the QA cycle result.
 ```text
 User: /qa-cycle
 
-QA Cycle 1: 2 of 5 criteria pass. Bug: form validation missing on email field.
-Bugfix: Added email regex validation to UserForm component.
-QA Cycle 2: 5 of 5 criteria pass. 0 bugs.
+QA (sonnet) — Cycle 1: 2 of 5 criteria pass. Bug: form validation missing on email field.
+Bugfix (sonnet) — Added email regex validation to UserForm component.
+QA (sonnet) — Cycle 2: 5 of 5 criteria pass. 0 bugs.
 
 Result: Approved.
 ```

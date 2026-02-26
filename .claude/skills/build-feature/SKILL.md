@@ -435,7 +435,7 @@ Example Task invocation:
 Task tool with:
   subagent_type: "general-purpose"
   model: "opus"
-  prompt: "Read .claude/agents/developer.md and assume that role. Then: [task description]"
+  prompt: "Read .claude/agents/advisor.md and assume that role. Then: [task description]"
 ```
 
 The `model` parameter is resolved from the step's `model-tier`: reasoning→`"opus"`, execution→`"sonnet"`, routine→`"haiku"`. System/gate steps run inline (no Task tool).
