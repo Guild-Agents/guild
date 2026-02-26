@@ -1,6 +1,6 @@
 {
   "name": "guild-agents",
-  "version": "0.3.1-snapshot.20260225.2",
+  "version": "0.3.1-snapshot.20260226.1",
   "description": "Specification-driven development CLI for Claude Code — think before you build",
   "type": "module",
   "files": [
