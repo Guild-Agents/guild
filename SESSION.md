@@ -2,10 +2,10 @@
 
 ## Active session
 - **Date:** 2026-03-01
-- **Current task:** runtime-orchestrator — pipeline complete, ready to merge
-- **Branch:** `feature/runtime-orchestrator` (ready to merge to develop)
+- **Current task:** v1.0.0 release — PR #47 ready for merge
+- **Branch:** `develop` (PR #47 → main)
 - **Active agent:** none
-- **Status:** 453 tests pass, 0 lint errors, clean working tree
+- **Status:** 467 tests pass, 0 lint errors, CI green
 
 ## What happened this session
 
@@ -30,6 +30,27 @@ Completed all 6 phases. The orchestrator module executes declarative skill workf
 - **Review**: 2 blockers fixed (currentGroupIndex advancement, jumpToStepId clearing), 8 warnings fixed
 - **QA**: 43/43 acceptance criteria verified, 2 minor gaps fixed
 
+### Pipeline 7: guild run (build-feature)
+- CLI command `guild run <skill>` — plan-only viewer over orchestrate()
+- 9 tests, 462 total after merge
+
+### Pipeline 8: guild logs (build-feature, compressed)
+- CLI commands `guild logs` and `guild logs clean`
+- 5 tests, 467 total after merge
+
+### guild-specialize model visibility (XS)
+- Added model names (opus/sonnet) to guild-specialize skill template
+
+### v1.0 Cleanup
+- Removed self-dependency from package.json
+- README: 10 agents, added guild run + guild logs + learnings-extractor
+- CHANGELOG: full [1.0.0] section
+
+### Version bump to 1.0.0
+- `npm version 1.0.0`, package-lock regenerated
+- PR #47 created (develop → main)
+- CI green on all pushes
+
 ## Key decisions
 
 1. **Workspaces deferred** — multi-repo workspaces diferido hasta post-v1.0
@@ -42,23 +63,13 @@ Completed all 6 phases. The orchestrator module executes declarative skill workf
 8. **Keep develop branch** — user prefers develop→main flow over trunk-based
 
 ## Technical context
-- **Version**: 0.3.1 (stable) / 0.3.1-snapshot.20260226.1 (snapshot)
-- **Tests**: 453 passing (19 files)
+- **Version**: 1.0.0
+- **Tests**: 467 passing (21 files)
 - **Agents**: 10 templates
 - **Skills**: 11 templates
 - **Node**: v24.12.0 local, CI matrix 20.x/22.x
 
-## Pending items
-
-### Feature branch ready to merge
-`feature/runtime-orchestrator` — ready to merge to develop
-
-### OG image PNG not regenerated
-
 ## Next steps
-1. **Merge orchestrator branch** — merge `feature/runtime-orchestrator` to `develop`
-2. **`guild run` CLI command** — thin wrapper over orchestrate() for CLI invocation
-3. **guild-specialize model visibility** — add model names to guild-specialize skill
-4. **`guild logs` command** — view/clean traces
-5. **Workspaces design doc** — documentar la vision multi-repo
-6. **Create PR** — develop to main after next batch of features
+1. **Merge PR #47** — develop to main, tag v1.0.0
+2. **npm publish** — `npm publish --tag latest`
+3. **Workspaces design doc** — documentar la vision multi-repo para post-v1.0
