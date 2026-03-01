@@ -84,6 +84,8 @@ export function resolveStepDispatch(step, options = {}) {
 
   const tier = resolveEffectiveTier(stepConfig, agentMetadata);
 
+  // W4: resolveModel already handles the fallback chain internally;
+  // a single try-catch is sufficient here.
   let model;
   let fallback;
 
@@ -91,20 +93,8 @@ export function resolveStepDispatch(step, options = {}) {
     model = resolveModel(tier, profile);
     fallback = false;
   } catch {
-    // Fallback: try execution tier
-    try {
-      model = resolveModel('execution', profile);
-      fallback = true;
-    } catch {
-      // Last resort: try routine
-      try {
-        model = resolveModel('routine', profile);
-        fallback = true;
-      } catch {
-        model = null;
-        fallback = false;
-      }
-    }
+    model = null;
+    fallback = false;
   }
 
   return {
@@ -126,11 +116,6 @@ export function resolveStepDispatch(step, options = {}) {
  * @throws {Error} If skill not found, has no workflow, or has validation errors
  */
 export function loadWorkflow(skillName, options = {}) {
-  const loadOptions = {};
-  if (options.basePath) {
-    loadOptions.basePath = options.basePath;
-  }
-
   const skill = options.basePath
     ? loadSkill(skillName, options.basePath)
     : loadSkill(skillName);
@@ -246,6 +231,7 @@ export function recordStepTrace(traceCtx, step, stepState, dispatchInfo) {
     model: dispatchInfo.model || 'none',
     fallback: dispatchInfo.fallback,
     started,
+    // TODO(v2): capture actual wall-clock duration and token usage from step executor
     duration: 0,
     tokens: 0,
     result: stepState.status === 'passed' ? 'pass' : stepState.status === 'skipped' ? 'skip' : 'fail',
@@ -255,18 +241,49 @@ export function recordStepTrace(traceCtx, step, stepState, dispatchInfo) {
 /**
  * Finalizes a workflow trace and produces an execution summary.
  *
+ * testsPass and lintPass are derived from gate steps whose intent contains
+ * the keywords "test" or "lint" respectively. They can be overridden via
+ * options when the caller has better information.
+ *
  * @param {import('./trace.js').TraceContext} traceCtx - Completed trace context
  * @param {import('./orchestrator.js').ExecutionPlan} plan - Final execution plan
+ * @param {object} [options={}] - Optional overrides
+ * @param {boolean} [options.testsPass] - Override for testsPass (derived from gate steps if omitted)
+ * @param {boolean} [options.lintPass] - Override for lintPass (derived from gate steps if omitted)
  * @returns {{ trace: object, executionSummary: string }}
  */
-export function finalizeWorkflowTrace(traceCtx, plan) {
+export function finalizeWorkflowTrace(traceCtx, plan, options = {}) {
   const allStates = Object.values(plan.stepStates);
   const anyFailed = allStates.some(s => s.status === 'failed');
 
+  // Derive testsPass / lintPass from gate steps when not explicitly provided
+  let testsPass = options.testsPass;
+  let lintPass = options.lintPass;
+
+  if (testsPass === undefined || lintPass === undefined) {
+    for (const group of plan.groups) {
+      for (const step of group.steps) {
+        if (!step.gate) continue;
+        const state = plan.stepStates[step.id];
+        const passed = state && state.status === 'passed';
+        const intent = (step.intent || '').toLowerCase();
+        if (testsPass === undefined && intent.includes('test')) {
+          testsPass = passed;
+        }
+        if (lintPass === undefined && intent.includes('lint')) {
+          lintPass = passed;
+        }
+      }
+    }
+    // Fall back to true when no matching gate step found (v1 behaviour)
+    if (testsPass === undefined) testsPass = true;
+    if (lintPass === undefined) lintPass = true;
+  }
+
   const summary = {
     result: anyFailed || plan.status === 'aborted' || plan.status === 'circuit-breaker' ? 'fail' : 'pass',
-    testsPass: true,
-    lintPass: true,
+    testsPass,
+    lintPass,
   };
 
   const trace = finalizeTrace(traceCtx, summary);
@@ -291,7 +308,12 @@ export function finalizeWorkflowTrace(traceCtx, plan) {
  * @param {string} [options.tracesDir] - Override traces directory
  * @param {string} [options.traceLevel='default'] - Trace level
  * @param {number} [options.circuitBreakerLimit] - Override circuit breaker limit
- * @returns {Promise<{ plan: import('./orchestrator.js').ExecutionPlan, trace: import('./trace.js').TraceContext }>}
+ * @returns {Promise<{
+ *   plan: import('./orchestrator.js').ExecutionPlan,
+ *   trace: import('./trace.js').TraceContext,
+ *   dispatchInfoMap: Object.<string, StepDispatchInfo>,
+ *   input: string
+ * }>}
  */
 export async function orchestrate(skillName, input = '', options = {}) {
   const {
@@ -325,14 +347,10 @@ export async function orchestrate(skillName, input = '', options = {}) {
     }
   }
 
-  // Expand delegations (record in plan metadata, v1 plan-only)
-  // In v1 we just annotate — actual sub-workflow loading is left to the executor
+  // W8: return dispatchInfoMap and input as separate result fields instead of
+  // mutating traceCtx, keeping the trace context pure.
   const traceDirResolved = tracesDir || join(projectRoot, '.claude', 'guild', 'traces');
   const traceCtx = createTrace(skillName, traceLevel, traceDirResolved);
 
-  // Attach dispatch info and input to context (for future executor use)
-  traceCtx.dispatchInfoMap = dispatchInfoMap;
-  traceCtx.input = input;
-
-  return { plan, trace: traceCtx };
+  return { plan, trace: traceCtx, dispatchInfoMap, input };
 }

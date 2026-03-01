@@ -115,11 +115,15 @@ export function advanceStep(plan, stepId, result) {
   const currentState = plan.stepStates[stepId];
   const newTotalStepsExecuted = plan.totalStepsExecuted + 1;
 
+  // B2: if the step being advanced is the current jump target, clear the jump
+  const clearJump = plan.jumpToStepId === stepId;
+
   if (newTotalStepsExecuted > plan.circuitBreakerLimit) {
     return {
       ...plan,
       totalStepsExecuted: newTotalStepsExecuted,
       status: 'circuit-breaker',
+      jumpToStepId: clearJump ? null : plan.jumpToStepId,
       stepStates: {
         ...plan.stepStates,
         [stepId]: {
@@ -142,6 +146,7 @@ export function advanceStep(plan, stepId, result) {
       return {
         ...plan,
         totalStepsExecuted: newTotalStepsExecuted,
+        jumpToStepId: clearJump ? null : plan.jumpToStepId,
         stepStates: {
           ...plan.stepStates,
           [stepId]: {
@@ -170,6 +175,7 @@ export function advanceStep(plan, stepId, result) {
         ...plan,
         totalStepsExecuted: newTotalStepsExecuted,
         status: 'aborted',
+        jumpToStepId: clearJump ? null : plan.jumpToStepId,
         stepStates: {
           ...plan.stepStates,
           [stepId]: updatedStepState,
@@ -178,69 +184,78 @@ export function advanceStep(plan, stepId, result) {
     }
 
     if (action === 'goto') {
+      // B1: recalculate currentGroupIndex with updated step states
+      const newStepStates = { ...plan.stepStates, [stepId]: updatedStepState };
       return {
         ...plan,
         totalStepsExecuted: newTotalStepsExecuted,
+        currentGroupIndex: calcCurrentGroupIndex(plan.groups, newStepStates, plan.currentGroupIndex),
         jumpToStepId: targetId,
-        stepStates: {
-          ...plan.stepStates,
-          [stepId]: updatedStepState,
-        },
+        stepStates: newStepStates,
       };
     }
 
     // 'continue' — just mark failed and keep running
+    const continueStepStates = { ...plan.stepStates, [stepId]: updatedStepState };
     return {
       ...plan,
       totalStepsExecuted: newTotalStepsExecuted,
-      stepStates: {
-        ...plan.stepStates,
-        [stepId]: updatedStepState,
-      },
+      currentGroupIndex: calcCurrentGroupIndex(plan.groups, continueStepStates, plan.currentGroupIndex),
+      jumpToStepId: clearJump ? null : plan.jumpToStepId,
+      stepStates: continueStepStates,
     };
   }
 
   // Passed or skipped
+  const newStepStates = {
+    ...plan.stepStates,
+    [stepId]: {
+      ...currentState,
+      status: result.status,
+      attempts: currentState.attempts + (result.status !== 'skipped' ? 1 : 0),
+      outcome: result.outcome || null,
+      error: result.error || null,
+    },
+  };
+
   return {
     ...plan,
     totalStepsExecuted: newTotalStepsExecuted,
-    stepStates: {
-      ...plan.stepStates,
-      [stepId]: {
-        ...currentState,
-        status: result.status,
-        attempts: currentState.attempts + (result.status !== 'skipped' ? 1 : 0),
-        outcome: result.outcome || null,
-        error: result.error || null,
-      },
-    },
+    currentGroupIndex: calcCurrentGroupIndex(plan.groups, newStepStates, plan.currentGroupIndex),
+    jumpToStepId: clearJump ? null : plan.jumpToStepId,
+    stepStates: newStepStates,
   };
 }
 
 /**
- * Returns the next steps to execute from the plan.
- * Handles sequential, parallel, conditional, and jump-to scenarios.
+ * Returns the next steps to execute from the plan, plus any steps whose conditions
+ * evaluated to false and should be marked as skipped by the caller.
+ *
+ * The caller is responsible for calling advanceStep(plan, id, { status: 'skipped' })
+ * for each ID in the returned `skipped` array so that isPlanComplete can work correctly.
  *
  * @param {ExecutionPlan} plan - Current plan
- * @returns {object[]} Array of step definitions ready to execute (may be empty)
+ * @returns {{ steps: object[], skipped: string[] }}
+ *   steps  — step definitions ready to execute (may be empty)
+ *   skipped — IDs of steps whose conditions were not met (caller must advance as skipped)
  */
 export function getNextSteps(plan) {
   if (plan.status !== 'running') {
-    return [];
+    return { steps: [], skipped: [] };
   }
 
   // Handle jump (goto target from failure)
   if (plan.jumpToStepId) {
     const targetStep = findStepById(plan, plan.jumpToStepId);
     if (!targetStep) {
-      return [];
+      return { steps: [], skipped: [] };
     }
-    return [targetStep];
+    return { steps: [targetStep], skipped: [] };
   }
 
   // Find current group
   if (plan.currentGroupIndex >= plan.groups.length) {
-    return [];
+    return { steps: [], skipped: [] };
   }
 
   let groupIndex = plan.currentGroupIndex;
@@ -248,7 +263,7 @@ export function getNextSteps(plan) {
   // Scan forward through groups to find one with pending steps
   while (groupIndex < plan.groups.length) {
     const group = plan.groups[groupIndex];
-    const pendingSteps = getPendingStepsInGroup(group, plan);
+    const { pending, skipped } = getPendingStepsInGroup(group, plan);
 
     const allDone = group.steps.every(step => {
       const state = plan.stepStates[step.id];
@@ -260,15 +275,15 @@ export function getNextSteps(plan) {
       continue;
     }
 
-    if (pendingSteps.length > 0) {
-      return pendingSteps;
+    if (pending.length > 0 || skipped.length > 0) {
+      return { steps: pending, skipped };
     }
 
-    // Steps in group are not all done, but no pending — they are in-flight or skipped
+    // Steps in group are not all done, but no pending/skipped — they are in-flight
     break;
   }
 
-  return [];
+  return { steps: [], skipped: [] };
 }
 
 /**
@@ -504,14 +519,40 @@ function isTerminalStatus(status) {
 }
 
 /**
- * Returns pending steps from a group, evaluating conditions.
- * Skips steps whose condition evaluates to false.
+ * Calculates the new currentGroupIndex after a step state change.
+ * Advances past any groups where all steps are already in a terminal state.
+ *
+ * @param {ExecutionGroup[]} groups - All groups in the plan
+ * @param {Object.<string, StepState>} stepStates - Updated step states
+ * @param {number} currentGroupIndex - Current group index (never go backwards)
+ * @returns {number} Updated group index
+ */
+function calcCurrentGroupIndex(groups, stepStates, currentGroupIndex) {
+  let idx = currentGroupIndex;
+  while (idx < groups.length) {
+    const group = groups[idx];
+    const allDone = group.steps.every(s => {
+      const st = stepStates[s.id];
+      return st && isTerminalStatus(st.status);
+    });
+    if (!allDone) break;
+    idx++;
+  }
+  return idx;
+}
+
+/**
+ * Returns pending steps from a group and IDs of steps whose conditions were not met.
+ * Steps with unmet conditions are returned as skipped IDs so the caller can advance
+ * them as 'skipped', allowing isPlanComplete to work correctly.
+ *
  * @param {ExecutionGroup} group
  * @param {ExecutionPlan} plan
- * @returns {object[]}
+ * @returns {{ pending: object[], skipped: string[] }}
  */
 function getPendingStepsInGroup(group, plan) {
   const pending = [];
+  const skipped = [];
 
   for (const step of group.steps) {
     const state = plan.stepStates[step.id];
@@ -526,16 +567,16 @@ function getPendingStepsInGroup(group, plan) {
       if (parsed) {
         const conditionMet = evaluateCondition(parsed, plan.stepStates);
         if (!conditionMet) {
-          // Condition not met — skip this step (caller handles skipping)
+          // Condition not met — report as skipped so caller can advance it
+          skipped.push(step.id);
           continue;
         }
       }
-      // If condition is not in step.X.Y format (e.g., a simple flag), skip for now
-      // (non-parseable conditions are treated as truthy in v1)
+      // If condition is not in step.X.Y format (e.g., a simple flag), treat as truthy (v1)
     }
 
     pending.push(step);
   }
 
-  return pending;
+  return { pending, skipped };
 }

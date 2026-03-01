@@ -272,16 +272,19 @@ describe('advanceStep', () => {
 });
 
 // --- getNextSteps ---
+// getNextSteps returns { steps: object[], skipped: string[] }.
+// Callers must call advanceStep(plan, id, { status: 'skipped' }) for each id in skipped.
 
 describe('getNextSteps', () => {
   it('returns first step for a fresh sequential plan', () => {
     const workflow = makeSequentialWorkflow(['a', 'b', 'c']);
     const plan = createExecutionPlan(workflow);
 
-    const next = getNextSteps(plan);
+    const { steps, skipped } = getNextSteps(plan);
 
-    expect(next).toHaveLength(1);
-    expect(next[0].id).toBe('a');
+    expect(steps).toHaveLength(1);
+    expect(steps[0].id).toBe('a');
+    expect(skipped).toEqual([]);
   });
 
   it('returns second step after first is passed', () => {
@@ -289,10 +292,11 @@ describe('getNextSteps', () => {
     let plan = createExecutionPlan(workflow);
     plan = advanceStep(plan, 'a', { status: 'passed', outcome: null, error: null });
 
-    const next = getNextSteps(plan);
+    const { steps, skipped } = getNextSteps(plan);
 
-    expect(next).toHaveLength(1);
-    expect(next[0].id).toBe('b');
+    expect(steps).toHaveLength(1);
+    expect(steps[0].id).toBe('b');
+    expect(skipped).toEqual([]);
   });
 
   it('returns all parallel steps at once', () => {
@@ -303,34 +307,37 @@ describe('getNextSteps', () => {
     ]);
     const plan = createExecutionPlan(workflow);
 
-    const next = getNextSteps(plan);
+    const { steps, skipped } = getNextSteps(plan);
 
-    expect(next).toHaveLength(2);
-    const ids = next.map(s => s.id).sort();
+    expect(steps).toHaveLength(2);
+    const ids = steps.map(s => s.id).sort();
     expect(ids).toEqual(['a', 'b']);
+    expect(skipped).toEqual([]);
   });
 
-  it('returns empty array when plan is aborted', () => {
+  it('returns empty steps when plan is aborted', () => {
     const workflow = makeSequentialWorkflow(['a']);
     let plan = createExecutionPlan(workflow);
     plan = advanceStep(plan, 'a', { status: 'failed', outcome: null, error: 'fail' });
 
     expect(plan.status).toBe('aborted');
-    const next = getNextSteps(plan);
-    expect(next).toEqual([]);
+    const { steps, skipped } = getNextSteps(plan);
+    expect(steps).toEqual([]);
+    expect(skipped).toEqual([]);
   });
 
-  it('returns empty array when all steps are complete', () => {
+  it('returns empty steps when all steps are complete', () => {
     const workflow = makeSequentialWorkflow(['a', 'b']);
     let plan = createExecutionPlan(workflow);
     plan = advanceStep(plan, 'a', { status: 'passed', outcome: null, error: null });
     plan = advanceStep(plan, 'b', { status: 'passed', outcome: null, error: null });
 
-    const next = getNextSteps(plan);
-    expect(next).toEqual([]);
+    const { steps, skipped } = getNextSteps(plan);
+    expect(steps).toEqual([]);
+    expect(skipped).toEqual([]);
   });
 
-  it('skips steps with unmet conditions', () => {
+  it('returns skipped id for steps with unmet conditions', () => {
     const workflow = makeWorkflow([
       makeStep('a'),
       makeStep('b', { condition: 'step.a.verdict == approved' }),
@@ -345,12 +352,10 @@ describe('getNextSteps', () => {
     });
 
     // Step 'b' has condition step.a.verdict == approved — not met
-    // So getNextSteps on the second group should skip 'b'
-    const next = getNextSteps(plan);
-    // 'b' is skipped because condition not met, only 'c' remains if b is in different group
-    // Actually b is in its own group - condition not met means b is not returned
-    // Let's check what comes back
-    expect(next.every(s => s.id !== 'b')).toBe(true);
+    // getNextSteps should NOT include 'b' in steps, but report it in skipped
+    const { steps, skipped } = getNextSteps(plan);
+    expect(steps.every(s => s.id !== 'b')).toBe(true);
+    expect(skipped).toContain('b');
   });
 
   it('follows jumpToStepId when set', () => {
@@ -363,17 +368,134 @@ describe('getNextSteps', () => {
     plan = advanceStep(plan, 'a', { status: 'failed', outcome: null, error: 'fail' });
 
     expect(plan.jumpToStepId).toBe('c');
-    const next = getNextSteps(plan);
-    expect(next).toHaveLength(1);
-    expect(next[0].id).toBe('c');
+    const { steps, skipped } = getNextSteps(plan);
+    expect(steps).toHaveLength(1);
+    expect(steps[0].id).toBe('c');
+    expect(skipped).toEqual([]);
   });
 
-  it('returns empty array for completed plan', () => {
+  it('returns empty steps for completed plan', () => {
     const workflow = makeSequentialWorkflow(['a']);
     let plan = createExecutionPlan(workflow);
     plan = { ...plan, status: 'completed' };
 
-    expect(getNextSteps(plan)).toEqual([]);
+    const { steps, skipped } = getNextSteps(plan);
+    expect(steps).toEqual([]);
+    expect(skipped).toEqual([]);
+  });
+
+  // --- B1: currentGroupIndex advances ---
+
+  it('B1: currentGroupIndex advances after all steps in group 0 are done', () => {
+    const workflow = makeSequentialWorkflow(['a', 'b']);
+    let plan = createExecutionPlan(workflow);
+
+    expect(plan.currentGroupIndex).toBe(0);
+
+    plan = advanceStep(plan, 'a', { status: 'passed', outcome: null, error: null });
+
+    expect(plan.currentGroupIndex).toBe(1);
+
+    const { steps } = getNextSteps(plan);
+    expect(steps).toHaveLength(1);
+    expect(steps[0].id).toBe('b');
+  });
+
+  it('B1: getNextSteps returns steps from group 1 after group 0 is complete', () => {
+    const workflow = makeSequentialWorkflow(['a', 'b', 'c']);
+    let plan = createExecutionPlan(workflow);
+
+    plan = advanceStep(plan, 'a', { status: 'passed', outcome: null, error: null });
+    expect(plan.currentGroupIndex).toBe(1);
+
+    const { steps } = getNextSteps(plan);
+    expect(steps[0].id).toBe('b');
+  });
+
+  // --- B2: jumpToStepId is cleared after executing jump target ---
+
+  it('B2: jumpToStepId is set after goto failure', () => {
+    const workflow = makeWorkflow([
+      makeStep('a', { onFailure: 'goto:c' }),
+      makeStep('b'),
+      makeStep('c'),
+    ]);
+    let plan = createExecutionPlan(workflow);
+    plan = advanceStep(plan, 'a', { status: 'failed', outcome: null, error: 'fail' });
+
+    expect(plan.jumpToStepId).toBe('c');
+  });
+
+  it('B2: jumpToStepId is cleared after executing the jump target step', () => {
+    const workflow = makeWorkflow([
+      makeStep('a', { onFailure: 'goto:c' }),
+      makeStep('b'),
+      makeStep('c'),
+    ]);
+    let plan = createExecutionPlan(workflow);
+
+    // Step A fails with goto:C
+    plan = advanceStep(plan, 'a', { status: 'failed', outcome: null, error: 'fail' });
+    expect(plan.jumpToStepId).toBe('c');
+
+    // getNextSteps returns [c]
+    const { steps } = getNextSteps(plan);
+    expect(steps[0].id).toBe('c');
+
+    // Execute step C (the jump target) — jumpToStepId must be cleared
+    plan = advanceStep(plan, 'c', { status: 'passed', outcome: null, error: null });
+    expect(plan.jumpToStepId).toBeNull();
+  });
+
+  it('B2: full goto cycle — after jump target passes, getNextSteps returns next group (not C again)', () => {
+    const workflow = makeWorkflow([
+      makeStep('a', { onFailure: 'goto:c' }),
+      makeStep('b'),
+      makeStep('c'),
+      makeStep('d'),
+    ]);
+    let plan = createExecutionPlan(workflow);
+
+    // A fails -> goto C
+    plan = advanceStep(plan, 'a', { status: 'failed', outcome: null, error: 'fail' });
+    expect(plan.jumpToStepId).toBe('c');
+
+    // Execute C (jump target)
+    plan = advanceStep(plan, 'c', { status: 'passed', outcome: null, error: null });
+    expect(plan.jumpToStepId).toBeNull();
+
+    // Now getNextSteps must not return C again
+    const { steps } = getNextSteps(plan);
+    expect(steps.every(s => s.id !== 'c')).toBe(true);
+  });
+
+  // --- W1: skipped steps allow isPlanComplete to work ---
+
+  it('W1: skipped steps returned by getNextSteps allow isPlanComplete after advancing them', () => {
+    const workflow = makeWorkflow([
+      makeStep('a'),
+      makeStep('b', { condition: 'step.a.verdict == approved' }),
+    ]);
+    let plan = createExecutionPlan(workflow);
+
+    // Pass 'a' with rejected verdict so 'b' condition is false
+    plan = advanceStep(plan, 'a', {
+      status: 'passed',
+      outcome: { verdict: 'rejected' },
+      error: null,
+    });
+
+    const { steps, skipped } = getNextSteps(plan);
+    expect(steps).toEqual([]);
+    expect(skipped).toContain('b');
+
+    // Caller advances skipped steps
+    for (const id of skipped) {
+      plan = advanceStep(plan, id, { status: 'skipped', outcome: null, error: null });
+    }
+
+    // Now plan should be complete
+    expect(isPlanComplete(plan)).toBe(true);
   });
 });
 
