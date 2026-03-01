@@ -1,13 +1,20 @@
 # SESSION.md
 
 ## Active session
-- **Date:** 2026-02-26
-- **Current task:** model-visibility-per-step — pipeline complete, post-pipeline fix applied
-- **Branch:** `feature/model-visibility-per-step` (ready to merge to develop)
+- **Date:** 2026-03-01
+- **Current task:** none — resuming from previous session
+- **Branch:** `develop` (clean working tree)
 - **Active agent:** none
-- **Status:** 344 tests pass, 0 lint errors, clean working tree
+- **Status:** clean tree, on develop
 
 ## What happened this session
+
+### Council: Workspaces multi-repo
+- **Pregunta:** Deberia Guild soportar workspaces multi-repo?
+- **Tipo:** feature-scope (Advisor + Product Owner + Tech Lead)
+- **Consenso:** La idea tiene valor, MVP debe ser declarativo, Opcion A (directorio padre con manifiesto)
+- **Desacuerdo:** timing (Advisor: post-v1.0, Tech Lead: post-orchestrator, PO: ahora)
+- **Decision:** Opcion A — Diferir y documentar. No implementar hasta v1.0 estable.
 
 ### Pipeline 4: Declarative Skill Migration (feature/declarative-skill-migration)
 Completed all 6 phases. Migrated 7 remaining skills to declarative workflow format.
@@ -41,6 +48,7 @@ Completed all 6 phases. Adds model name display (opus/sonnet) to progress indica
 6. **Execution summary budget** — 500 tokens, compact digest for learnings-extractor
 7. **Model visibility = display + instruction** — showing model names is not enough; each phase must explicitly instruct passing `model` to Task tool
 8. **Keep develop branch** — user prefers develop→main flow over trunk-based
+9. **Workspaces deferred** — multi-repo workspaces diferido hasta post-v1.0; solo documentar vision por ahora
 
 ## Problems encountered and resolved
 
@@ -66,10 +74,8 @@ All work is on `develop` but no PR to `main` has been created yet.
 ### OG image PNG not regenerated
 
 ## Next steps
-1. **Merge model-visibility branch** — merge `feature/model-visibility-per-step` to `develop`, publish snapshot
-2. **Create PR** — `develop` to `main` to promote all v1.x core features
-3. **Runtime orchestrator** — executes declarative workflows, wires learnings injection
-4. **guild-specialize model visibility** — follow-up: add model names to guild-specialize skill (noted in review S2)
-5. **`guild logs` command** — view/clean traces
-
-**Resume with:** `/session-start` then merge feature branch and create PR from develop to main.
+1. **Create PR** — `develop` to `main` to promote all v0.3.x features (19 commits ready)
+2. **Runtime orchestrator** — executes declarative workflows, wires learnings injection
+3. **guild-specialize model visibility** — follow-up: add model names to guild-specialize skill (noted in review S2)
+4. **`guild logs` command** — view/clean traces
+5. **Workspaces design doc** — documentar la vision multi-repo (sin implementar) para referencia futura
