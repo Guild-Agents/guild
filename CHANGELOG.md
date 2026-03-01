@@ -7,7 +7,7 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [Unreleased]
+## [1.0.0] - 2026-03-01
 
 ### Added
 
@@ -229,7 +229,8 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-[Unreleased]: https://github.com/Guild-Agents/guild/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/Guild-Agents/guild/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/Guild-Agents/guild/compare/v0.3.1...v1.0.0
 [0.3.1]: https://github.com/Guild-Agents/guild/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Guild-Agents/guild/compare/v0.2.9...v0.3.0
 [0.2.9]: https://github.com/Guild-Agents/guild/compare/v0.2.8...v0.2.9
