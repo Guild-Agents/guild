@@ -120,4 +120,21 @@ program
     }
   });
 
+// guild run
+program
+  .command('run')
+  .description('Display the execution plan for a skill')
+  .argument('<skill>', 'Skill name to run')
+  .argument('[input]', 'Input text for the skill', '')
+  .option('--profile <profile>', 'Model profile (max, balanced, fast)', 'max')
+  .action(async (skill, input, options) => {
+    try {
+      const { runRun } = await import('../src/commands/run.js');
+      await runRun(skill, input, options);
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  });
+
 program.parse();
