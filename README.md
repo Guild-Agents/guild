@@ -86,11 +86,14 @@ guild new-agent <name>  # Create a custom agent
 guild status            # Show project status
 guild doctor            # Diagnose setup
 guild list              # List agents and skills
+guild run <skill>       # Preview a skill's execution plan (dry-run)
+guild logs              # View execution traces
+guild logs clean        # Remove old traces (--days N, --all)
 ```
 
 ## Under the Hood
 
-Guild coordinates 9 specialized agents through the pipeline. Each agent handles one phase.
+Guild coordinates 10 specialized agents through the pipeline. Each agent handles one phase.
 
 | Agent | Role |
 | --- | --- |
@@ -103,6 +106,7 @@ Guild coordinates 9 specialized agents through the pipeline. Each agent handles 
 | bugfix | Bug diagnosis and resolution |
 | db-migration | Schema changes and safe migrations |
 | platform-expert | Diagnoses Claude Code integration issues |
+| learnings-extractor | Extracts compound learnings from pipeline executions |
 
 Agents are flat `.md` files with identity and expertise. Skills orchestrate agents through structured pipelines. Everything lives in `.claude/`, readable by humans, tracked by git.
 
