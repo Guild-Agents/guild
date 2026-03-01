@@ -25,10 +25,13 @@ export const MAX_DELEGATION_DEPTH = 2;
 
 /**
  * @typedef {Object} StepState
+ * @property {string} id - Step identifier (matches the key in stepStates)
  * @property {'pending'|'running'|'passed'|'failed'|'skipped'} status - Current state
  * @property {number} attempts - Number of execution attempts so far
  * @property {object|null} outcome - Produced values from step execution
  * @property {string|null} error - Error message if step failed
+ * @property {number|null} startedAt - Timestamp (ms) when step started (populated by executor, null in plan-only mode)
+ * @property {number|null} finishedAt - Timestamp (ms) when step finished (populated by executor, null in plan-only mode)
  */
 
 /**
@@ -47,6 +50,7 @@ export const MAX_DELEGATION_DEPTH = 2;
  * @property {number} totalStepsExecuted - Running total for circuit breaker
  * @property {number} circuitBreakerLimit - Max steps before abort
  * @property {'running'|'completed'|'aborted'|'circuit-breaker'} status - Plan status
+ * @property {number} totalSteps - Total number of steps in the plan
  * @property {string|null} jumpToStepId - If set, getNextSteps returns only this step
  */
 
@@ -75,10 +79,13 @@ export function createExecutionPlan(workflow, options = {}) {
   for (const group of groups) {
     for (const step of group.steps) {
       stepStates[step.id] = {
+        id: step.id,
         status: 'pending',
         attempts: 0,
         outcome: null,
         error: null,
+        startedAt: null,
+        finishedAt: null,
       };
     }
   }
@@ -92,6 +99,7 @@ export function createExecutionPlan(workflow, options = {}) {
     totalStepsExecuted: 0,
     circuitBreakerLimit,
     status: 'running',
+    totalSteps: Object.keys(stepStates).length,
     jumpToStepId: null,
   };
 }

@@ -67,17 +67,26 @@ describe('createExecutionPlan', () => {
     expect(plan.jumpToStepId).toBeNull();
   });
 
-  it('initializes all stepStates as pending', () => {
+  it('initializes all stepStates as pending with all fields', () => {
     const workflow = makeSequentialWorkflow(['a', 'b', 'c']);
     const plan = createExecutionPlan(workflow);
 
     expect(Object.keys(plan.stepStates)).toHaveLength(3);
-    for (const state of Object.values(plan.stepStates)) {
+    for (const [id, state] of Object.entries(plan.stepStates)) {
+      expect(state.id).toBe(id);
       expect(state.status).toBe('pending');
       expect(state.attempts).toBe(0);
       expect(state.outcome).toBeNull();
       expect(state.error).toBeNull();
+      expect(state.startedAt).toBeNull();
+      expect(state.finishedAt).toBeNull();
     }
+  });
+
+  it('includes totalSteps count', () => {
+    const workflow = makeSequentialWorkflow(['a', 'b', 'c']);
+    const plan = createExecutionPlan(workflow);
+    expect(plan.totalSteps).toBe(3);
   });
 
   it('uses plain object for stepStates (not Map)', () => {
