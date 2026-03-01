@@ -2,10 +2,10 @@
 
 ## Active session
 - **Date:** 2026-03-01
-- **Current task:** v1.0.0 release — PR #47 ready for merge
-- **Branch:** `develop` (PR #47 → main)
+- **Current task:** none — v1.0.0 released
+- **Branch:** `main` (v1.0.0 tag), `develop` (1 commit ahead: SESSION.md)
 - **Active agent:** none
-- **Status:** 467 tests pass, 0 lint errors, CI green
+- **Status:** 467 tests pass, 0 lint errors, CI green, npm published
 
 ## What happened this session
 
@@ -46,10 +46,12 @@ Completed all 6 phases. The orchestrator module executes declarative skill workf
 - README: 10 agents, added guild run + guild logs + learnings-extractor
 - CHANGELOG: full [1.0.0] section
 
-### Version bump to 1.0.0
-- `npm version 1.0.0`, package-lock regenerated
-- PR #47 created (develop → main)
-- CI green on all pushes
+### v1.0.0 Release
+- Version bumped to 1.0.0
+- PR #47 merged to main
+- Tag v1.0.0 pushed, release workflow green
+- npm: `guild-agents@1.0.0` published to `latest`
+- GitHub Release: v1.0.0 created
 
 ## Key decisions
 
@@ -70,6 +72,6 @@ Completed all 6 phases. The orchestrator module executes declarative skill workf
 - **Node**: v24.12.0 local, CI matrix 20.x/22.x
 
 ## Next steps
-1. **Merge PR #47** — develop to main, tag v1.0.0
-2. **npm publish** — `npm publish --tag latest`
-3. **Workspaces design doc** — documentar la vision multi-repo para post-v1.0
+1. **Workspaces design doc** — documentar la vision multi-repo para post-v1.0
+2. **Ejecución real de steps** — que `guild run` ejecute steps, no solo muestre el plan
+3. **OG image PNG** — regenerar imagen para GitHub/social
