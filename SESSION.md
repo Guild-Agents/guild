@@ -17,6 +17,11 @@
 ### Council: Workspaces multi-repo
 - **Decision:** Opcion A — Diferir y documentar. No implementar hasta v1.0 estable.
 
+### Council: Roadmap v1.0
+- **Tipo:** feature-scope (Advisor + Product Owner + Tech Lead)
+- **Consenso:** `guild run` es el unico blocker, plan-only mode, guild-specialize + guild logs completan el release
+- **Decision:** Opcion B — v1.0 con observabilidad: guild run + guild logs + model visibility + cleanup + README/CHANGELOG + bump
+
 ### Pipeline 6: Runtime Orchestrator (feature/runtime-orchestrator)
 Completed all 6 phases. The orchestrator module executes declarative skill workflows at runtime — state machine, condition evaluation, retry/failure handling, dispatch resolution, delegation expansion, and execution tracing.
 - **Files created**: 4 (`orchestrator.js`, `orchestrator-io.js`, + 2 test files)
