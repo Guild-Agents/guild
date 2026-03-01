@@ -3,6 +3,7 @@ name: qa
 description: "Testing, edge cases, regression"
 tools: Read, Write, Edit, Bash, Glob, Grep
 permissionMode: bypassPermissions
+default-tier: execution
 ---
 
 # QA

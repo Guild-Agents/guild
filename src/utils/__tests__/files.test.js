@@ -14,7 +14,7 @@ describe('getAgentNames', () => {
   it('reads agent names from the templates directory', () => {
     const names = getAgentNames();
     // Should match the .md files in src/templates/agents/
-    expect(names).toHaveLength(9);
+    expect(names).toHaveLength(10);
     expect(names).toContain('advisor');
     expect(names).toContain('product-owner');
     expect(names).toContain('tech-lead');
@@ -24,6 +24,7 @@ describe('getAgentNames', () => {
     expect(names).toContain('bugfix');
     expect(names).toContain('db-migration');
     expect(names).toContain('platform-expert');
+    expect(names).toContain('learnings-extractor');
   });
 
   it('returns names sorted alphabetically', () => {
@@ -79,13 +80,13 @@ describe('copyTemplates', () => {
     if (existsSync(TEST_DIR)) rmSync(TEST_DIR, { recursive: true });
   });
 
-  it('creates .claude/agents/ with 9 flat .md files', async () => {
+  it('creates .claude/agents/ with 10 flat .md files', async () => {
     await copyTemplates();
     const agentsDir = join('.claude', 'agents');
     expect(existsSync(agentsDir)).toBe(true);
 
     const files = readdirSync(agentsDir);
-    expect(files).toHaveLength(9);
+    expect(files).toHaveLength(10);
     for (const name of getAgentNames()) {
       expect(files).toContain(`${name}.md`);
     }

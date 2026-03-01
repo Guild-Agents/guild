@@ -30,7 +30,9 @@ if (prereleaseWarning) {
 program
   .name('guild')
   .description('Specification-driven development CLI for Claude Code')
-  .version(pkg.version);
+  .version(pkg.version)
+  .option('--verbose', 'Enable verbose logging (records decision trail)')
+  .option('--debug', 'Enable debug logging (records full prompts and responses)');
 
 // guild init
 program
@@ -97,6 +99,21 @@ program
     try {
       const { runList } = await import('../src/commands/list.js');
       await runList();
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  });
+
+// guild reset-learnings
+program
+  .command('reset-learnings')
+  .description('Reset the compound learnings file')
+  .option('-f, --force', 'Skip confirmation prompt')
+  .action(async (options) => {
+    try {
+      const { runResetLearnings } = await import('../src/commands/reset-learnings.js');
+      await runResetLearnings(options);
     } catch (err) {
       console.error(err.message);
       process.exit(1);

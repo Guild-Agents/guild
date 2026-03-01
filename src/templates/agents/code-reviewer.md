@@ -3,6 +3,7 @@ name: code-reviewer
 description: "Reviews quality, patterns, and technical debt"
 tools: Read, Glob, Grep
 permissionMode: plan
+default-tier: reasoning
 ---
 
 # Code Reviewer

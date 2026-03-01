@@ -2,6 +2,104 @@
 name: build-feature
 description: "Full pipeline: evaluation -> spec -> implementation -> review -> QA"
 user-invocable: true
+workflow:
+  version: 1
+  steps:
+    - id: evaluate
+      role: advisor
+      intent: "Evaluate the feature against the project vision. Identify risks, dependencies, and conflicts. Issue verdict: Approved / Rejected / Requires adjustments."
+      requires: [feature-description]
+      produces: [evaluation-report, verdict]
+      model-tier: reasoning
+      on-failure: abort
+    - id: specify
+      role: product-owner
+      intent: "Break the feature into concrete tasks with verifiable acceptance criteria. Estimate effort and suggest implementation order."
+      requires: [feature-description, evaluation-report]
+      produces: [task-list, acceptance-criteria]
+      model-tier: reasoning
+      condition: step.evaluate.verdict != rejected
+    - id: design
+      role: tech-lead
+      intent: "Define implementation approach: files to modify, patterns to follow, interfaces, and technical risks."
+      requires: [task-list, acceptance-criteria]
+      produces: [technical-plan]
+      model-tier: reasoning
+    - id: implement
+      role: developer
+      intent: "Implement the feature following the technical plan. Write unit tests. Make atomic commits."
+      requires: [technical-plan, acceptance-criteria]
+      produces: [implementation, test-results]
+      model-tier: execution
+    - id: gate-pre-review
+      role: system
+      intent: "Run project tests and lint. Both must pass before review."
+      commands: [npm test, npm run lint]
+      gate: true
+      produces: [gate-pre-review-result]
+      on-failure: goto:implement
+    - id: checkpoint-phase4
+      role: system
+      intent: "Create checkpoint commit and write partial pipeline trace (phases 1-4) to spec file."
+      requires: [implementation, gate-pre-review-result]
+      produces: [checkpoint-commit]
+      gate: true
+    - id: review
+      role: code-reviewer
+      intent: "Review code quality, patterns, security, and test coverage. Classify findings as Blocker, Warning, or Suggestion."
+      requires: [implementation, gate-pre-review-result]
+      produces: [review-report]
+      model-tier: reasoning
+      retry:
+        max: 2
+        on: has-blockers
+    - id: fix-review-blockers
+      role: developer
+      intent: "Fix blocker findings from code review. Run tests after fixing."
+      requires: [review-report]
+      produces: [implementation]
+      model-tier: execution
+      condition: step.review.has-blockers
+      on-failure: goto:review
+    - id: qa-phase
+      role: system
+      intent: "Run QA validation with bugfix cycles."
+      delegates-to: qa-cycle
+      requires: [acceptance-criteria, implementation]
+      produces: [qa-report]
+      retry:
+        max: 2
+        on: has-bugs
+    - id: post-qa-review
+      role: code-reviewer
+      intent: "Review changes introduced during QA bugfix cycles."
+      requires: [qa-report, implementation]
+      produces: [post-qa-review-report]
+      model-tier: reasoning
+      condition: step.qa-phase.had-significant-changes
+      retry:
+        max: 2
+        on: has-blockers
+    - id: gate-final
+      role: system
+      intent: "Run project tests and lint as final verification. Both must pass."
+      commands: [npm test, npm run lint]
+      gate: true
+      produces: [final-gate-result]
+      on-failure: goto:qa-phase
+    - id: completion
+      role: system
+      intent: "Write complete pipeline trace to spec file. Update SESSION.md. Present summary to user."
+      requires: [final-gate-result, review-report, qa-report]
+      produces: [pipeline-trace, session-update]
+      gate: true
+    - id: extract-learnings
+      role: learnings-extractor
+      intent: "Extract compound learnings from this pipeline execution."
+      requires: [pipeline-trace]
+      produces: [updated-learnings]
+      model-tier: routine
+      blocking: false
 ---
 
 # Build Feature
@@ -40,27 +138,29 @@ When running a single build-feature, a simple `git checkout -b` is sufficient.
 At the start of each phase, display a progress indicator to the user before any agent output:
 
 ```text
-[1/6] Advisor — Evaluating feature...
-[2/6] Product Owner — Defining spec...
-[3/6] Tech Lead — Defining technical approach...
-[4/6] Developer — Implementing...
-[5/6] Code Reviewer — Reviewing changes...
-[6/6] QA — Validating acceptance criteria...
+[1/6] Advisor (opus) — Evaluating feature...
+[2/6] Product Owner (opus) — Defining spec...
+[3/6] Tech Lead (opus) — Defining technical approach...
+[4/6] Developer (sonnet) — Implementing...
+[5/6] Code Reviewer (opus) — Reviewing changes...
+[6/6] QA (sonnet) — Validating acceptance criteria...
 ```
+
+Model names are resolved from the step's `model-tier` using the `max` profile: reasoning=opus, execution=sonnet, routine=haiku. System/gate steps do not show a model name.
 
 When a phase loops (review-fix or QA-review cycles), show the iteration:
 
 ```text
-[5/6 · round 2] Code Reviewer — Re-reviewing after fixes...
-[4/6 · round 2] Developer — Fixing review blockers...
+[5/6 · round 2] Code Reviewer (opus) — Re-reviewing after fixes...
+[4/6 · round 2] Developer (sonnet) — Fixing review blockers...
 ```
 
 This indicator MUST be displayed before spawning the agent for that phase.
 
 ### Phase 1 — Evaluation (Advisor)
 
-**Progress:** `[1/6] Advisor — Evaluating feature...`
-**Agent:** Reads `.claude/agents/advisor.md` via Task tool
+**Progress:** `[1/6] Advisor (opus) — Evaluating feature...`
+**Agent:** Reads `.claude/agents/advisor.md` via Task tool with `model: "opus"`
 **Input:** The feature description provided by the user
 **Process:**
 
@@ -74,8 +174,8 @@ This indicator MUST be displayed before spawning the agent for that phase.
 
 ### Phase 2 — Specification (Product Owner)
 
-**Progress:** `[2/6] Product Owner — Defining spec...`
-**Agent:** Reads `.claude/agents/product-owner.md` via Task tool
+**Progress:** `[2/6] Product Owner (opus) — Defining spec...`
+**Agent:** Reads `.claude/agents/product-owner.md` via Task tool with `model: "opus"`
 **Input:** The feature approved by the Advisor + their observations
 **Process:**
 
@@ -88,8 +188,8 @@ This indicator MUST be displayed before spawning the agent for that phase.
 
 ### Phase 3 — Technical Approach (Tech Lead)
 
-**Progress:** `[3/6] Tech Lead — Defining technical approach...`
-**Agent:** Reads `.claude/agents/tech-lead.md` via Task tool
+**Progress:** `[3/6] Tech Lead (opus) — Defining technical approach...`
+**Agent:** Reads `.claude/agents/tech-lead.md` via Task tool with `model: "opus"`
 **Input:** Product Owner tasks + acceptance criteria
 **Process:**
 
@@ -102,8 +202,8 @@ This indicator MUST be displayed before spawning the agent for that phase.
 
 ### Phase 4 — Implementation (Developer)
 
-**Progress:** `[4/6] Developer — Implementing...`
-**Agent:** Reads `.claude/agents/developer.md` via Task tool
+**Progress:** `[4/6] Developer (sonnet) — Implementing...`
+**Agent:** Reads `.claude/agents/developer.md` via Task tool with `model: "sonnet"`
 **Input:** Tech Lead technical plan + PO acceptance criteria
 **Process:**
 
@@ -129,8 +229,8 @@ This gate CANNOT be skipped, even if the user requested phase skipping. The spec
 
 ### Phase 5 — Review (Code Reviewer)
 
-**Progress:** `[5/6] Code Reviewer — Reviewing changes...`
-**Agent:** Reads `.claude/agents/code-reviewer.md` via Task tool
+**Progress:** `[5/6] Code Reviewer (opus) — Reviewing changes...`
+**Agent:** Reads `.claude/agents/code-reviewer.md` via Task tool with `model: "opus"`
 **Input:** The implemented changes (git diff)
 **Process:**
 
@@ -143,7 +243,7 @@ This gate CANNOT be skipped, even if the user requested phase skipping. The spec
 
 ### Phase 6 — QA (delegates to /qa-cycle)
 
-**Progress:** `[6/6] QA — Validating acceptance criteria...`
+**Progress:** `[6/6] QA (sonnet) — Validating acceptance criteria...`
 
 Runs the `/qa-cycle` skill passing the PO acceptance criteria as context. The qa-cycle handles:
 
@@ -334,30 +434,33 @@ Example Task invocation:
 ```text
 Task tool with:
   subagent_type: "general-purpose"
-  prompt: "Read .claude/agents/developer.md and assume that role. Then: [task description]"
+  model: "opus"
+  prompt: "Read .claude/agents/advisor.md and assume that role. Then: [task description]"
 ```
+
+The `model` parameter is resolved from the step's `model-tier`: reasoning→`"opus"`, execution→`"sonnet"`, routine→`"haiku"`. System/gate steps run inline (no Task tool).
 
 ## Example Session
 
 ```text
 User: /build-feature add dark mode toggle to settings page
 
-[1/6] Advisor — Evaluating feature...
+[1/6] Advisor (opus) — Evaluating feature...
   Approved. Low risk, aligns with UX roadmap.
 
-[2/6] Product Owner — Defining spec...
+[2/6] Product Owner (opus) — Defining spec...
   3 tasks defined with acceptance criteria.
 
-[3/6] Tech Lead — Defining technical approach...
+[3/6] Tech Lead (opus) — Defining technical approach...
   Use CSS variables + context provider pattern.
 
-[4/6] Developer — Implementing...
+[4/6] Developer (sonnet) — Implementing...
   Implemented ThemeContext, toggle component, CSS vars.
 
-[5/6] Code Reviewer — Reviewing changes...
+[5/6] Code Reviewer (opus) — Reviewing changes...
   Passed. 1 suggestion (memoize context value).
 
-[6/6] QA — Validating acceptance criteria...
+[6/6] QA (sonnet) — Validating acceptance criteria...
   All 3 acceptance criteria verified. 0 bugs.
 
 Feature complete. PR ready for merge.
@@ -368,3 +471,4 @@ Feature complete. PR ready for merge.
 - If the user wants to skip phases (e.g., "already evaluated, implement directly"), allow skipping to Phase 4 but warn that validation is lost. Verification gates (pre-Review and final) are NEVER skipped
 - The pipeline is sequential: each phase depends on the output of the previous one
 - Review/QA loops have limits to prevent infinite cycles
+- In v1.x, parallel pipeline execution (multiple build-features via worktrees) is best-effort and depends on the host environment supporting concurrent agents

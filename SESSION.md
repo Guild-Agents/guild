@@ -1,80 +1,75 @@
 # SESSION.md
 
 ## Active session
-- **Date:** 2026-02-25
-- **Current task:** Pre-release publishing — pipeline complete
-- **Active agent:** None
-- **Status:** Feature implemented on `feature/prerelease-publishing`, ready for merge/PR
+- **Date:** 2026-02-26
+- **Current task:** model-visibility-per-step — pipeline complete, post-pipeline fix applied
+- **Branch:** `feature/model-visibility-per-step` (ready to merge to develop)
+- **Active agent:** none
+- **Status:** 344 tests pass, 0 lint errors, clean working tree
 
 ## What happened this session
 
-### Housekeeping
-1. Deleted 10 stale spec files from `docs/specs/` (kept only `spec-prerelease-publishing.md`)
-2. Cleaned up 16 stale branches (8 worktree, 6 feature/fix, 2 claude/)
-3. Removed 2 orphaned worktrees
-4. Branch state: only `main` + `feature/prerelease-publishing`
+### Pipeline 4: Declarative Skill Migration (feature/declarative-skill-migration)
+Completed all 6 phases. Migrated 7 remaining skills to declarative workflow format.
+- 344 tests at branch level
+- Merged to develop, snapshot published: `guild-agents@0.3.1-snapshot.20260225.2`
 
-### Pre-release & Snapshot Publishing (build-feature pipeline)
+### Pipeline 5: Model Visibility Per Step (feature/model-visibility-per-step)
+Completed all 6 phases. Adds model name display (opus/sonnet) to progress indicators in 4 skill templates and includes `model` parameter in Task tool invocation examples.
+- Files modified: 8 (4 templates + 4 active copies)
+- Review: 0 blockers, 1 warning fixed, 2 suggestions (1 fixed, 1 out of scope)
+- QA: 8/8 acceptance criteria verified, 0 bugs
+- **Post-pipeline fix:** User caught that build-feature phase descriptions only showed model in decorative Progress text but didn't explicitly instruct Task tool to pass `model`. Fixed all 5 Agent lines to say `with model: "opus"` / `with model: "sonnet"`.
 
-Full 6-phase pipeline completed:
+### Council sessions
+- Feature-scope council on next priorities — unanimous: PR to main first, then orchestrator
+- Council on token-accounting spec — rejected (too many unbuilt dependencies)
+- Council on model visibility — unanimous: template-only change, recommended Option B (display + model param)
 
-| Phase | Result |
-|-------|--------|
-| 1. Advisor | Approved (user override) |
-| 2. Product Owner | 7 stories, 38 acceptance criteria |
-| 3. Tech Lead | ESModule architecture, centralized version logic |
-| 4. Developer | 11 files changed, 19 new tests |
-| 5. Code Review | 3 blockers fixed (ESM require, promote-beta, channel detection) |
-| 6. QA | 12/12 acceptance criteria pass, 0 bugs |
+### Branch cleanup
+- Deleted 3 local feature branches + 1 worktree branch
+- Deleted 13 remote merged/stale branches
+- Kept `develop` branch per user preference
 
-### What was implemented
+## Key decisions
 
-1. **`src/utils/version.js`** — parseVersion, getPreReleaseWarning, computeSnapshot/Beta/StableVersion
-2. **`scripts/version-{snapshot,beta,stable}.js`** — thin ESModule wrappers
-3. **`package.json`** — 7 new npm scripts (version:*, publish:*, publish:promote-beta)
-4. **`bin/guild.js`** — pre-release indicator (yellow for beta, red for snapshot, on stderr)
-5. **`.github/workflows/snapshot.yml`** — auto-publish on push to `dev`
-6. **`.github/workflows/beta.yml`** — manual trigger with description input
-7. **`.github/workflows/release.yml`** — added workflow_dispatch with bump type (kept tag trigger)
-8. **`.github/workflows/ci.yml`** — added `dev` to branch triggers
+1. **Merge dispatch + workflows** — workflow frontmatter is canonical format
+2. **Pure/IO split** — learnings.js (zero deps) + learnings-io.js (fs operations)
+3. **File locking deferred to v2** — concurrent workflows not supported yet
+4. **Token estimation heuristic** — words x 1.35, no external tokenizer
+5. **Dispatch precedence** — workflow steps > null (no "dispatch blocks" format yet)
+6. **Execution summary budget** — 500 tokens, compact digest for learnings-extractor
+7. **Model visibility = display + instruction** — showing model names is not enough; each phase must explicitly instruct passing `model` to Task tool
+8. **Keep develop branch** — user prefers develop→main flow over trunk-based
 
-## Key decisions made this session
+## Problems encountered and resolved
 
-### 1. Backlog reset
-- Previous v0.4-v1.0 roadmap on hold
-- User will provide new backlog direction
+1. **Decorative vs instructional model display** — Pipeline templates showed `(opus)` in progress lines but didn't instruct the orchestrator to pass `model` param to Task tool. Fixed by adding `with model: "opus"` to each phase's **Agent:** line.
+2. **Task example agent/model mismatch** — build-feature Task example used `developer.md` with `model: "opus"` (developer is execution tier = sonnet). Fixed to use `advisor.md` which matches opus.
+3. **qa-cycle Example Session inconsistency** — Only skill whose Example Session didn't show model names. Fixed to show `QA (sonnet)` and `Bugfix (sonnet)`.
 
-### 2. Spec implemented as-is
-- Advisor concerns overridden by user directive
-- ESM/package-name issues fixed during implementation
-
-### 3. Version computation centralized
-- All logic in `src/utils/version.js` (pure, testable functions)
-- Scripts are thin wrappers (read pkg → compute → write pkg)
-
-### 4. Backward-compatible release workflow
-- Kept `v*` tag trigger alongside new `workflow_dispatch`
-- Tag-triggered releases skip version bump (already correct)
+## Technical context
+- **Version**: 0.3.1 (stable) / 0.3.1-snapshot.20260225.2 (snapshot)
+- **Tests**: 344 passing (17 files)
+- **Agents**: 10 templates
+- **Skills**: 11 templates (all with declarative workflows + model visibility)
+- **Node**: v24.12.0 local, CI matrix 20.x/22.x
 
 ## Pending items
 
-### Feature branch ready for merge
-`feature/prerelease-publishing` has 4 commits ready for merge to main.
+### Feature branch ready to merge
+`feature/model-visibility-per-step` has 4 commits, ready to merge to `develop`.
+
+### PRs to main not yet created
+All work is on `develop` but no PR to `main` has been created yet.
 
 ### OG image PNG not regenerated
-`docs/og-image.svg` was updated but `docs/og-image.png` was not regenerated.
-
-### `dev` branch does not exist yet
-Snapshot workflow triggers on push to `dev`. Branch needs to be created when adopting the branching strategy.
-
-## Technical context
-- **Version**: 0.3.1 (on main)
-- **Tests**: 123 passing (9 test files)
-- **Agents**: 9 templates + SDD Methodologist (local only)
-- **Skills**: 11 templates (including create-pr)
-- **Node**: v24.12.0 local, CI matrix 20.x/22.x
 
 ## Next steps
-1. Merge `feature/prerelease-publishing` to main (or create PR)
-2. Receive new backlog from user
-3. Regenerate `docs/og-image.png`
+1. **Merge model-visibility branch** — merge `feature/model-visibility-per-step` to `develop`, publish snapshot
+2. **Create PR** — `develop` to `main` to promote all v1.x core features
+3. **Runtime orchestrator** — executes declarative workflows, wires learnings injection
+4. **guild-specialize model visibility** — follow-up: add model names to guild-specialize skill (noted in review S2)
+5. **`guild logs` command** — view/clean traces
+
+**Resume with:** `/session-start` then merge feature branch and create PR from develop to main.

@@ -2,6 +2,26 @@
 name: review
 description: "Standalone code review on the current diff"
 user-invocable: true
+workflow:
+  version: 1
+  steps:
+    - id: gather-diff
+      role: system
+      intent: "Get current git diff (staged or unstaged) and run tests + lint for context."
+      commands: [git diff --staged, git diff, npm test, npm run lint]
+      produces: [diff-content, test-result, lint-result]
+    - id: review
+      role: code-reviewer
+      intent: "Review code quality, patterns, security, and tests. Classify findings by severity."
+      requires: [diff-content, test-result, lint-result]
+      produces: [review-report]
+      model-tier: reasoning
+    - id: present
+      role: system
+      intent: "Present findings organized by severity with final verdict."
+      requires: [review-report]
+      produces: [formatted-report]
+      gate: true
 ---
 
 # Review
@@ -38,7 +58,7 @@ Note: The Code Reviewer does not have access to Bash (only Read, Glob, Grep), so
 
 ### Step 2 — Invoke Code Reviewer
 
-Invoke the Code Reviewer agent using Task tool:
+Invoke the Code Reviewer agent using Task tool with `model: "opus"` (reasoning tier):
 
 1. Read `.claude/agents/code-reviewer.md` to assume the role
 2. Read CLAUDE.md to understand the project conventions
@@ -66,6 +86,7 @@ If there are blockers, suggest fixing them and running `/review` again.
 User: /review
 
 Reviewing diff: 4 files changed, +127 -34
+Code Reviewer (opus) — Reviewing changes...
 
 Findings:
 - [Warning] src/api/users.js:45 — No input validation on email parameter

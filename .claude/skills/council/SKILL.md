@@ -2,6 +2,49 @@
 name: council
 description: "Convenes multiple agents to debate an important decision"
 user-invocable: true
+workflow:
+  version: 1
+  steps:
+    - id: identify-type
+      role: system
+      intent: "Analyze the question and determine council type: architecture, feature-scope, or tech-debt."
+      requires: [user-question]
+      produces: [council-type, participant-roles]
+      gate: true
+    - id: agent-1
+      role: dynamic
+      intent: "Analyze the question from specialized perspective. State position with concrete arguments."
+      requires: [user-question, council-type]
+      produces: [perspective-1]
+      model-tier: reasoning
+      parallel: [agent-2, agent-3]
+    - id: agent-2
+      role: dynamic
+      intent: "Analyze the question from specialized perspective. State position with concrete arguments."
+      requires: [user-question, council-type]
+      produces: [perspective-2]
+      model-tier: reasoning
+      parallel: [agent-1, agent-3]
+    - id: agent-3
+      role: dynamic
+      intent: "Analyze the question from specialized perspective. State position with concrete arguments."
+      requires: [user-question, council-type]
+      produces: [perspective-3]
+      model-tier: reasoning
+      parallel: [agent-1, agent-2]
+    - id: synthesize
+      role: system
+      intent: "Synthesize debate: points of agreement, disagreement, risks. Present options to user."
+      requires: [perspective-1, perspective-2, perspective-3]
+      produces: [synthesis, options]
+      gate: true
+    - id: write-spec
+      role: system
+      intent: "After user decides, write spec document to docs/specs/."
+      requires: [synthesis, user-decision]
+      produces: [spec-document]
+      condition: user-wants-spec
+      gate: true
 ---
 
 # Council
@@ -71,7 +114,7 @@ Analyze the user's question and determine which council type applies:
 
 ### Step 2 — Convene agents
 
-Invoke the 3 corresponding agents IN PARALLEL using Task tool. Each agent:
+Invoke the 3 corresponding agents IN PARALLEL using Task tool with `model: "opus"` (all council agents use reasoning tier). Each agent:
 
 1. Reads their `.claude/agents/[name].md` file to assume their role
 2. Reads `CLAUDE.md` and `SESSION.md` for project context
@@ -147,8 +190,11 @@ Example:
 ```text
 Task tool with:
   subagent_type: "general-purpose"
+  model: "opus"
   prompt: "Read .claude/agents/tech-lead.md and assume that role. Then: [debate question]"
 ```
+
+The `model` parameter is resolved from the step's `model-tier`: all council agents use reasoning→`"opus"`.
 
 ## Example Session
 
@@ -157,9 +203,9 @@ User: /council Should we migrate from REST to GraphQL?
 
 Council: Architecture
 
-Tech Lead — Recommends GraphQL for complex queries, keep REST for simple CRUD.
-Advisor — Risk is high mid-project. Suggests incremental adoption.
-Developer — Prefers REST simplicity. GraphQL adds tooling overhead.
+Tech Lead (opus) — Recommends GraphQL for complex queries, keep REST for simple CRUD.
+Advisor (opus) — Risk is high mid-project. Suggests incremental adoption.
+Developer (opus) — Prefers REST simplicity. GraphQL adds tooling overhead.
 
 Consensus: Incremental adoption. New endpoints in GraphQL, existing stay REST.
 ```
@@ -173,3 +219,4 @@ Consensus: Incremental adoption. New endpoints in GraphQL, existing stay REST.
 - After the user decides, always offer to write the spec to `docs/specs/`
 - The spec document is the primary output of `/council` — it captures the debate, decision, and rationale
 - If the user declines the spec, log the decision to SESSION.md as before
+- In v1.x, `parallel` execution is best-effort — the orchestrator may run parallel steps sequentially if concurrent agent execution is unavailable

@@ -3,6 +3,7 @@ name: db-migration
 description: "Schema changes and safe migrations"
 tools: Read, Write, Edit, Bash, Glob, Grep
 permissionMode: bypassPermissions
+default-tier: execution
 ---
 
 # DB Migration
