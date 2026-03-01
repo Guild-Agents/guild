@@ -179,6 +179,61 @@ describe('runRun', () => {
     expect(conditionLine).toContain('gate-tests == failed');
   });
 
+  it('step with requires and produces — displays both lines', async () => {
+    const { plan, dispatchInfoMap } = fakePlan([
+      {
+        parallel: false,
+        steps: [
+          {
+            id: 'req-1',
+            role: 'code-reviewer',
+            intent: 'Review the diff',
+            requires: ['diff-content', 'test-result'],
+            produces: ['review-report'],
+            _dispatch: { model: 'claude-opus-4-5' },
+          },
+        ],
+      },
+    ]);
+    orchestrateMock.mockResolvedValueOnce({ plan, dispatchInfoMap });
+
+    const { runRun } = await import('../run.js');
+    await runRun('review', '', {});
+
+    const infoCalls = prompts.log.info.mock.calls.map(c => c[0]);
+    const reqLine = infoCalls.find(msg => msg.includes('requires:'));
+    expect(reqLine).toContain('diff-content');
+    expect(reqLine).toContain('test-result');
+    const prodLine = infoCalls.find(msg => msg.includes('produces:'));
+    expect(prodLine).toContain('review-report');
+  });
+
+  it('system step with commands — displays commands line', async () => {
+    const { plan, dispatchInfoMap } = fakePlan([
+      {
+        parallel: false,
+        steps: [
+          {
+            id: 'cmd-1',
+            role: 'system',
+            intent: 'Run build and test',
+            commands: ['npm run build', 'npm test'],
+            _dispatch: { model: null },
+          },
+        ],
+      },
+    ]);
+    orchestrateMock.mockResolvedValueOnce({ plan, dispatchInfoMap });
+
+    const { runRun } = await import('../run.js');
+    await runRun('build', '', {});
+
+    const infoCalls = prompts.log.info.mock.calls.map(c => c[0]);
+    const cmdLine = infoCalls.find(msg => msg.includes('commands:'));
+    expect(cmdLine).toContain('npm run build');
+    expect(cmdLine).toContain('npm test');
+  });
+
   it('skill not found — orchestrate throws, error propagates', async () => {
     orchestrateMock.mockRejectedValueOnce(new Error('Skill "nonexistent" not found'));
 
