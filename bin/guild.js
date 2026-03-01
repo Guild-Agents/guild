@@ -137,4 +137,34 @@ program
     }
   });
 
+// guild logs (list traces)
+const logsCmd = program
+  .command('logs')
+  .description('View and manage execution traces')
+  .action(async (options) => {
+    try {
+      const { runLogs } = await import('../src/commands/logs.js');
+      await runLogs('list', options);
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  });
+
+// guild logs clean
+logsCmd
+  .command('clean')
+  .description('Remove old execution traces')
+  .option('--days <days>', 'Remove traces older than N days', '30')
+  .option('--all', 'Remove all traces')
+  .action(async (options) => {
+    try {
+      const { runLogs } = await import('../src/commands/logs.js');
+      await runLogs('clean', options);
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  });
+
 program.parse();
