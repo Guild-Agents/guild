@@ -103,7 +103,7 @@ Investigate the real project structure looking for:
 
 ### Step 3 — Enrich CLAUDE.md
 
-Replace all `[PENDING: guild-specialize]` placeholders in CLAUDE.md with real information:
+Invoke the Tech Lead agent using Task tool with `model: "opus"` (reasoning tier) to replace all `[PENDING: guild-specialize]` placeholders in CLAUDE.md with real information:
 
 - **Stack with exact versions**: extracted from dependency files
 - **Folder structure explained**: what each main folder does
@@ -115,7 +115,7 @@ Replace all `[PENDING: guild-specialize]` placeholders in CLAUDE.md with real in
 
 ### Step 4 — Specialize agents
 
-For each agent in `.claude/agents/*.md`, add project-specific context:
+Invoke the Tech Lead agent using Task tool with `model: "sonnet"` (execution tier) to add project-specific context for each agent in `.claude/agents/*.md`:
 
 - **advisor.md**: real project domain, target users
 - **tech-lead.md**: specific stack, detected patterns, architecture decisions
@@ -127,7 +127,9 @@ For each agent in `.claude/agents/*.md`, add project-specific context:
 - **db-migration.md**: ORM, migration tool, current schema (if applicable)
 - **platform-expert.md**: Claude Code version, known permission bugs, hook configuration
 
-Use the `Task` tool to invoke each agent by reading their `.claude/agents/[name].md` if you need a specialized perspective to enrich their configuration.
+Use the `Task` tool with `model: "sonnet"` to invoke each agent by reading their `.claude/agents/[name].md` if you need a specialized perspective to enrich their configuration.
+
+The `model` parameter is resolved from the step's `model-tier`: reasoning→`"opus"`, execution→`"sonnet"`. System/gate steps run inline (no Task tool).
 
 ### Step 5 — Confirm
 
@@ -167,6 +169,7 @@ User: /guild-specialize
 
 Guild Specialize analyzing project...
 
+Tech Lead (opus) — Enriching CLAUDE.md...
 Stack detected:
 - Node.js 20.11.0, TypeScript 5.3.3
 - React 18.2.0, Next.js 14.1.0
@@ -177,6 +180,7 @@ Architecture:
 - API routes in src/app/api/
 - Shared components in src/components/
 
+Tech Lead (sonnet) — Specializing agents...
 Agents updated:
 - developer.md: Specialized for Next.js + TypeScript
 - qa.md: Configured for Vitest + Playwright

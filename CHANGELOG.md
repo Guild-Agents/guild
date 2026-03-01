@@ -7,10 +7,22 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [Unreleased]
+## [1.0.0] - 2026-03-01
+
+### Added
+
+- **Runtime Orchestrator**: new module (`src/utils/orchestrator.js` + `orchestrator-io.js`) that executes declarative skill workflows — state machine, condition evaluation, retry/failure handling, dispatch resolution, delegation expansion, execution tracing (~2,300 lines, 109 tests)
+- **`guild run <skill>`**: CLI command that previews a skill's execution plan (dry-run) — shows groups, steps, agents, models, conditions, gates, and dispatch info
+- **`guild logs`**: CLI command to view execution traces; `guild logs clean` removes old traces (`--days N`, `--all`)
+- **Model visibility**: all skill templates now show which model (opus/sonnet/haiku) each step uses, resolved from `model-tier` in workflow frontmatter
+- **Pre-release publishing pipeline**: `npm run publish:snapshot`, `publish:beta`, `publish:stable` scripts with version management (#45)
+- 10th agent: `learnings-extractor` — extracts compound learnings from pipeline executions
 
 ### Fixed
 
+- Self-dependency removed from package.json (guild-agents was listing itself as a dependency)
+- README.md: agent count corrected from 9 to 10, added `guild run`, `guild logs`, and `learnings-extractor`
+- minimatch ReDoS vulnerability resolved (npm audit fix)
 - CHANGELOG.md: added missing v0.3.0 entry and enriched v0.3.1 with granular details
 - GitHub release notes updated for v0.3.0 and v0.3.1 with full descriptions
 
@@ -217,7 +229,8 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-[Unreleased]: https://github.com/Guild-Agents/guild/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/Guild-Agents/guild/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/Guild-Agents/guild/compare/v0.3.1...v1.0.0
 [0.3.1]: https://github.com/Guild-Agents/guild/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Guild-Agents/guild/compare/v0.2.9...v0.3.0
 [0.2.9]: https://github.com/Guild-Agents/guild/compare/v0.2.8...v0.2.9
