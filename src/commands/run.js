@@ -1,34 +1,20 @@
 /**
- * run.js — Displays the execution plan for a skill (dry-run)
+ * run.js — Executes a skill workflow (or displays the plan in dry-run mode)
  */
 
 import * as p from '@clack/prompts';
 import chalk from 'chalk';
 import { ensureProjectRoot } from '../utils/files.js';
-import { orchestrate } from '../utils/orchestrator-io.js';
+import { orchestrate, finalizeWorkflowTrace } from '../utils/orchestrator-io.js';
+import { execute } from '../utils/executor.js';
+import { createClaudeCodeProvider } from '../utils/providers/claude-code.js';
 
 /**
- * Runs the `guild run <skill>` command.
- * Loads the skill workflow, resolves dispatch info, and displays the plan.
- *
- * @param {string} skillName - Name of the skill to run
- * @param {string} [input=''] - Optional input text for the skill
- * @param {object} [options={}] - Options
- * @param {string} [options.profile='max'] - Model profile (max, balanced, fast)
+ * Displays the execution plan without running it.
+ * @param {object} plan
+ * @param {object} dispatchInfoMap
  */
-export async function runRun(skillName, input = '', options = {}) {
-  const root = ensureProjectRoot();
-  const { profile = 'max' } = options;
-
-  p.intro(chalk.bold.cyan(' Guild — Run: ' + skillName + ' '));
-
-  const { plan, dispatchInfoMap } = await orchestrate(skillName, input, {
-    profile,
-    projectRoot: root,
-  });
-
-  p.log.info(chalk.gray(`Profile: ${profile} | Steps: ${plan.totalSteps}`));
-
+function displayPlan(plan, dispatchInfoMap) {
   for (let i = 0; i < plan.groups.length; i++) {
     const group = plan.groups[i];
     const label = group.parallel ? `Group ${i + 1} (parallel)` : `Group ${i + 1}`;
@@ -57,6 +43,63 @@ export async function runRun(skillName, input = '', options = {}) {
       }
     }
   }
+}
 
-  p.outro(chalk.gray('Plan generated (dry-run). No steps were executed.'));
+/**
+ * Runs the `guild run <skill>` command.
+ *
+ * @param {string} skillName - Name of the skill to run
+ * @param {string} [input=''] - Optional input text for the skill
+ * @param {object} [options={}] - Options
+ * @param {string} [options.profile='max'] - Model profile
+ * @param {boolean} [options.dryRun=false] - Show plan without executing
+ */
+export async function runRun(skillName, input = '', options = {}) {
+  const root = ensureProjectRoot();
+  const { profile = 'max', dryRun = false } = options;
+
+  p.intro(chalk.bold.cyan(' Guild — Run: ' + skillName + ' '));
+
+  const { plan, trace, dispatchInfoMap } = await orchestrate(skillName, input, {
+    profile,
+    projectRoot: root,
+  });
+
+  p.log.info(chalk.gray(`Profile: ${profile} | Steps: ${plan.totalSteps}`));
+
+  if (dryRun) {
+    displayPlan(plan, dispatchInfoMap);
+    p.outro(chalk.gray('Plan generated (dry-run). No steps were executed.'));
+    return;
+  }
+
+  // Real execution
+  const provider = createClaudeCodeProvider({ projectRoot: root });
+
+  const finalPlan = await execute(plan, dispatchInfoMap, {
+    provider,
+    input,
+    trace,
+    projectRoot: root,
+
+    onStepStart(step, dispatch) {
+      const roleLabel = step.role === 'system' ? chalk.yellow('system') : chalk.blue(step.role);
+      const modelLabel = dispatch.model ? chalk.gray(` (${dispatch.model})`) : '';
+      p.log.step(`${chalk.bold(step.id)} ${roleLabel}${modelLabel}`);
+    },
+
+    onStepEnd(step, result) {
+      const icon = result.status === 'passed' ? chalk.green('✓') : chalk.red('✗');
+      p.log.info(`  ${icon} ${result.status}`);
+    },
+  });
+
+  // Finalize trace
+  const { executionSummary } = finalizeWorkflowTrace(trace, finalPlan);
+
+  const statusLabel = finalPlan.status === 'completed'
+    ? chalk.green('completed')
+    : chalk.red(finalPlan.status);
+
+  p.outro(`${statusLabel} | ${executionSummary}`);
 }

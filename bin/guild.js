@@ -123,10 +123,11 @@ program
 // guild run
 program
   .command('run')
-  .description('Display the execution plan for a skill')
+  .description('Execute a skill workflow')
   .argument('<skill>', 'Skill name to run')
   .argument('[input]', 'Input text for the skill', '')
-  .option('--profile <profile>', 'Model profile (max, balanced, fast)', 'max')
+  .option('--profile <profile>', 'Model profile (max, pro)', 'max')
+  .option('--dry-run', 'Display the execution plan without running it')
   .action(async (skill, input, options) => {
     try {
       const { runRun } = await import('../src/commands/run.js');
