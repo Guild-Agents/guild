@@ -78,7 +78,7 @@ export async function runRun(skillName, input = '', options = {}) {
 
   const finalPlan = await execute(plan, dispatchInfoMap, {
     provider,
-    input,
+    skillBody: input,
     trace,
     projectRoot: root,
 

@@ -14,7 +14,7 @@ function execFileAsync(cmd, args, opts) {
       resolve({
         stdout: stdout || (error && error.stdout) || '',
         stderr: stderr || (error && error.stderr) || '',
-        exitCode: error ? (error.code || 1) : 0,
+        exitCode: error ? (typeof error.code === 'number' ? error.code : 1) : 0,
       });
     });
   });

@@ -30,7 +30,7 @@ function execFileAsync(cmd, args, opts) {
       resolve({
         stdout: stdout || '',
         stderr: stderr || (error && error.message) || '',
-        exitCode: error ? (error.code || 1) : 0,
+        exitCode: error ? (typeof error.code === 'number' ? error.code : 1) : 0,
       });
     });
   });
@@ -50,8 +50,9 @@ async function executeSystemStep(step, options = {}) {
   if (step.commands && step.commands.length > 0) {
     const outputs = [];
     for (const cmd of step.commands) {
-      const parts = cmd.split(' ');
-      const [bin, ...args] = parts;
+      // v1.1: simple split — commands with quoted args or shell features
+      // are not supported. Use simple commands like "npm test".
+      const [bin, ...args] = cmd.split(' ');
       const result = await execFileAsync(bin, args, {
         cwd: projectRoot,
         timeout: SYSTEM_STEP_TIMEOUT,
@@ -120,6 +121,8 @@ export async function execute(plan, dispatchInfoMap, options = {}) {
   } = options;
 
   let currentPlan = plan;
+  let emptyIterations = 0;
+  const MAX_EMPTY_ITERATIONS = 100;
 
   while (!isPlanComplete(currentPlan)) {
     const { steps, skipped } = getNextSteps(currentPlan);
@@ -140,8 +143,13 @@ export async function execute(plan, dispatchInfoMap, options = {}) {
     // If no executable steps remain, check completion again
     if (steps.length === 0) {
       if (isPlanComplete(currentPlan)) break;
+      if (++emptyIterations > MAX_EMPTY_ITERATIONS) {
+        currentPlan = { ...currentPlan, status: 'aborted' };
+        break;
+      }
       continue;
     }
+    emptyIterations = 0;
 
     // v1.1: sequential execution — one step at a time
     const step = steps[0];
