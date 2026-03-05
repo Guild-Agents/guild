@@ -3,6 +3,7 @@
  */
 
 import { writeFileSync } from 'fs';
+import { wrapZone } from './zones.js';
 
 /**
  * Generates PROJECT.md with the onboarding data.
@@ -105,19 +106,16 @@ This project uses Guild. Read SESSION.md at the start of each session.
 ${data.stack}
 
 ## Project structure
-[PENDING: guild-specialize]
-
-docs/
-  specs/                              # Design documents (SDD specs)
+${wrapZone('structure', '[PENDING: guild-specialize]\n\ndocs/\n  specs/                              # Design documents (SDD specs)')}
 
 ## Code conventions
-${inferCodeConventions(data.type, data.stack)}
+${wrapZone('conventions', inferCodeConventions(data.type, data.stack))}
 
 ## Architecture patterns
-[PENDING: guild-specialize]
+${wrapZone('architecture', '[PENDING: guild-specialize]')}
 
 ## Environment variables
-${inferEnvVars(data.type, data.stack)}
+${wrapZone('env-vars', inferEnvVars(data.type, data.stack))}
 
 ## Global rules
 - Do not implement without an approved plan

@@ -102,14 +102,25 @@ describe('generateClaudeMd', () => {
     expect(content).toContain('SESSION.md');
   });
 
-  it('includes exactly 2 placeholders for guild-specialize', async () => {
+  it('wraps auto-generated sections with guild zone markers', async () => {
     await generateClaudeMd(makeProjectData());
     const content = readFileSync('CLAUDE.md', 'utf8');
-    const matches = content.match(/\[PENDING: guild-specialize\]/g);
-    expect(matches).toHaveLength(2);
-    // Placeholders only in Project structure and Architecture patterns
-    expect(content).toContain('## Project structure\n[PENDING: guild-specialize]');
-    expect(content).toContain('## Architecture patterns\n[PENDING: guild-specialize]');
+    expect(content).toContain('<!-- guild:auto-start:structure -->');
+    expect(content).toContain('<!-- guild:auto-end:structure -->');
+    expect(content).toContain('<!-- guild:auto-start:architecture -->');
+    expect(content).toContain('<!-- guild:auto-end:architecture -->');
+    expect(content).toContain('<!-- guild:auto-start:conventions -->');
+    expect(content).toContain('<!-- guild:auto-end:conventions -->');
+    expect(content).toContain('<!-- guild:auto-start:env-vars -->');
+    expect(content).toContain('<!-- guild:auto-end:env-vars -->');
+  });
+
+  it('does not wrap user-owned sections with markers', async () => {
+    await generateClaudeMd(makeProjectData());
+    const content = readFileSync('CLAUDE.md', 'utf8');
+    expect(content).not.toContain('guild:auto-start:global-rules');
+    expect(content).not.toContain('guild:auto-start:subagent-rules');
+    expect(content).not.toContain('guild:auto-start:skills');
   });
 
   it('lists skills instead of slash commands', async () => {
