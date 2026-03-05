@@ -54,3 +54,29 @@ export function resolveWorkspaceAgents(workspace, localAgentsDir) {
 
   return [...agents.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
+
+export function generateWorkspaceContext(workspace, currentMemberName) {
+  if (!workspace) return '';
+
+  const otherMembers = workspace.members.filter(m => m.name !== currentMemberName);
+  if (otherMembers.length === 0) return '';
+
+  const lines = [
+    '## Workspace context',
+    `- **Workspace:** ${workspace.name}`,
+    `- **Members:** ${workspace.members.map(m => m.name === currentMemberName ? `${m.name} (this)` : m.name).join(', ')}`,
+  ];
+
+  for (const member of otherMembers) {
+    const projectMdPath = join(member.absolutePath, 'PROJECT.md');
+    if (existsSync(projectMdPath)) {
+      const content = readFileSync(projectMdPath, 'utf8');
+      const stackMatch = content.match(/\*\*Stack:\*\*\s*(.+)/);
+      if (stackMatch) {
+        lines.push(`- **${member.name} stack:** ${stackMatch[1].trim()}`);
+      }
+    }
+  }
+
+  return lines.join('\n');
+}

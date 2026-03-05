@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdirSync, writeFileSync, rmSync, realpathSync, mkdtempSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { findWorkspaceRoot, loadWorkspace, resolveWorkspaceAgents } from '../workspace.js';
+import { findWorkspaceRoot, loadWorkspace, resolveWorkspaceAgents, generateWorkspaceContext } from '../workspace.js';
 
 describe('findWorkspaceRoot', () => {
   let testDir;
@@ -140,5 +140,65 @@ describe('resolveWorkspaceAgents', () => {
     const localDir = join(testDir, 'nonexistent');
     const result = resolveWorkspaceAgents(null, localDir);
     expect(result).toEqual([]);
+  });
+});
+
+describe('generateWorkspaceContext', () => {
+  let tempDir;
+
+  beforeEach(() => {
+    tempDir = realpathSync(mkdtempSync(join(tmpdir(), 'guild-ws-test-')));
+  });
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  it('generates context section from other members PROJECT.md', () => {
+    const config = {
+      name: 'my-product',
+      members: [
+        { name: 'backend', path: './backend' },
+        { name: 'frontend', path: './frontend' },
+      ],
+      shared: { agents: '.guild/agents', skills: '.guild/skills' },
+    };
+    writeFileSync(join(tempDir, 'guild-workspace.json'), JSON.stringify(config));
+
+    const backendDir = join(tempDir, 'backend');
+    const frontendDir = join(tempDir, 'frontend');
+    mkdirSync(backendDir, { recursive: true });
+    mkdirSync(frontendDir, { recursive: true });
+    writeFileSync(join(backendDir, 'PROJECT.md'), '# PROJECT.md\n## Project\n- **Stack:** Express, PostgreSQL');
+    writeFileSync(join(frontendDir, 'PROJECT.md'), '# PROJECT.md\n## Project\n- **Stack:** React, Vite');
+
+    const workspace = loadWorkspace(tempDir);
+    const result = generateWorkspaceContext(workspace, 'backend');
+
+    expect(result).toContain('## Workspace context');
+    expect(result).toContain('my-product');
+    expect(result).toContain('frontend');
+    expect(result).toContain('React, Vite');
+    expect(result).not.toContain('Express, PostgreSQL');
+  });
+
+  it('returns empty string when workspace is null', () => {
+    const result = generateWorkspaceContext(null, 'backend');
+    expect(result).toBe('');
+  });
+
+  it('returns empty string when current member is the only member', () => {
+    const config = {
+      name: 'solo',
+      members: [{ name: 'app', path: './app' }],
+      shared: { agents: '.guild/agents', skills: '.guild/skills' },
+    };
+    writeFileSync(join(tempDir, 'guild-workspace.json'), JSON.stringify(config));
+    mkdirSync(join(tempDir, 'app'), { recursive: true });
+    writeFileSync(join(tempDir, 'app', 'PROJECT.md'), '# PROJECT.md\n## Project\n- **Stack:** Node');
+
+    const workspace = loadWorkspace(tempDir);
+    const result = generateWorkspaceContext(workspace, 'app');
+    expect(result).toBe('');
   });
 });
