@@ -53,10 +53,10 @@
 11. **Backlog priority (Council, Option B)** — re-specialize before Workspaces (protected zones must exist before workspace composition). Watchdog rebajado de P0 a P3 (proyecto separado, cero valor para usuarios npm). Skill Eval: solo Component 1. Unanimidad en items 1-3 esta semana.
 
 ## Technical context
-- **Version**: 1.0.0
-- **Tests**: 485 passing (23 files)
+- **Version**: 1.1.0
+- **Tests**: 488 passing (23 files)
 - **Agents**: 10 templates
-- **Skills**: 11 templates
+- **Skills**: 14 templates (11 workflow + 3 discipline)
 - **Node**: v24.12.0 local, CI matrix 20.x/22.x
 
 ## Next steps (Council-approved, Option B — 2026-03-05)

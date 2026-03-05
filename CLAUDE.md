@@ -109,3 +109,6 @@ SESSION.md                            # Session state — persists across conver
 - /dev-flow          — view current pipeline phase
 - /session-start     — load context and resume work
 - /session-end       — save state to SESSION.md
+- /tdd               — TDD red-green-refactor discipline
+- /debug             — systematic 4-phase debugging
+- /verify            — evidence-before-claims verification
