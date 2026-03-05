@@ -111,4 +111,5 @@ SESSION.md                            # Session state — persists across conver
 - /session-end       — save state to SESSION.md
 - /tdd               — TDD red-green-refactor discipline
 - /debug             — systematic 4-phase debugging
+- /re-specialize     — incremental re-specialization of auto-generated zones
 - /verify            — evidence-before-claims verification
