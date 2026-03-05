@@ -50,6 +50,7 @@
 8. **Simple function provider** — `(step, dispatch, context) → { status, output, tokens }`
 9. **--dry-run flag** — preserves v1.0 plan-only behavior as opt-in mode
 10. **Keep develop branch** — user prefers develop→main flow over trunk-based
+11. **Backlog priority (Council, Option B)** — re-specialize before Workspaces (protected zones must exist before workspace composition). Watchdog rebajado de P0 a P3 (proyecto separado, cero valor para usuarios npm). Skill Eval: solo Component 1. Unanimidad en items 1-3 esta semana.
 
 ## Technical context
 - **Version**: 1.0.0
@@ -58,8 +59,11 @@
 - **Skills**: 11 templates
 - **Node**: v24.12.0 local, CI matrix 20.x/22.x
 
-## Next steps
+## Next steps (Council-approved, Option B — 2026-03-05)
 1. **Create PR** — `/create-pr` for `feature/guild-run-executor` → `develop`
-2. **After merge:** bump version to 1.1.0, push, publish
-3. **Import Superpowers skills** — create `/tdd`, `/debug`, `/verify` skills as Guild templates
-4. **v1.2: Workspaces MVP** — `guild-workspace.json`, shared resolution, workspace commands
+2. **Bump & publish** — v1.1.0 release
+3. **Import Superpowers skills** — create `/tdd`, `/debug`, `/verify` as Guild templates
+4. **guild-re-specialize (P2)** — protected zones pattern (`<!-- guild:auto-start/end -->`), modify `guild-specialize` to emit markers, build re-specialize skill. See `guild-ideas-eval-and-respecialize.md` Idea 1.
+5. **Workspaces MVP v1.2 (P2)** — `guild-workspace.json`, shared resolution, workspace commands. Needs spec first.
+6. **Skill Evaluation System (P3)** — Component 1 only: trigger test suite. Defer Components 2-4 until skill count > 20. See `guild-ideas-eval-and-respecialize.md` Idea 2.
+7. **Guild Watchdog (P3)** — separate project, defer until v1.2 stable. Consider Watchdog Lite (local, no infra) as intermediate validation. See `ideas/guild-watchdog-spec.md`.
