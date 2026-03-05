@@ -2,66 +2,54 @@
 
 ## Active session
 - **Date:** 2026-03-01
-- **Current task:** none — v1.0.0 released
-- **Branch:** `main` (v1.0.0 tag), `develop` (1 commit ahead: SESSION.md)
+- **Current task:** guild run executor v1.1 — design approved, plan written, ready for implementation
+- **Branch:** `develop` (2 commits ahead of main: SESSION.md updates)
 - **Active agent:** none
 - **Status:** 467 tests pass, 0 lint errors, CI green, npm published
 
 ## What happened this session
 
-### PR #46 merged to main
-- Promoted all v0.3.x features (20 commits) from develop to main
-- Fixed minimatch ReDoS vulnerability (npm audit fix)
-- CI green on Node 20.x/22.x matrix
+### Council: Post-v1.0 Roadmap (Workspaces re-eval)
+- **Type:** feature-scope (Advisor + Product Owner + Tech Lead)
+- **Trigger:** Real user feedback requesting multi-repo workspace support
+- **Consensus:** Execution first, workspaces second. All 3 agents agreed.
+- **Decision:** Option A — v1.1 = `guild run` real execution. v1.2 = workspaces MVP.
+- **Spec:** `docs/specs/post-v1-roadmap-workspaces.md`
 
-### Council: Workspaces multi-repo
-- **Decision:** Opcion A — Diferir y documentar. No implementar hasta v1.0 estable.
+### Brainstorming: guild run executor
+- Explored the full architecture: orchestrator, dispatch, providers, execution model
+- Discussed Claude Code single-process vs guild run multi-process tradeoffs
+- Confirmed vision: Guild as provider-agnostic runtime (v3+ supports OpenCode, Codex, Ollama, etc.)
+- Discussed token cost implications — executor reduces cost 55-70% via model routing + Node.js orchestration
+- Key insight: tiers abstractos + dispatch protocol ya están diseñados para ser agnósticos
 
-### Council: Roadmap v1.0
-- **Tipo:** feature-scope (Advisor + Product Owner + Tech Lead)
-- **Consenso:** `guild run` es el unico blocker, plan-only mode, guild-specialize + guild logs completan el release
-- **Decision:** Opcion B — v1.0 con observabilidad: guild run + guild logs + model visibility + cleanup + README/CHANGELOG + bump
+### Design: guild run executor v1.1
+- **Approved design decisions:**
+  1. CLI subprocess dispatch (`claude -p` as provider)
+  2. Full auto with abort (no human intervention, CI/CD friendly)
+  3. Sequential only for v1.1 (parallel deferred to v1.2)
+  4. Simple function provider (no classes, no inheritance)
+  5. Executor as separate module (`executor.js`)
+- **Design doc:** `docs/plans/2026-03-01-guild-run-executor-design.md`
 
-### Pipeline 6: Runtime Orchestrator (feature/runtime-orchestrator)
-Completed all 6 phases. The orchestrator module executes declarative skill workflows at runtime — state machine, condition evaluation, retry/failure handling, dispatch resolution, delegation expansion, and execution tracing.
-- **Files created**: 4 (`orchestrator.js`, `orchestrator-io.js`, + 2 test files)
-- **Lines added**: ~2,300
-- **Tests**: 109 new (81 pure + 28 I/O), 453 total
-- **Review**: 2 blockers fixed (currentGroupIndex advancement, jumpToStepId clearing), 8 warnings fixed
-- **QA**: 43/43 acceptance criteria verified, 2 minor gaps fixed
-
-### Pipeline 7: guild run (build-feature)
-- CLI command `guild run <skill>` — plan-only viewer over orchestrate()
-- 9 tests, 462 total after merge
-
-### Pipeline 8: guild logs (build-feature, compressed)
-- CLI commands `guild logs` and `guild logs clean`
-- 5 tests, 467 total after merge
-
-### guild-specialize model visibility (XS)
-- Added model names (opus/sonnet) to guild-specialize skill template
-
-### v1.0 Cleanup
-- Removed self-dependency from package.json
-- README: 10 agents, added guild run + guild logs + learnings-extractor
-- CHANGELOG: full [1.0.0] section
-
-### v1.0.0 Release
-- Version bumped to 1.0.0
-- PR #47 merged to main
-- Tag v1.0.0 pushed, release workflow green
-- npm: `guild-agents@1.0.0` published to `latest`
-- GitHub Release: v1.0.0 created
+### Implementation plan written
+- **Plan:** `docs/plans/2026-03-01-guild-run-executor-plan.md`
+- **4 tasks, TDD throughout:**
+  1. Claude Code CLI provider (`src/utils/providers/claude-code.js`) — 6 tests
+  2. Executor loop (`src/utils/executor.js`) — 9 tests
+  3. Wire into `run.js` + `--dry-run` flag — update existing + 2 new tests
+  4. Integration verification (full suite + lint + smoke)
+- **Execution mode:** Parallel session in worktree
 
 ## Key decisions
 
-1. **Workspaces deferred** — multi-repo workspaces diferido hasta post-v1.0
-2. **Orchestrator = plan-only in v1** — produces structured execution plan, does not invoke agents autonomously
-3. **Pure/IO split** — orchestrator.js (zero I/O) + orchestrator-io.js (file system, dispatch, tracing)
-4. **Plain objects for stepStates** — not Map, for JSON serializability
-5. **getNextSteps returns { steps, skipped }** — enables caller to mark condition-skipped steps
-6. **Circuit breaker = terminal state** — returns plan with status 'circuit-breaker', does not throw
-7. **Delegation depth cap = 2** — prevents infinite sub-workflow chains
+1. **Workspaces → v1.2** — re-evaluated post-v1.0; execution first (v1.1), workspaces MVP second (v1.2)
+2. **Provider-agnostic vision** — Guild targets any AI runtime; Claude Code CLI is just the first provider
+3. **CLI subprocess dispatch** — `claude -p` for agent steps, no API key needed
+4. **Full auto with abort** — designed for unattended/CI execution
+5. **Sequential only v1.1** — parallel groups deferred to v1.2
+6. **Simple function provider** — `(step, dispatch, context) → { status, output, tokens }`
+7. **--dry-run flag** — preserves v1.0 plan-only behavior as opt-in mode
 8. **Keep develop branch** — user prefers develop→main flow over trunk-based
 
 ## Technical context
@@ -72,6 +60,13 @@ Completed all 6 phases. The orchestrator module executes declarative skill workf
 - **Node**: v24.12.0 local, CI matrix 20.x/22.x
 
 ## Next steps
-1. **Workspaces design doc** — documentar la vision multi-repo para post-v1.0
-2. **Ejecución real de steps** — que `guild run` ejecute steps, no solo muestre el plan
-3. **OG image PNG** — regenerar imagen para GitHub/social
+1. **Execute implementation plan** — open worktree session at `feature/guild-run-executor`, run plan task by task
+   ```bash
+   git worktree add .claude/worktrees/feature/guild-run-executor -b feature/guild-run-executor develop
+   cd .claude/worktrees/feature/guild-run-executor
+   claude
+   # Then: Read docs/plans/2026-03-01-guild-run-executor-plan.md and execute it task by task.
+   ```
+2. **After implementation:** `/review` + `/qa-cycle` on the feature branch
+3. **After QA passes:** `/create-pr` to merge into develop
+4. **v1.2: Workspaces MVP** — `guild-workspace.json`, shared resolution, workspace commands
