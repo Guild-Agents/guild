@@ -164,6 +164,24 @@ describe('generateClaudeMd', () => {
     expect(content).toContain('DATABASE_URL');
     expect(content).toContain('REDIS_URL');
   });
+
+  it('injects workspace context when workspace data is provided', async () => {
+    await generateClaudeMd(makeProjectData(), {
+      name: 'my-product',
+      currentMember: 'backend',
+      otherMembers: [{ name: 'frontend', stack: 'React, Vite' }],
+    });
+    const content = readFileSync('CLAUDE.md', 'utf8');
+    expect(content).toContain('## Workspace context');
+    expect(content).toContain('my-product');
+    expect(content).toContain('frontend');
+  });
+
+  it('does not inject workspace context when no workspace data', async () => {
+    await generateClaudeMd(makeProjectData());
+    const content = readFileSync('CLAUDE.md', 'utf8');
+    expect(content).not.toContain('Workspace context');
+  });
 });
 
 describe('inferCodeConventions', () => {
