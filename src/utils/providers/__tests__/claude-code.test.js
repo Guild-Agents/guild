@@ -99,6 +99,39 @@ describe('createClaudeCodeProvider', () => {
     expect(opts.timeout).toBe(60000);
   });
 
+  it('omits --model flag when dispatch.model is null', async () => {
+    mockExecFile('OK');
+    const provider = createClaudeCodeProvider({ projectRoot: '/fake' });
+
+    await provider(
+      { id: 's1', role: 'developer', intent: 'Implement' },
+      { model: null, tier: null },
+      'Prompt'
+    );
+
+    const args = execFile.mock.calls[0][1];
+    expect(args).not.toContain('--model');
+  });
+
+  it('rejects with install message when CLI is not found (ENOENT)', async () => {
+    execFile.mockImplementation((_cmd, _args, _opts, callback) => {
+      const err = new Error('spawn claude ENOENT');
+      err.code = 'ENOENT';
+      callback(err);
+      return { kill: vi.fn() };
+    });
+
+    const provider = createClaudeCodeProvider({ projectRoot: '/fake' });
+
+    await expect(
+      provider(
+        { id: 's1', role: 'developer', intent: 'Implement' },
+        { model: 'claude-sonnet-4-6', tier: 'execution' },
+        'Prompt'
+      )
+    ).rejects.toThrow('Claude Code CLI not found');
+  });
+
   it('defaults timeout to 5 minutes', async () => {
     mockExecFile('OK');
     const provider = createClaudeCodeProvider({ projectRoot: '/fake' });

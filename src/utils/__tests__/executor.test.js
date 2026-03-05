@@ -217,6 +217,35 @@ describe('execute', () => {
     expect(result.stepStates['delegate'].status).toBe('passed');
   });
 
+  it('aborts after MAX_EMPTY_ITERATIONS when no steps are executable', async () => {
+    const workflow = makeWorkflow([makeStep({ id: 's1', role: 'advisor' })]);
+    const plan = createExecutionPlan(workflow, { skillName: 'test' });
+    const dispatchMap = makeDispatchMap(plan);
+    const provider = mockProvider();
+
+    // Patch getNextSteps to always return empty (simulates stuck plan)
+    const orchestrator = await import('../orchestrator.js');
+    const originalGetNext = orchestrator.getNextSteps;
+    const originalIsComplete = orchestrator.isPlanComplete;
+    let callCount = 0;
+    vi.spyOn(orchestrator, 'getNextSteps').mockImplementation((p) => {
+      callCount++;
+      if (callCount <= 150) return { steps: [], skipped: [] };
+      return originalGetNext(p);
+    });
+    vi.spyOn(orchestrator, 'isPlanComplete').mockImplementation((p) => {
+      if (callCount <= 150) return false;
+      return originalIsComplete(p);
+    });
+
+    const result = await execute(plan, dispatchMap, { provider });
+
+    expect(result.status).toBe('aborted');
+    expect(provider).not.toHaveBeenCalled();
+
+    vi.restoreAllMocks();
+  });
+
   it('retries step on failure when retry is configured', async () => {
     const workflow = makeWorkflow([
       makeStep({

@@ -24,10 +24,10 @@ export function createClaudeCodeProvider(config) {
   const { projectRoot, stepTimeout = DEFAULT_TIMEOUT } = config;
 
   return async function claudeCodeProvider(step, dispatch, context) {
-    const args = [
-      '-p', context,
-      '--model', dispatch.model,
-    ];
+    const args = ['-p', context];
+    if (dispatch.model) {
+      args.push('--model', dispatch.model);
+    }
 
     const result = await execFileAsync('claude', args, {
       cwd: projectRoot,
