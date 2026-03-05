@@ -54,16 +54,16 @@
 
 ## Technical context
 - **Version**: 1.1.0
-- **Tests**: 488 passing (23 files)
+- **Tests**: 497 passing (24 files)
 - **Agents**: 10 templates
-- **Skills**: 14 templates (11 workflow + 3 discipline)
+- **Skills**: 15 templates (12 workflow + 3 discipline)
 - **Node**: v24.12.0 local, CI matrix 20.x/22.x
 
 ## Next steps (Council-approved, Option B — 2026-03-05)
 1. **Create PR** — `/create-pr` for `feature/guild-run-executor` → `develop`
 2. **Bump & publish** — v1.1.0 release
 3. **Import Superpowers skills** — create `/tdd`, `/debug`, `/verify` as Guild templates
-4. **guild-re-specialize (P2)** — protected zones pattern (`<!-- guild:auto-start/end -->`), modify `guild-specialize` to emit markers, build re-specialize skill. See `guild-ideas-eval-and-respecialize.md` Idea 1.
+4. ~~**guild-re-specialize (P2)**~~ — ✅ Done. Zone parser, generators emit markers, guild-specialize updated, re-specialize skill created.
 5. **Workspaces MVP v1.2 (P2)** — `guild-workspace.json`, shared resolution, workspace commands. Needs spec first.
 6. **Skill Evaluation System (P3)** — Component 1 only: trigger test suite. Defer Components 2-4 until skill count > 20. See `guild-ideas-eval-and-respecialize.md` Idea 2.
 7. **Guild Watchdog (P3)** — separate project, defer until v1.2 stable. Consider Watchdog Lite (local, no infra) as intermediate validation. See `ideas/guild-watchdog-spec.md`.
