@@ -1,64 +1,69 @@
 # SESSION.md
 
 ## Active session
-- **Date:** 2026-03-01
-- **Current task:** runtime-orchestrator — pipeline complete, ready to merge
-- **Branch:** `feature/runtime-orchestrator` (ready to merge to develop)
+- **Date:** 2026-03-05
+- **Current task:** guild run executor v1.1 — implemented, reviewed, ready for PR
+- **Branch:** `feature/guild-run-executor` (worktree at `.claude/worktrees/guild-run-executor`)
 - **Active agent:** none
-- **Status:** 453 tests pass, 0 lint errors, clean working tree
+- **Status:** 485 tests pass, 0 lint errors, review blockers fixed
 
 ## What happened this session
 
-### PR #46 merged to main
-- Promoted all v0.3.x features (20 commits) from develop to main
-- Fixed minimatch ReDoS vulnerability (npm audit fix)
-- CI green on Node 20.x/22.x matrix
+### Council: Superpowers vs Guild evaluation
+- **Type:** feature-scope (Advisor + Product Owner + Tech Lead)
+- **Trigger:** User asked whether Superpowers plugin replaces Guild
+- **Consensus:** Unanimous — complement, don't replace
+- **Decision:** Guild remains independent. Import 3 skills (TDD, debugging, verification) from Superpowers as Guild templates. Zero coupling.
+- **Spec:** `docs/specs/superpowers-complementation.md` (gitignored, local reference)
 
-### Council: Workspaces multi-repo
-- **Decision:** Opcion A — Diferir y documentar. No implementar hasta v1.0 estable.
+### Implementation: guild run executor v1.1
+- **All 4 tasks completed** (TDD throughout):
+  1. Claude Code CLI provider (`src/utils/providers/claude-code.js`) — 6 tests
+  2. Executor loop (`src/utils/executor.js`) — 9 tests
+  3. Wire into `run.js` + `--dry-run` flag — 3 new tests
+  4. Integration verification — 485 tests, 0 lint, smoke test passed
+- Tasks 1 and 2 executed in parallel via subagents
+- Worktree at `.claude/worktrees/guild-run-executor`
 
-### Council: Roadmap v1.0
-- **Tipo:** feature-scope (Advisor + Product Owner + Tech Lead)
-- **Consenso:** `guild run` es el unico blocker, plan-only mode, guild-specialize + guild logs completan el release
-- **Decision:** Opcion B — v1.0 con observabilidad: guild run + guild logs + model visibility + cleanup + README/CHANGELOG + bump
+### Code review: executor feature
+- **Reviewer:** Code Reviewer agent (opus)
+- **Findings:** 2 blockers, 4 warnings, 3 suggestions
+- **Blockers fixed:**
+  - B1: `input` vs `skillBody` mismatch — user input was silently dropped
+  - B2: `cmd.split(' ')` limitation documented for system step commands
+- **Additional fixes:** dead-loop guard (W1), error.code type check (W2)
+- **Deferred tech debt:** execFileAsync duplication (W3), onStepSkip callback (W4)
 
-### Pipeline 6: Runtime Orchestrator (feature/runtime-orchestrator)
-Completed all 6 phases. The orchestrator module executes declarative skill workflows at runtime — state machine, condition evaluation, retry/failure handling, dispatch resolution, delegation expansion, and execution tracing.
-- **Files created**: 4 (`orchestrator.js`, `orchestrator-io.js`, + 2 test files)
-- **Lines added**: ~2,300
-- **Tests**: 109 new (81 pure + 28 I/O), 453 total
-- **Review**: 2 blockers fixed (currentGroupIndex advancement, jumpToStepId clearing), 8 warnings fixed
-- **QA**: 43/43 acceptance criteria verified, 2 minor gaps fixed
+### Branch state: feature/guild-logs
+- Confirmed already integrated into develop (ancestor of develop HEAD)
+- No merge needed
 
 ## Key decisions
 
-1. **Workspaces deferred** — multi-repo workspaces diferido hasta post-v1.0
-2. **Orchestrator = plan-only in v1** — produces structured execution plan, does not invoke agents autonomously
-3. **Pure/IO split** — orchestrator.js (zero I/O) + orchestrator-io.js (file system, dispatch, tracing)
-4. **Plain objects for stepStates** — not Map, for JSON serializability
-5. **getNextSteps returns { steps, skipped }** — enables caller to mark condition-skipped steps
-6. **Circuit breaker = terminal state** — returns plan with status 'circuit-breaker', does not throw
-7. **Delegation depth cap = 2** — prevents infinite sub-workflow chains
-8. **Keep develop branch** — user prefers develop→main flow over trunk-based
+1. **Superpowers = complement, not replacement** — Guild covers orchestration, Superpowers covers individual discipline
+2. **Import 3 skills from Superpowers** — TDD, systematic-debugging, verification-before-completion (future task)
+3. **Workspaces → v1.2** — execution first (v1.1), workspaces MVP second (v1.2)
+4. **Provider-agnostic vision** — Guild targets any AI runtime; Claude Code CLI is just the first provider
+5. **CLI subprocess dispatch** — `claude -p` for agent steps, no API key needed
+6. **Full auto with abort** — designed for unattended/CI execution
+7. **Sequential only v1.1** — parallel groups deferred to v1.2
+8. **Simple function provider** — `(step, dispatch, context) → { status, output, tokens }`
+9. **--dry-run flag** — preserves v1.0 plan-only behavior as opt-in mode
+10. **Keep develop branch** — user prefers develop→main flow over trunk-based
+11. **Backlog priority (Council, Option B)** — re-specialize before Workspaces (protected zones must exist before workspace composition). Watchdog rebajado de P0 a P3 (proyecto separado, cero valor para usuarios npm). Skill Eval: solo Component 1. Unanimidad en items 1-3 esta semana.
 
 ## Technical context
-- **Version**: 0.3.1 (stable) / 0.3.1-snapshot.20260226.1 (snapshot)
-- **Tests**: 453 passing (19 files)
+- **Version**: 1.0.0
+- **Tests**: 485 passing (23 files)
 - **Agents**: 10 templates
 - **Skills**: 11 templates
 - **Node**: v24.12.0 local, CI matrix 20.x/22.x
 
-## Pending items
-
-### Feature branch ready to merge
-`feature/runtime-orchestrator` — ready to merge to develop
-
-### OG image PNG not regenerated
-
-## Next steps
-1. **Merge orchestrator branch** — merge `feature/runtime-orchestrator` to `develop`
-2. **`guild run` CLI command** — thin wrapper over orchestrate() for CLI invocation
-3. **guild-specialize model visibility** — add model names to guild-specialize skill
-4. **`guild logs` command** — view/clean traces
-5. **Workspaces design doc** — documentar la vision multi-repo
-6. **Create PR** — develop to main after next batch of features
+## Next steps (Council-approved, Option B — 2026-03-05)
+1. **Create PR** — `/create-pr` for `feature/guild-run-executor` → `develop`
+2. **Bump & publish** — v1.1.0 release
+3. **Import Superpowers skills** — create `/tdd`, `/debug`, `/verify` as Guild templates
+4. **guild-re-specialize (P2)** — protected zones pattern (`<!-- guild:auto-start/end -->`), modify `guild-specialize` to emit markers, build re-specialize skill. See `guild-ideas-eval-and-respecialize.md` Idea 1.
+5. **Workspaces MVP v1.2 (P2)** — `guild-workspace.json`, shared resolution, workspace commands. Needs spec first.
+6. **Skill Evaluation System (P3)** — Component 1 only: trigger test suite. Defer Components 2-4 until skill count > 20. See `guild-ideas-eval-and-respecialize.md` Idea 2.
+7. **Guild Watchdog (P3)** — separate project, defer until v1.2 stable. Consider Watchdog Lite (local, no infra) as intermediate validation. See `ideas/guild-watchdog-spec.md`.
