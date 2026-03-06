@@ -140,10 +140,54 @@ You can read any file under /abs/path/to/frontend/ for deeper analysis.
 - Unit tests for `collectMemberContext()` — with/without siblings, with/without missing files
 - Skill template changes are markdown, validated manually
 
-### Future: v1.2.2+ — Cross-Repo Commands
+### v1.2.2 — Cross-Repo Commands
 
-- Run tests/lint in sibling repos from a skill
-- Skills that coordinate execution across repos
+CLI primitive to run commands in sibling repos. Skills can adopt it later.
+
+#### CLI Interface
+
+```bash
+guild workspace run <member> test          # predefined: npm test
+guild workspace run <member> lint          # predefined: npm run lint
+guild workspace run <member> build         # predefined: npm run build
+guild workspace run <member> --cmd "..."   # custom command
+guild workspace run --all test             # all siblings, collect-all
+```
+
+#### Preset command mapping
+
+```javascript
+const PRESET_COMMANDS = {
+  test:  { cmd: 'npm', args: ['test'] },
+  lint:  { cmd: 'npm', args: ['run', 'lint'] },
+  build: { cmd: 'npm', args: ['run', 'build'] },
+};
+```
+
+#### Code changes
+
+- **`src/utils/workspace.js`** — new `runInMember(member, command, options)` function. Executes via `execFile` with `cwd` set to member's `absolutePath`. Returns `{ status, output, duration }`.
+- **`src/commands/workspace.js`** — new `run` subcommand: resolves member, maps preset or `--cmd`, executes, reports.
+- **`bin/guild.js`** — wire `run` subcommand into workspace command.
+
+#### Behavior
+
+- **Single member:** execute, report result with duration.
+- **`--all`:** execute in each sibling sequentially (no parallelism), collect all results, report summary at the end. Failed members don't stop execution.
+- **Member not found:** error with list of available members.
+- **Command fails:** capture output, mark as failed, continue to next (`--all`).
+
+#### Testing
+
+- Unit tests for `runInMember()` — success, failure, timeout
+- Unit tests for preset resolution and `--cmd` parsing
+- CLI wiring validated by lint
+
+#### What is NOT included
+
+- Skill integration (skills adopt the primitive later)
+- Parallel execution (sequential to avoid resource contention)
+- Cross-repo file modifications
 
 ## Out of Scope
 
