@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdirSync, writeFileSync, rmSync, realpathSync, mkdtempSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { findWorkspaceRoot, loadWorkspace, resolveWorkspaceAgents, generateWorkspaceContext } from '../workspace.js';
+import { findWorkspaceRoot, loadWorkspace, resolveWorkspaceAgents, generateWorkspaceContext, collectMemberContext } from '../workspace.js';
 
 describe('findWorkspaceRoot', () => {
   let testDir;
@@ -200,5 +200,121 @@ describe('generateWorkspaceContext', () => {
     const workspace = loadWorkspace(tempDir);
     const result = generateWorkspaceContext(workspace, 'app');
     expect(result).toBe('');
+  });
+});
+
+describe('collectMemberContext', () => {
+  let tempDir;
+
+  beforeEach(() => {
+    tempDir = realpathSync(mkdtempSync(join(tmpdir(), 'guild-ws-collect-')));
+  });
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  it('returns empty string when workspace is null', () => {
+    const result = collectMemberContext(null, 'backend');
+    expect(result).toBe('');
+  });
+
+  it('returns empty string when current member is the only member', () => {
+    const config = {
+      name: 'solo',
+      members: [{ name: 'app', path: './app' }],
+    };
+    writeFileSync(join(tempDir, 'guild-workspace.json'), JSON.stringify(config));
+    mkdirSync(join(tempDir, 'app'), { recursive: true });
+
+    const workspace = loadWorkspace(tempDir);
+    const result = collectMemberContext(workspace, 'app');
+    expect(result).toBe('');
+  });
+
+  it('collects context from sibling with all three files', () => {
+    const config = {
+      name: 'my-product',
+      members: [
+        { name: 'backend', path: './backend' },
+        { name: 'frontend', path: './frontend' },
+      ],
+    };
+    writeFileSync(join(tempDir, 'guild-workspace.json'), JSON.stringify(config));
+
+    const backendDir = join(tempDir, 'backend');
+    const frontendDir = join(tempDir, 'frontend');
+    mkdirSync(backendDir, { recursive: true });
+    mkdirSync(frontendDir, { recursive: true });
+
+    writeFileSync(join(frontendDir, 'PROJECT.md'), '# PROJECT.md\n## Project\n- **Stack:** React, Vite, TypeScript\n');
+    writeFileSync(join(frontendDir, 'CLAUDE.md'), '# CLAUDE.md\n## Project structure\nsrc/components/, src/api/\n## Other\nstuff\n');
+    writeFileSync(join(frontendDir, 'SESSION.md'), '# SESSION.md\n## Active session\n- **Current task:** migrating to React 19\n');
+
+    const workspace = loadWorkspace(tempDir);
+    const result = collectMemberContext(workspace, 'backend');
+
+    expect(result).toContain('## Workspace: my-product');
+    expect(result).toContain('### frontend');
+    expect(result).toContain('sibling');
+    expect(result).toContain(frontendDir);
+    expect(result).toContain('**Stack:** React, Vite, TypeScript');
+    expect(result).toContain('**Structure:** src/components/, src/api/');
+    expect(result).toContain('**Current task:** migrating to React 19');
+    expect(result).toContain('You can read any file under');
+    expect(result).not.toContain('### backend');
+  });
+
+  it('handles sibling with missing files gracefully', () => {
+    const config = {
+      name: 'my-product',
+      members: [
+        { name: 'backend', path: './backend' },
+        { name: 'frontend', path: './frontend' },
+      ],
+    };
+    writeFileSync(join(tempDir, 'guild-workspace.json'), JSON.stringify(config));
+
+    const backendDir = join(tempDir, 'backend');
+    const frontendDir = join(tempDir, 'frontend');
+    mkdirSync(backendDir, { recursive: true });
+    mkdirSync(frontendDir, { recursive: true });
+
+    const workspace = loadWorkspace(tempDir);
+    const result = collectMemberContext(workspace, 'backend');
+
+    expect(result).toContain('### frontend');
+    expect(result).toContain('You can read any file under');
+    expect(result).not.toContain('**Stack:**');
+    expect(result).not.toContain('**Structure:**');
+    expect(result).not.toContain('**Current task:**');
+  });
+
+  it('collects context from multiple siblings', () => {
+    const config = {
+      name: 'platform',
+      members: [
+        { name: 'api', path: './api' },
+        { name: 'web', path: './web' },
+        { name: 'mobile', path: './mobile' },
+      ],
+    };
+    writeFileSync(join(tempDir, 'guild-workspace.json'), JSON.stringify(config));
+
+    mkdirSync(join(tempDir, 'api'), { recursive: true });
+    mkdirSync(join(tempDir, 'web'), { recursive: true });
+    mkdirSync(join(tempDir, 'mobile'), { recursive: true });
+
+    writeFileSync(join(tempDir, 'web', 'PROJECT.md'), '# PROJECT\n- **Stack:** React, Vite');
+    writeFileSync(join(tempDir, 'mobile', 'PROJECT.md'), '# PROJECT\n- **Stack:** React Native, Expo');
+
+    const workspace = loadWorkspace(tempDir);
+    const result = collectMemberContext(workspace, 'api');
+
+    expect(result).toContain('### web');
+    expect(result).toContain('### mobile');
+    expect(result).toContain('React, Vite');
+    expect(result).toContain('React Native, Expo');
+    expect(result).not.toContain('### api');
   });
 });

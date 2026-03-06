@@ -80,3 +80,48 @@ export function generateWorkspaceContext(workspace, currentMemberName) {
 
   return lines.join('\n');
 }
+
+export function collectMemberContext(workspace, currentMemberName) {
+  if (!workspace) return '';
+
+  const siblings = workspace.members.filter(m => m.name !== currentMemberName);
+  if (siblings.length === 0) return '';
+
+  const lines = [`## Workspace: ${workspace.name}`, ''];
+
+  for (const member of siblings) {
+    lines.push(`### ${member.name} (sibling — ${member.absolutePath})`);
+
+    const projectMdPath = join(member.absolutePath, 'PROJECT.md');
+    if (existsSync(projectMdPath)) {
+      const content = readFileSync(projectMdPath, 'utf8');
+      const stackMatch = content.match(/\*\*Stack:\*\*\s*(.+)/);
+      if (stackMatch) {
+        lines.push(`- **Stack:** ${stackMatch[1].trim()}`);
+      }
+    }
+
+    const claudeMdPath = join(member.absolutePath, 'CLAUDE.md');
+    if (existsSync(claudeMdPath)) {
+      const content = readFileSync(claudeMdPath, 'utf8');
+      const structureMatch = content.match(/## Project structure\n(.+)/);
+      if (structureMatch) {
+        lines.push(`- **Structure:** ${structureMatch[1].trim()}`);
+      }
+    }
+
+    const sessionMdPath = join(member.absolutePath, 'SESSION.md');
+    if (existsSync(sessionMdPath)) {
+      const content = readFileSync(sessionMdPath, 'utf8');
+      const taskMatch = content.match(/\*\*Current task:\*\*\s*(.+)/);
+      if (taskMatch) {
+        lines.push(`- **Current task:** ${taskMatch[1].trim()}`);
+      }
+    }
+
+    lines.push(`You can read any file under ${member.absolutePath}/ for deeper analysis.`);
+    lines.push('');
+  }
+
+  return lines.join('\n').trim();
+}
