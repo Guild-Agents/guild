@@ -5,6 +5,14 @@
  * structural correctness. Compatible with anthropics/skills eval format.
  */
 
+import { readFileSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { parseSkill } from './workflow-parser.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const TEMPLATES_DIR = join(__dirname, '..', 'templates', 'skills');
+
 /**
  * Evaluates a single assertion against a parsed workflow.
  * @param {object} workflow - Parsed workflow with { version, steps[] }
@@ -82,4 +90,50 @@ export function evaluateAssertion(workflow, assertion) {
     default:
       return { passed: false, evidence: `Unknown assertion type: "${type}"` };
   }
+}
+
+/**
+ * Loads evals.json for a skill template.
+ * @param {string} skillName - Skill directory name (e.g. 'build-feature')
+ * @returns {object|null} Parsed evals object or null if no evals exist
+ */
+export function loadEvals(skillName) {
+  const evalsPath = join(TEMPLATES_DIR, skillName, 'evals', 'evals.json');
+  if (!existsSync(evalsPath)) return null;
+  return JSON.parse(readFileSync(evalsPath, 'utf8'));
+}
+
+/**
+ * Runs all evals for a skill template.
+ * Parses the SKILL.md, loads evals.json, and evaluates each assertion.
+ * @param {string} skillName - Skill directory name
+ * @returns {{ skill: string, results: Array<{ id: string, description: string, passed: boolean, expectations: Array }> }}
+ */
+export function runEvals(skillName) {
+  const evals = loadEvals(skillName);
+  if (!evals) throw new Error(`No evals found for skill "${skillName}"`);
+
+  const skillPath = join(TEMPLATES_DIR, skillName, 'SKILL.md');
+  const content = readFileSync(skillPath, 'utf8');
+  const skill = parseSkill(content);
+
+  if (!skill.workflow) {
+    throw new Error(`Skill "${skillName}" has no workflow definition`);
+  }
+
+  const results = evals.evals.map(evalCase => {
+    const expectations = evalCase.expectations.map(exp => {
+      const result = evaluateAssertion(skill.workflow, exp.assertion);
+      return { text: exp.text, assertion: exp.assertion, ...result };
+    });
+    const passed = expectations.every(e => e.passed);
+    return {
+      id: evalCase.id,
+      description: evalCase.description,
+      passed,
+      expectations,
+    };
+  });
+
+  return { skill: skillName, results };
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { evaluateAssertion } from '../eval-runner.js';
+import { evaluateAssertion, loadEvals, runEvals } from '../eval-runner.js';
 
 const MOCK_STEPS = [
   { id: 'evaluate', role: 'advisor', modelTier: 'reasoning', gate: false, requires: ['feature-description'], parallel: undefined, condition: undefined },
@@ -92,5 +92,50 @@ describe('evaluateAssertion', () => {
     const result = evaluateAssertion(MOCK_WORKFLOW, 'unknown-type:foo');
     expect(result.passed).toBe(false);
     expect(result.evidence).toContain('Unknown');
+  });
+});
+
+describe('loadEvals', () => {
+  it('loads evals.json for a skill with evals', () => {
+    const evals = loadEvals('build-feature');
+    expect(evals).not.toBeNull();
+    expect(evals.skill).toBe('build-feature');
+    expect(Array.isArray(evals.evals)).toBe(true);
+    expect(evals.evals.length).toBeGreaterThan(0);
+  });
+
+  it('returns null for a skill without evals', () => {
+    const evals = loadEvals('session-start');
+    expect(evals).toBeNull();
+  });
+});
+
+describe('runEvals', () => {
+  it('runs all evals for build-feature and returns results', () => {
+    const results = runEvals('build-feature');
+    expect(results.skill).toBe('build-feature');
+    expect(Array.isArray(results.results)).toBe(true);
+    expect(results.results.length).toBeGreaterThan(0);
+    for (const evalResult of results.results) {
+      expect(evalResult).toHaveProperty('id');
+      expect(evalResult).toHaveProperty('passed');
+      expect(Array.isArray(evalResult.expectations)).toBe(true);
+    }
+  });
+
+  it('all build-feature evals pass', () => {
+    const results = runEvals('build-feature');
+    const failed = results.results.filter(r => !r.passed);
+    expect(failed).toEqual([]);
+  });
+
+  it('all council evals pass', () => {
+    const results = runEvals('council');
+    const failed = results.results.filter(r => !r.passed);
+    expect(failed).toEqual([]);
+  });
+
+  it('throws for skill without evals', () => {
+    expect(() => runEvals('session-start')).toThrow('No evals found');
   });
 });
