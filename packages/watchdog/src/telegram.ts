@@ -13,15 +13,19 @@ const SEVERITY_ICON: Record<string, string> = {
   critical: 'ALERT',
 };
 
+export function escapeHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 export function formatNotification(notification: Notification): string {
   const icon = SEVERITY_ICON[notification.severity] ?? '';
-  const lines = [`[${icon}] ${notification.summary}`];
+  const lines = [`[${icon}] ${escapeHtml(notification.summary)}`];
 
   if (notification.details) {
-    lines.push(notification.details);
+    lines.push(escapeHtml(notification.details));
   }
   if (notification.link) {
-    lines.push(notification.link);
+    lines.push(escapeHtml(notification.link));
   }
 
   return lines.join('\n');
