@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdirSync, writeFileSync, rmSync, realpathSync, mkdtempSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { findWorkspaceRoot, loadWorkspace, resolveWorkspaceAgents, generateWorkspaceContext, collectMemberContext } from '../workspace.js';
+import { findWorkspaceRoot, loadWorkspace, resolveWorkspaceAgents, generateWorkspaceContext, collectMemberContext, runInMember } from '../workspace.js';
 
 describe('findWorkspaceRoot', () => {
   let testDir;
@@ -316,5 +316,47 @@ describe('collectMemberContext', () => {
     expect(result).toContain('React, Vite');
     expect(result).toContain('React Native, Expo');
     expect(result).not.toContain('### api');
+  });
+});
+
+describe('runInMember', () => {
+  let tempDir;
+
+  beforeEach(() => {
+    tempDir = realpathSync(mkdtempSync(join(tmpdir(), 'guild-ws-run-')));
+  });
+
+  afterEach(() => {
+    rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  it('executes a command in the member directory', () => {
+    const member = { name: 'app', absolutePath: tempDir };
+    const result = runInMember(member, 'node', ['-e', "console.log('hello')"]);
+
+    expect(result.member).toBe('app');
+    expect(result.status).toBe('passed');
+    expect(result.output).toContain('hello');
+    expect(result.duration).toBeGreaterThanOrEqual(0);
+  });
+
+  it('captures failure with output', () => {
+    const member = { name: 'app', absolutePath: tempDir };
+    const result = runInMember(member, 'node', ['-e', 'process.exit(1)']);
+
+    expect(result.member).toBe('app');
+    expect(result.status).toBe('failed');
+    expect(result.duration).toBeGreaterThanOrEqual(0);
+  });
+
+  it('returns error when member directory does not exist', () => {
+    const badPath = join(tempDir, 'nonexistent');
+    const member = { name: 'ghost', absolutePath: badPath };
+    const result = runInMember(member, 'node', ['-e', "console.log('hi')"]);
+
+    expect(result.member).toBe('ghost');
+    expect(result.status).toBe('failed');
+    expect(result.output).toContain(badPath);
+    expect(result.duration).toBe(0);
   });
 });

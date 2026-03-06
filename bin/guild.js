@@ -225,4 +225,31 @@ workspaceCmd
     }
   });
 
+// guild workspace run
+workspaceCmd
+  .command('run')
+  .description('Run a command in a workspace member repo')
+  .argument('[member]', 'Member name (or omit with --all)')
+  .argument('[preset]', 'Preset command: test, lint, build')
+  .option('--cmd <command>', 'Custom command to run')
+  .option('--all', 'Run in all workspace members')
+  .action(async (member, preset, options) => {
+    try {
+      const { runWorkspaceCommand } = await import('../src/commands/workspace.js');
+      const results = runWorkspaceCommand(member, preset, options);
+      for (const r of results) {
+        const icon = r.status === 'passed' ? '\u2705' : '\u274C';
+        console.log(`${icon} ${r.member}: ${r.status} (${r.duration}ms)`);
+        if (r.status === 'failed' && r.output) {
+          console.log(r.output);
+        }
+      }
+      const failed = results.filter(r => r.status === 'failed');
+      if (failed.length > 0) process.exit(1);
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  });
+
 program.parse();
