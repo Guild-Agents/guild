@@ -28,7 +28,10 @@
     "publish:snapshot": "npm run version:snapshot && npm publish --tag snapshot",
     "publish:beta": "npm run version:beta && npm publish --tag beta",
     "publish:stable": "npm run version:stable && npm publish --tag latest",
-    "publish:promote-beta": "npm dist-tag add guild-agents@$(node --input-type=commonjs -p \"require('./package.json').version\") beta"
+    "publish:promote-beta": "npm dist-tag add guild-agents@$(node --input-type=commonjs -p \"require('./package.json').version\") beta",
+    "eval": "node scripts/run-evals.js",
+    "eval:build-feature": "node scripts/run-evals.js build-feature",
+    "eval:council": "node scripts/run-evals.js council"
   },
   "keywords": [
     "claude",
