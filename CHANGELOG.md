@@ -7,6 +7,25 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.3.0] - 2026-03-06
+
+### Added
+
+- **Cross-repo council** (PR #51): council skill auto-detects workspace membership and injects sibling context (CLAUDE.md, PROJECT.md, SESSION.md) into agent prompts
+  - `collectMemberContext()` in workspace.js — reads sibling repo state, returns formatted markdown — 5 tests
+  - Council SKILL.md updated with `workspace-context` step in workflow frontmatter
+- **Cross-repo commands** (PR #52): run commands across workspace members
+  - `guild workspace run <member> <preset>` — run test/lint/build in a specific member
+  - `guild workspace run --all <preset>` — run in all members
+  - `guild workspace run <member> --cmd "..."` — run custom commands
+  - `runInMember()` and `runWorkspaceCommand()` with collect-all error handling — 8 tests
+- **Skill Evaluation System** (PR #53): dry-run assertion framework for verifying skill template correctness
+  - `evaluateAssertion()` engine with 7 assertion types: step-exists, step-role, step-model-tier, step-requires, step-parallel, gate-exists, step-count — 16 tests
+  - `loadEvals()` and `runEvals()` parse SKILL.md workflows and run assertions from evals.json — 6 tests
+  - Eval definitions for build-feature (6 evals) and council (4 evals)
+  - `npm run eval` / `eval:build-feature` / `eval:council` scripts
+  - Compatible with `anthropics/skills` eval format; internal development only
+
 ## [1.2.0] - 2026-03-06
 
 ### Added
@@ -267,7 +286,8 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-[Unreleased]: https://github.com/Guild-Agents/guild/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/Guild-Agents/guild/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/Guild-Agents/guild/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/Guild-Agents/guild/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/Guild-Agents/guild/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Guild-Agents/guild/compare/v0.3.1...v1.0.0
