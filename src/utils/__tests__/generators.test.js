@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdirSync, readFileSync, rmSync, existsSync } from 'fs';
+import { mkdirSync, readFileSync, writeFileSync, rmSync, existsSync } from 'fs';
 import { join } from 'path';
 import { generateProjectMd, generateSessionMd, generateClaudeMd, inferCodeConventions, inferEnvVars } from '../generators.js';
 
@@ -102,14 +102,25 @@ describe('generateClaudeMd', () => {
     expect(content).toContain('SESSION.md');
   });
 
-  it('includes exactly 2 placeholders for guild-specialize', async () => {
+  it('wraps auto-generated sections with guild zone markers', async () => {
     await generateClaudeMd(makeProjectData());
     const content = readFileSync('CLAUDE.md', 'utf8');
-    const matches = content.match(/\[PENDING: guild-specialize\]/g);
-    expect(matches).toHaveLength(2);
-    // Placeholders only in Project structure and Architecture patterns
-    expect(content).toContain('## Project structure\n[PENDING: guild-specialize]');
-    expect(content).toContain('## Architecture patterns\n[PENDING: guild-specialize]');
+    expect(content).toContain('<!-- guild:auto-start:structure -->');
+    expect(content).toContain('<!-- guild:auto-end:structure -->');
+    expect(content).toContain('<!-- guild:auto-start:architecture -->');
+    expect(content).toContain('<!-- guild:auto-end:architecture -->');
+    expect(content).toContain('<!-- guild:auto-start:conventions -->');
+    expect(content).toContain('<!-- guild:auto-end:conventions -->');
+    expect(content).toContain('<!-- guild:auto-start:env-vars -->');
+    expect(content).toContain('<!-- guild:auto-end:env-vars -->');
+  });
+
+  it('does not wrap user-owned sections with markers', async () => {
+    await generateClaudeMd(makeProjectData());
+    const content = readFileSync('CLAUDE.md', 'utf8');
+    expect(content).not.toContain('guild:auto-start:global-rules');
+    expect(content).not.toContain('guild:auto-start:subagent-rules');
+    expect(content).not.toContain('guild:auto-start:skills');
   });
 
   it('lists skills instead of slash commands', async () => {
@@ -152,6 +163,37 @@ describe('generateClaudeMd', () => {
     expect(content).not.toMatch(/## Environment variables\n\[PENDING/);
     expect(content).toContain('DATABASE_URL');
     expect(content).toContain('REDIS_URL');
+  });
+
+  it('injects workspace context when workspace is provided', async () => {
+    // Create a sibling member with PROJECT.md
+    const frontendDir = join(TEST_DIR, '..', 'frontend-test-ws');
+    mkdirSync(frontendDir, { recursive: true });
+    writeFileSync(join(frontendDir, 'PROJECT.md'), '# PROJECT.md\n## Project\n- **Stack:** React, Vite');
+
+    const workspace = {
+      name: 'my-product',
+      root: join(TEST_DIR, '..'),
+      members: [
+        { name: 'backend', path: './backend', absolutePath: TEST_DIR },
+        { name: 'frontend', path: './frontend-test-ws', absolutePath: frontendDir },
+      ],
+      shared: { agents: '.guild/agents', skills: '.guild/skills' },
+    };
+
+    await generateClaudeMd(makeProjectData(), workspace, 'backend');
+    const content = readFileSync('CLAUDE.md', 'utf8');
+    expect(content).toContain('## Workspace context');
+    expect(content).toContain('my-product');
+    expect(content).toContain('frontend');
+
+    rmSync(frontendDir, { recursive: true, force: true });
+  });
+
+  it('does not inject workspace context when no workspace data', async () => {
+    await generateClaudeMd(makeProjectData());
+    const content = readFileSync('CLAUDE.md', 'utf8');
+    expect(content).not.toContain('Workspace context');
   });
 });
 

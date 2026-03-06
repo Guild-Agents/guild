@@ -65,6 +65,9 @@ SESSION.md                            # Session state — persists across conver
 - `npm run lint:js` — ESLint only
 - `npm run lint:md` — markdownlint only
 - `npm run dev` — run CLI locally (`node bin/guild.js`)
+- `guild workspace init <name> <members...>` — create a workspace
+- `guild workspace add <path>` — add a member repo
+- `guild workspace status` — show workspace members and state
 
 ## CI/CD
 - **CI** (`.github/workflows/ci.yml`): lint + test on push/PR to develop/main, matrix Node 20.x/22.x, security audit
@@ -109,3 +112,7 @@ SESSION.md                            # Session state — persists across conver
 - /dev-flow          — view current pipeline phase
 - /session-start     — load context and resume work
 - /session-end       — save state to SESSION.md
+- /tdd               — TDD red-green-refactor discipline
+- /debug             — systematic 4-phase debugging
+- /re-specialize     — incremental re-specialization of auto-generated zones
+- /verify            — evidence-before-claims verification
