@@ -88,6 +88,9 @@ async function runPipeline(): Promise<'ok' | 'alert'> {
       if (triage.decision === 'ignore') continue;
     }
 
+    // Deduplication check — skip Sonnet call if duplicate
+    if (isDuplicate(config.workspacePath, signal.source, 4)) continue;
+
     // Action with Sonnet
     const chain = `sensor(${signal.status}) -> classifier(${classification.severity}) -> sonnet`;
     const workspace = {
@@ -99,11 +102,8 @@ async function runPipeline(): Promise<'ok' | 'alert'> {
     const action = await llm.actWithSonnet(signal, chain, workspace);
     recordSonnetCall(dailyStats, action.inputTokens, action.outputTokens);
 
-    // Deduplication check
-    if (!isDuplicate(config.workspacePath, signal.source, 4)) {
-      writeEvent(config.workspacePath, signal.source, 'action', action.event);
-      await bot.sendNotification(action.notification);
-    }
+    writeEvent(config.workspacePath, signal.source, 'action', action.event);
+    await bot.sendNotification(action.notification);
 
     hadAlert = true;
   }
