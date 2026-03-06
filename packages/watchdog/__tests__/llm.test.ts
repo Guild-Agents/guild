@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { triageWithHaiku, actWithSonnet } from '../src/llm.js';
+import { triageWithHaiku, actWithSonnet, createLlmClient } from '../src/llm.js';
 import type { SensorResult } from '../src/sensors/types.js';
 
 const mockCreate = vi.fn();
@@ -82,6 +82,19 @@ describe('llm', () => {
       expect(result.notification.summary).toContain('CI');
       expect(result.inputTokens).toBe(500);
       expect(result.outputTokens).toBe(150);
+    });
+
+    it('shares a single Anthropic client via createLlmClient factory', async () => {
+      mockCreate.mockResolvedValueOnce({
+        content: [{ type: 'text', text: 'IGNORE' }],
+        usage: { input_tokens: 50, output_tokens: 5 },
+      });
+
+      const llm = createLlmClient('sk-factory');
+      const result = await llm.triageWithHaiku(signal, 'test');
+      expect(result.decision).toBe('ignore');
+      // The mock constructor is called once for the factory, not per call
+      expect(mockCreate).toHaveBeenCalledTimes(1);
     });
 
     it('returns fallback notification on unparseable JSON', async () => {

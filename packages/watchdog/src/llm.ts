@@ -21,14 +21,28 @@ interface WorkspaceContext {
   memory: string;
 }
 
+export interface LlmClient {
+  triageWithHaiku(signal: SensorResult, heuristicReason: string): Promise<TriageResult>;
+  actWithSonnet(signal: SensorResult, classificationChain: string, workspace: WorkspaceContext): Promise<ActionResult>;
+}
+
+export function createLlmClient(apiKey: string): LlmClient {
+  const client = new Anthropic({ apiKey });
+  return {
+    triageWithHaiku: (signal, heuristicReason) => triageWithHaiku(signal, heuristicReason, apiKey, client),
+    actWithSonnet: (signal, chain, workspace) => actWithSonnet(signal, chain, apiKey, workspace, client),
+  };
+}
+
 export async function triageWithHaiku(
   signal: SensorResult,
   heuristicReason: string,
   apiKey: string,
+  client?: Anthropic,
 ): Promise<TriageResult> {
-  const client = new Anthropic({ apiKey });
+  const anthropic = client ?? new Anthropic({ apiKey });
 
-  const response = await client.messages.create({
+  const response = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 50,
     messages: [{
@@ -58,10 +72,11 @@ export async function actWithSonnet(
   classificationChain: string,
   apiKey: string,
   workspace: WorkspaceContext,
+  client?: Anthropic,
 ): Promise<ActionResult> {
-  const client = new Anthropic({ apiKey });
+  const anthropic = client ?? new Anthropic({ apiKey });
 
-  const response = await client.messages.create({
+  const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-20250514',
     max_tokens: 1024,
     messages: [{

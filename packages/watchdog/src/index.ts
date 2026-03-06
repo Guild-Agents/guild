@@ -4,7 +4,7 @@ import { createInitialState, computeNextInterval, isInActiveHours } from './hear
 import type { HeartbeatState } from './heartbeat.js';
 import { runAllSensors } from './sensors/index.js';
 import { classify } from './classifier.js';
-import { triageWithHaiku, actWithSonnet } from './llm.js';
+import { createLlmClient } from './llm.js';
 import { createTelegramBot } from './telegram.js';
 import type { CommandHandlers } from './telegram.js';
 import {
@@ -34,6 +34,9 @@ let heartbeatState: HeartbeatState =
 let dailyStats: DailyStats = createDailyStats();
 let paused = false;
 const startedAt = Date.now();
+
+// LLM
+const llm = createLlmClient(config.anthropic.apiKey);
 
 // Telegram
 const telegramBot = new TelegramBot(config.telegram.botToken, { polling: true });
@@ -80,9 +83,7 @@ async function runPipeline(): Promise<'ok' | 'alert'> {
 
     // Triage with Haiku if low confidence
     if (classification.confidence === 'low') {
-      const triage = await triageWithHaiku(
-        signal, classification.reason, config.anthropic.apiKey,
-      );
+      const triage = await llm.triageWithHaiku(signal, classification.reason);
       recordHaikuCall(dailyStats, triage.inputTokens, triage.outputTokens, triage.decision === 'action');
       if (triage.decision === 'ignore') continue;
     }
@@ -95,7 +96,7 @@ async function runPipeline(): Promise<'ok' | 'alert'> {
       memory: loadWorkspaceFile(config.workspacePath, 'MEMORY.md'),
     };
 
-    const action = await actWithSonnet(signal, chain, config.anthropic.apiKey, workspace);
+    const action = await llm.actWithSonnet(signal, chain, workspace);
     recordSonnetCall(dailyStats, action.inputTokens, action.outputTokens);
 
     // Deduplication check
