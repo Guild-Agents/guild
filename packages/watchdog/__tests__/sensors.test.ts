@@ -91,8 +91,10 @@ describe('sensors', () => {
             title: 'chore(deps): update dependency',
             created_at: staleDate,
             html_url: 'https://github.com/pr/1',
+            draft: false,
             user: { login: 'renovate[bot]' },
             labels: [{ name: 'dependencies' }],
+            head: { sha: 'ren111' },
           },
         ]),
       });
@@ -111,14 +113,105 @@ describe('sensors', () => {
             title: 'chore(deps): update dependency',
             created_at: freshDate,
             html_url: 'https://github.com/pr/2',
+            draft: false,
             user: { login: 'renovate[bot]' },
             labels: [{ name: 'dependencies' }],
+            head: { sha: 'ren222' },
           },
         ]),
       });
 
       const result = await checkPrStatus(githubConfig);
       expect(result.status).toBe(200);
+    });
+
+    it('returns 500 for non-draft PR with failing checks older than 1h', async () => {
+      const oldDate = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+      const prList = [{
+        title: 'feat: new feature',
+        created_at: oldDate,
+        html_url: 'https://github.com/pr/5',
+        draft: false,
+        user: { login: 'dev-user' },
+        labels: [],
+        head: { sha: 'abc123' },
+      }];
+
+      // First call: PR list
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => prList,
+      });
+      // Second call: commit status
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ state: 'failure' }),
+      });
+
+      const result = await checkPrStatus(githubConfig, mockFetch);
+      expect(result.status).toBe(500);
+      expect(result.payload).toContain('Failing checks');
+      expect(result.payload).toContain('new feature');
+    });
+
+    it('returns 200 for non-draft PR with passing checks', async () => {
+      const oldDate = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+      const prList = [{
+        title: 'feat: passing feature',
+        created_at: oldDate,
+        html_url: 'https://github.com/pr/6',
+        draft: false,
+        user: { login: 'dev-user' },
+        labels: [],
+        head: { sha: 'def456' },
+      }];
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => prList,
+      });
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ state: 'success' }),
+      });
+
+      const result = await checkPrStatus(githubConfig, mockFetch);
+      expect(result.status).toBe(200);
+    });
+
+    it('skips status check for draft PRs and PRs under 1h old', async () => {
+      const freshDate = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+      const oldDate = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+      const prList = [
+        {
+          title: 'draft PR',
+          created_at: oldDate,
+          html_url: 'https://github.com/pr/7',
+          draft: true,
+          user: { login: 'dev-user' },
+          labels: [],
+          head: { sha: 'aaa111' },
+        },
+        {
+          title: 'fresh PR',
+          created_at: freshDate,
+          html_url: 'https://github.com/pr/8',
+          draft: false,
+          user: { login: 'dev-user' },
+          labels: [],
+          head: { sha: 'bbb222' },
+        },
+      ];
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => prList,
+      });
+
+      const result = await checkPrStatus(githubConfig, mockFetch);
+      expect(result.status).toBe(200);
+      // Only one fetch call (the PR list) — no status checks
+      expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
     it('returns 502 when GitHub API fails', async () => {
