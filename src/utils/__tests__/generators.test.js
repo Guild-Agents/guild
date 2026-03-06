@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdirSync, readFileSync, rmSync, existsSync } from 'fs';
+import { mkdirSync, readFileSync, writeFileSync, rmSync, existsSync } from 'fs';
 import { join } from 'path';
 import { generateProjectMd, generateSessionMd, generateClaudeMd, inferCodeConventions, inferEnvVars } from '../generators.js';
 
@@ -165,16 +165,29 @@ describe('generateClaudeMd', () => {
     expect(content).toContain('REDIS_URL');
   });
 
-  it('injects workspace context when workspace data is provided', async () => {
-    await generateClaudeMd(makeProjectData(), {
+  it('injects workspace context when workspace is provided', async () => {
+    // Create a sibling member with PROJECT.md
+    const frontendDir = join(TEST_DIR, '..', 'frontend-test-ws');
+    mkdirSync(frontendDir, { recursive: true });
+    writeFileSync(join(frontendDir, 'PROJECT.md'), '# PROJECT.md\n## Project\n- **Stack:** React, Vite');
+
+    const workspace = {
       name: 'my-product',
-      currentMember: 'backend',
-      otherMembers: [{ name: 'frontend', stack: 'React, Vite' }],
-    });
+      root: join(TEST_DIR, '..'),
+      members: [
+        { name: 'backend', path: './backend', absolutePath: TEST_DIR },
+        { name: 'frontend', path: './frontend-test-ws', absolutePath: frontendDir },
+      ],
+      shared: { agents: '.guild/agents', skills: '.guild/skills' },
+    };
+
+    await generateClaudeMd(makeProjectData(), workspace, 'backend');
     const content = readFileSync('CLAUDE.md', 'utf8');
     expect(content).toContain('## Workspace context');
     expect(content).toContain('my-product');
     expect(content).toContain('frontend');
+
+    rmSync(frontendDir, { recursive: true, force: true });
   });
 
   it('does not inject workspace context when no workspace data', async () => {

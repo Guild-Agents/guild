@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join, dirname, resolve } from 'path';
 
-const WORKSPACE_FILE = 'guild-workspace.json';
+export const WORKSPACE_FILE = 'guild-workspace.json';
 
 export function findWorkspaceRoot(startDir = process.cwd()) {
   let dir = resolve(startDir);

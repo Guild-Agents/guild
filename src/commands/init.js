@@ -114,7 +114,7 @@ export async function runInit() {
   try {
     await copyTemplates();
     spinner.message('Generating CLAUDE.md...');
-    await generateClaudeMd(projectData);
+    await generateClaudeMd(projectData, workspace, name);
 
     spinner.message('Generating PROJECT.md...');
     await generateProjectMd(projectData);

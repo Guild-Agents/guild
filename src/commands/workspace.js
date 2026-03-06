@@ -1,8 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { basename, join } from 'path';
-import { findWorkspaceRoot } from '../utils/workspace.js';
-
-const WORKSPACE_FILE = 'guild-workspace.json';
+import { findWorkspaceRoot, WORKSPACE_FILE } from '../utils/workspace.js';
 
 export async function createWorkspaceFile(name, memberPaths) {
   const members = memberPaths.map(p => ({
