@@ -17,6 +17,7 @@ import {
 import {
   createDailyStats,
   recordSensorCheck,
+  recordHeuristicCheck,
   recordHaikuCall,
   recordSonnetCall,
   recordHeartbeatCheck,
@@ -71,8 +72,9 @@ async function runPipeline(): Promise<'ok' | 'alert'> {
   let hadAlert = false;
 
   for (const signal of signals) {
+    recordSensorCheck(dailyStats, false); // always count raw sensor call
     const classification = classify(signal);
-    recordSensorCheck(dailyStats, classification.severity === 'ignore');
+    recordHeuristicCheck(dailyStats, classification.severity === 'ignore');
 
     if (classification.severity === 'ignore') continue;
 

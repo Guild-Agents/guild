@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import {
   createDailyStats,
   recordSensorCheck,
+  recordHeuristicCheck,
   recordHaikuCall,
   recordSonnetCall,
   recordHeartbeatCheck,
@@ -45,6 +46,17 @@ describe('stats', () => {
       recordSensorCheck(stats, false);
       expect(stats.layers.sensor.checks).toBe(2);
       expect(stats.layers.sensor.escalated).toBe(1);
+    });
+
+    it('increments heuristic checks and filtered count', () => {
+      const stats = createDailyStats();
+      recordHeuristicCheck(stats, true);
+      expect(stats.layers.heuristic.checks).toBe(1);
+      expect(stats.layers.heuristic.filtered).toBe(1);
+
+      recordHeuristicCheck(stats, false);
+      expect(stats.layers.heuristic.checks).toBe(2);
+      expect(stats.layers.heuristic.escalated).toBe(1);
     });
 
     it('records Haiku token usage', () => {

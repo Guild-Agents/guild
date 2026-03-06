@@ -59,6 +59,12 @@ export function recordSensorCheck(stats: DailyStats, filtered: boolean): void {
   else stats.layers.sensor.escalated++;
 }
 
+export function recordHeuristicCheck(stats: DailyStats, filtered: boolean): void {
+  stats.layers.heuristic.checks++;
+  if (filtered) stats.layers.heuristic.filtered++;
+  else stats.layers.heuristic.escalated++;
+}
+
 export function recordHaikuCall(
   stats: DailyStats, inputTokens: number, outputTokens: number, escalated: boolean,
 ): void {
