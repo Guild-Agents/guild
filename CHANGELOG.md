@@ -7,6 +7,44 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.2.0] - 2026-03-06
+
+### Added
+
+- **Workspaces MVP**: multi-repo coordination via `guild-workspace.json` in a shared parent directory
+  - `guild workspace init <name> <members...>` — create a workspace with member repos
+  - `guild workspace add <path>` — add a member repo to an existing workspace
+  - `guild workspace status` — show workspace members and state
+  - Workspace resolver (`src/utils/workspace.js`) — findWorkspaceRoot, loadWorkspace, resolveWorkspaceAgents — 9 tests
+  - Workspace context generator — cross-repo stack visibility injected into CLAUDE.md — 3 tests
+  - Workspace-aware `guild init` — detects workspace membership automatically
+  - CLI command functions with 7 tests
+- **Zone parser** (`src/utils/zones.js`) — wrapZone, extractZones, replaceZone for protected auto-generated CLAUDE.md sections — 8 tests
+- **`/re-specialize` skill** — incremental re-specialization of auto-generated CLAUDE.md zones without overwriting manual edits
+- **`/tdd` skill** — TDD red-green-refactor discipline for implementation
+- **`/debug` skill** — systematic 4-phase debugging workflow
+- **`/verify` skill** — evidence-before-claims verification before completing work
+
+### Changed
+
+- `guild-specialize` skill updated with zone marker guidance
+- CLAUDE.md generator emits zone markers on 4 auto-generated sections
+- `guild init` passes workspace context to `generateClaudeMd()` when inside a workspace
+
+## [1.1.0] - 2026-03-03
+
+### Added
+
+- **Runtime executor** (`src/utils/orchestrator.js`): real execution mode for `guild run` — executes skill workflows via Claude Code CLI provider (`claude -p`), with state machine, retry/failure handling, and execution tracing
+- **Claude Code CLI provider** (`src/utils/claude-provider.js`): subprocess dispatch via `claude -p` with array args (no shell injection)
+- **3 discipline skills** imported from Superpowers: `/tdd`, `/debug`, `/verify`
+- `--dry-run` flag on `guild run` preserves v1.0 plan-only behavior as opt-in
+
+### Fixed
+
+- Guard null model in executor step resolution
+- Additional test coverage for executor edge cases
+
 ## [1.0.0] - 2026-03-01
 
 ### Added
@@ -229,7 +267,9 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-[Unreleased]: https://github.com/Guild-Agents/guild/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/Guild-Agents/guild/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/Guild-Agents/guild/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/Guild-Agents/guild/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/Guild-Agents/guild/compare/v0.3.1...v1.0.0
 [0.3.1]: https://github.com/Guild-Agents/guild/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/Guild-Agents/guild/compare/v0.2.9...v0.3.0

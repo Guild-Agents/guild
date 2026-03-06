@@ -62,7 +62,7 @@ Six phases: **evaluate**, **specify**, **plan**, **implement**, **review**, **va
 
 ## Skills Reference
 
-All 11 skills, grouped by function:
+All 15 skills, grouped by function:
 
 | Skill | Group | Description |
 | --- | --- | --- |
@@ -72,7 +72,11 @@ All 11 skills, grouped by function:
 | `/council` | Decision | Multi-perspective deliberation on a decision or feature |
 | `/review` | Quality | Code review on the current diff |
 | `/qa-cycle` | Quality | QA and bugfix loop until clean |
+| `/tdd` | Discipline | TDD red-green-refactor cycle |
+| `/debug` | Discipline | Systematic 4-phase debugging |
+| `/verify` | Discipline | Evidence-before-claims verification |
 | `/guild-specialize` | Context | Explore codebase, enrich CLAUDE.md with real conventions |
+| `/re-specialize` | Context | Incremental update of auto-generated CLAUDE.md zones |
 | `/session-start` | Context | Load context and resume work |
 | `/session-end` | Context | Save state to SESSION.md |
 | `/status` | Context | Project and session state overview |
@@ -89,6 +93,9 @@ guild list              # List agents and skills
 guild run <skill>       # Preview a skill's execution plan (dry-run)
 guild logs              # View execution traces
 guild logs clean        # Remove old traces (--days N, --all)
+guild workspace init <name> <members...>  # Create a workspace
+guild workspace add <path>                # Add a member repo
+guild workspace status                    # Show workspace state
 ```
 
 ## Under the Hood
