@@ -54,7 +54,7 @@
 
 ## Technical context
 - **Version**: 1.1.0
-- **Tests**: 497 passing (24 files)
+- **Tests**: 518 passing (26 files)
 - **Agents**: 10 templates
 - **Skills**: 15 templates (12 workflow + 3 discipline)
 - **Node**: v24.12.0 local, CI matrix 20.x/22.x
@@ -64,6 +64,6 @@
 2. **Bump & publish** — v1.1.0 release
 3. **Import Superpowers skills** — create `/tdd`, `/debug`, `/verify` as Guild templates
 4. ~~**guild-re-specialize (P2)**~~ — ✅ Done. Zone parser, generators emit markers, guild-specialize updated, re-specialize skill created.
-5. **Workspaces MVP v1.2 (P2)** — `guild-workspace.json`, shared resolution, workspace commands. Needs spec first.
+5. ~~**Workspaces MVP v1.2 (P2)**~~ — ✅ Done. workspace.js resolver, context generator, CLI commands (init/add/status), workspace-aware init, CLAUDE.md context injection.
 6. **Skill Evaluation System (P3)** — Component 1 only: trigger test suite. Defer Components 2-4 until skill count > 20. See `guild-ideas-eval-and-respecialize.md` Idea 2.
 7. **Guild Watchdog (P3)** — separate project, defer until v1.2 stable. Consider Watchdog Lite (local, no infra) as intermediate validation. See `ideas/guild-watchdog-spec.md`.

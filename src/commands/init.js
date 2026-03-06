@@ -14,10 +14,17 @@ import chalk from 'chalk';
 import { existsSync } from 'fs';
 import { generateProjectMd, generateSessionMd, generateClaudeMd } from '../utils/generators.js';
 import { copyTemplates, getAgentNames, getSkillNames } from '../utils/files.js';
+import { loadWorkspace } from '../utils/workspace.js';
 
 export async function runInit() {
   console.log('');
   p.intro(chalk.bold.cyan('Guild v1 — New project'));
+
+  // Detect workspace membership
+  const workspace = loadWorkspace();
+  if (workspace) {
+    p.log.info(chalk.gray(`Workspace detected: ${workspace.name} (${workspace.root})`));
+  }
 
   // Check for existing installation
   if (existsSync('.claude/agents')) {
@@ -107,7 +114,7 @@ export async function runInit() {
   try {
     await copyTemplates();
     spinner.message('Generating CLAUDE.md...');
-    await generateClaudeMd(projectData);
+    await generateClaudeMd(projectData, workspace, name);
 
     spinner.message('Generating PROJECT.md...');
     await generateProjectMd(projectData);

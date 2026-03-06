@@ -4,6 +4,7 @@
 
 import { writeFileSync } from 'fs';
 import { wrapZone } from './zones.js';
+import { generateWorkspaceContext } from './workspace.js';
 
 /**
  * Generates PROJECT.md with the onboarding data.
@@ -96,7 +97,10 @@ export function inferEnvVars(type, stack) {
 /**
  * Generates CLAUDE.md — central document with placeholders for guild-specialize.
  */
-export async function generateClaudeMd(data) {
+export async function generateClaudeMd(data, workspace = null, currentMemberName = null) {
+  const wsContext = generateWorkspaceContext(workspace, currentMemberName);
+  const workspaceSection = wsContext ? `\n${wsContext}\n` : '';
+
   const content = `# ${data.name}
 
 ## Framework
@@ -116,7 +120,7 @@ ${wrapZone('architecture', '[PENDING: guild-specialize]')}
 
 ## Environment variables
 ${wrapZone('env-vars', inferEnvVars(data.type, data.stack))}
-
+${workspaceSection}
 ## Global rules
 - Do not implement without an approved plan
 - Update SESSION.md at the end of each session

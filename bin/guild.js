@@ -168,4 +168,61 @@ logsCmd
     }
   });
 
+// guild workspace
+const workspaceCmd = program
+  .command('workspace')
+  .description('Manage multi-repo workspaces');
+
+// guild workspace init
+workspaceCmd
+  .command('init')
+  .description('Initialize a workspace in the current directory')
+  .argument('<name>', 'Workspace name')
+  .argument('<members...>', 'Paths to member repos (e.g., ./backend ./frontend)')
+  .action(async (name, members) => {
+    try {
+      const { createWorkspaceFile } = await import('../src/commands/workspace.js');
+      await createWorkspaceFile(name, members);
+      console.log(`Workspace "${name}" created with ${members.length} member(s).`);
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  });
+
+// guild workspace add
+workspaceCmd
+  .command('add')
+  .description('Add a member repo to the workspace')
+  .argument('<path>', 'Path to the member repo')
+  .action(async (memberPath) => {
+    try {
+      const { addWorkspaceMember } = await import('../src/commands/workspace.js');
+      await addWorkspaceMember(memberPath);
+      console.log(`Added "${memberPath}" to workspace.`);
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  });
+
+// guild workspace status
+workspaceCmd
+  .command('status')
+  .description('Show workspace members and their state')
+  .action(async () => {
+    try {
+      const { getWorkspaceStatus } = await import('../src/commands/workspace.js');
+      const status = await getWorkspaceStatus();
+      console.log(`Workspace: ${status.name}`);
+      for (const m of status.members) {
+        const state = m.initialized ? 'initialized' : 'not initialized';
+        console.log(`  ${m.name} (${m.path}) — ${state}`);
+      }
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  });
+
 program.parse();
