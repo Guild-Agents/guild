@@ -1,7 +1,14 @@
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import { join, dirname, resolve } from 'path';
+import { execFileSync } from 'node:child_process';
 
 export const WORKSPACE_FILE = 'guild-workspace.json';
+
+export const PRESET_COMMANDS = {
+  test:  { cmd: 'npm', args: ['test'] },
+  lint:  { cmd: 'npm', args: ['run', 'lint'] },
+  build: { cmd: 'npm', args: ['run', 'build'] },
+};
 
 export function findWorkspaceRoot(startDir = process.cwd()) {
   let dir = resolve(startDir);
@@ -124,4 +131,41 @@ export function collectMemberContext(workspace, currentMemberName) {
   }
 
   return lines.join('\n').trim();
+}
+
+export function runInMember(member, cmd, args) {
+  if (!existsSync(member.absolutePath)) {
+    return {
+      member: member.name,
+      status: 'failed',
+      output: `Directory not found: ${member.absolutePath}`,
+      duration: 0,
+    };
+  }
+
+  const start = Date.now();
+  try {
+    const stdout = execFileSync(cmd, args, {
+      cwd: member.absolutePath,
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    const duration = Date.now() - start;
+    return {
+      member: member.name,
+      status: 'passed',
+      output: stdout.trim(),
+      duration,
+    };
+  } catch (error) {
+    const duration = Date.now() - start;
+    const stdout = error.stdout || '';
+    const stderr = error.stderr || '';
+    return {
+      member: member.name,
+      status: 'failed',
+      output: (stdout + stderr).trim(),
+      duration,
+    };
+  }
 }
