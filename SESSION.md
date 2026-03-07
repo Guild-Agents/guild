@@ -1,73 +1,47 @@
 # SESSION.md
 
 ## Active session
-- **Date:** 2026-03-06
-- **Current task:** none — v1.3.0 release
-- **Branch:** `develop`
+- **Date:** 2026-03-07
+- **Current task:** Guild Watchdog — build-feature pipeline complete, pending local test + PR
+- **Branch:** `feature/guild-watchdog`
 - **Active agent:** none
-- **Status:** v1.3.0 published, 553 tests pass, 10 skill evals pass, CI green
+- **Status:** 6/6 pipeline phases complete, 65 watchdog tests + 553 root tests pass
 
 ## What happened this session
 
-### guild-re-specialize (PR #49)
-- **5 tasks completed** (TDD, subagent-driven):
-  1. Zone parser (`src/utils/zones.js`) — wrapZone, extractZones, replaceZone — 8 tests
-  2. Generators emit zone markers on 4 auto-generated sections
-  3. guild-specialize skill updated with zone marker guidance
-  4. New `/re-specialize` skill template created
-  5. CLAUDE.md and SESSION.md updated
-- **Review:** 0 blockers, 2 warnings (CRLF edge case, hardcoded regex), approved
-- **Merged:** PR #49, CI green
+### Guild Watchdog (feature/guild-watchdog)
+- **Brainstorming:** Spec already existed at `ideas/guild-watchdog-spec.md`. Refined via Q&A:
+  - Inside Guild repo as `packages/watchdog/` (not separate repo)
+  - TypeScript (watchdog only, Guild stays JS)
+  - Direct `@anthropic-ai/sdk` (not Agent SDK)
+  - Monolith simple architecture
+  - Full spec scope (6 phases), minus VPS deploy (manual later)
+- **Design doc:** `docs/plans/2026-03-06-guild-watchdog-design.md`
+- **Implementation plan:** `docs/plans/2026-03-06-guild-watchdog-plan.md` (16 tasks, 6 phases)
 
-### Guild Workspaces MVP v1.2.0 (PR #50)
-- **7 tasks completed** (TDD, subagent-driven):
-  1. Workspace resolver — findWorkspaceRoot, loadWorkspace, resolveWorkspaceAgents — 9 tests
-  2. Workspace context generator — generateWorkspaceContext — 3 tests
-  3. CLI command functions — createWorkspaceFile, addWorkspaceMember, getWorkspaceStatus — 7 tests
-  4. CLI wiring — `guild workspace init/add/status` subcommands
-  5. Workspace-aware `guild init` — detects workspace membership
-  6. CLAUDE.md generator accepts workspace context injection — 2 tests
-  7. Docs updated
-- **Review:** 1 blocker fixed (B1: init.js didn't pass workspace to generateClaudeMd), 4 warnings (W1 constant dedup fixed, W4 dual context gen fixed)
-- **Merged:** PR #50, CI green
+### Build-feature pipeline (all 6 phases)
+1. **Advisor (opus):** Approved with adjustments — Phase 6 (VPS deploy) removed from scope
+2. **Product Owner (opus):** 14 tasks, 6 deliverables, ~51 tests estimated
+3. **Tech Lead (opus):** 7 adjustments (root config excludes, ESLint removal, type sharing, error handling)
+4. **Developer (sonnet):** 14 tasks implemented, 57 tests
+5. **Code Reviewer (opus):** 2 blockers (HTML injection, heuristic stats), 6 warnings, 5 suggestions
+   - Round 2: Developer fixed B1 (escapeHtml), B2 (recordHeuristicCheck), W1 (shared Anthropic client), W3 (dedup before Sonnet), W6 (PR failing checks sensor) — 65 tests
+6. **QA (sonnet):** 29/29 acceptance criteria PASS, approved
 
-### Workspace design decisions
-- **Parent directory pattern**: `guild-workspace.json` in parent dir, `.guild/` for shared config
-- **Merge + local-wins**: shared agents/skills inherited, local overrides on name conflict
-- **Cross-repo context**: agents see other members' stack via CLAUDE.md injection
-- **Phased delivery**: v1.2.0 = context + read, v1.2.1 = cross-repo council, v1.2.2+ = cross-repo commands
-
-### Cross-repo council (PR #51)
-- **2 tasks completed** (TDD, subagent-driven):
-  1. `collectMemberContext()` in workspace.js — reads CLAUDE.md/PROJECT.md/SESSION.md from siblings, returns formatted markdown — 5 tests
-  2. Council SKILL.md updated — workspace-context step in frontmatter, Step 2 detects workspace and injects context
-- **Spec review:** compliant, 1 warning fixed (fragile test assertion)
-- **Merged:** PR #51, CI green
-
-### Cross-repo commands (PR #52)
-- **3 components** (TDD, subagent-driven):
-  1. `runInMember()` in workspace.js — executes command via execFileSync with cwd — 3 tests
-  2. `runWorkspaceCommand()` in commands/workspace.js — preset/custom/all modes, collect-all — 5 tests
-  3. CLI wiring — `guild workspace run` subcommand with member, preset, --cmd, --all options
-- **Merged:** PR #52, CI green
-
-### Skill Evaluation System (PR #53)
-- **4 tasks completed** (TDD, subagent-driven):
-  1. `evaluateAssertion()` engine — 7 assertion types — 16 tests
-  2. `loadEvals()` and `runEvals()` — parse SKILL.md + run evals.json assertions — 6 tests
-  3. Eval definitions for build-feature (6 evals) and council (4 evals)
-  4. `scripts/run-evals.js` runner + npm scripts (eval, eval:build-feature, eval:council)
-- **Merged:** PR #53, CI green
-
-### v1.2.0 release
-- README updated (15 skills, workspace CLI commands)
-- CHANGELOG updated (v1.1.0 + v1.2.0 entries)
-- Bumped, tagged, published to npm
-- Dependabot alerts already fixed (minimatch resolved)
-
-### v1.3.0 release
-- CHANGELOG updated with cross-repo council, cross-repo commands, skill eval
-- Bumped, tagged, published to npm
+### What was built
+- `packages/watchdog/` — TypeScript ESM package with:
+  - Adaptive heartbeat scheduler (15min → 4h backoff)
+  - GitHub CI + PR sensors (Layer 1, $0)
+  - Heuristic classifier (Layer 2, $0)
+  - LLM module: Haiku triage + Sonnet action (Layer 3)
+  - Telegram bot (notifications + 5 commands)
+  - Workspace I/O (events, state, crash recovery)
+  - Stats tracking (per-layer cost accounting)
+  - Main pipeline loop orchestrating everything
+  - PM2 ecosystem config
+  - CI workflow integration (separate job in ci.yml)
+- Root `vitest.config.js` and `eslint.config.js` updated to exclude `packages/`
+- 25 commits on feature branch
 
 ## Key decisions
 
@@ -85,25 +59,19 @@
 12. **Workspace parent dir pattern** — `guild-workspace.json` + `.guild/` in parent directory, merge + local-wins resolution
 13. **Workspace v1.2.0 vs v1.2.1** — context + read first, cross-repo execution second
 14. **Post-v1.2.0 priority (Council, unanimous)** — Dependabot fix → Workspaces v1.2.1 → Skill Eval design → Watchdog deferred to post-v1.3
+15. **Watchdog inside Guild repo** — `packages/watchdog/` as TypeScript, shares CI, deploys independently
+16. **Watchdog uses direct API** — `@anthropic-ai/sdk` not Agent SDK, simpler for targeted LLM calls
+17. **Watchdog deploy deferred** — VPS provisioning is manual, not part of build-feature pipeline
 
 ## Technical context
 - **Version**: 1.3.0
-- **Tests**: 553 passing (27 files)
+- **Tests**: 553 passing (27 files) + 65 watchdog tests (8 files) = 618 total
 - **Agents**: 10 templates
 - **Skills**: 15 templates (12 workflow + 3 discipline)
 - **Node**: v24.12.0 local, CI matrix 20.x/22.x
 
 ## Next steps
-1. ~~Create PR~~ ✅
-2. ~~Bump & publish v1.1.0~~ ✅
-3. ~~Import Superpowers skills~~ ✅
-4. ~~guild-re-specialize~~ ✅ PR #49
-5. ~~Workspaces MVP v1.2.0~~ ✅ PR #50
-6. ~~Bump & publish v1.2.0~~ ✅ tagged, CI green, npm published
-7. ~~Fix Dependabot high vulnerability~~ ✅ already resolved
-8. ~~Cross-repo council (Workspaces v1.2.1)~~ ✅ PR #51
-9. ~~Cross-repo commands (Workspaces v1.2.2)~~ ✅ PR #52
-10. ~~Skill Evaluation System~~ ✅ PR #53
-11. ~~Bump & publish v1.3.0~~ ✅
-12. **Skill Eval Component 2** — full execution with Claude, with-skill vs baseline comparison (future)
-13. **Guild Watchdog** — separate project, defer until post-v1.3.
+1. **Test Watchdog locally** — Set up .env with GitHub/Anthropic/Telegram tokens, run `npm run dev` in packages/watchdog. Consider a sensor-only test script first (no API keys needed)
+2. **Create PR** — `/create-pr` from feature/guild-watchdog to develop
+3. **Merge + deploy** — After CI green, merge PR, then manual VPS setup
+4. **Skill Eval Component 2** — full execution with Claude, with-skill vs baseline comparison (future)
