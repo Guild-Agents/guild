@@ -1,47 +1,36 @@
 # SESSION.md
 
 ## Active session
-- **Date:** 2026-03-07
-- **Current task:** Guild Watchdog — build-feature pipeline complete, pending local test + PR
-- **Branch:** `feature/guild-watchdog`
+- **Date:** 2026-03-23
+- **Current task:** Post-watchdog cleanup — merged PR + Dependabot updates
+- **Branch:** `develop`
 - **Active agent:** none
-- **Status:** 6/6 pipeline phases complete, 65 watchdog tests + 553 root tests pass
+- **Status:** Watchdog merged, 4/5 Dependabot PRs merged, develop up to date
 
 ## What happened this session
 
-### Guild Watchdog (feature/guild-watchdog)
-- **Brainstorming:** Spec already existed at `ideas/guild-watchdog-spec.md`. Refined via Q&A:
-  - Inside Guild repo as `packages/watchdog/` (not separate repo)
-  - TypeScript (watchdog only, Guild stays JS)
-  - Direct `@anthropic-ai/sdk` (not Agent SDK)
-  - Monolith simple architecture
-  - Full spec scope (6 phases), minus VPS deploy (manual later)
-- **Design doc:** `docs/plans/2026-03-06-guild-watchdog-design.md`
-- **Implementation plan:** `docs/plans/2026-03-06-guild-watchdog-plan.md` (16 tasks, 6 phases)
+### Guild Watchdog — merged to develop
+- PR #58 created and merged (`feature/guild-watchdog` → `develop`)
+- CI: 4/5 checks passed (lint + test on Node 20.x/22.x, watchdog lint + test on 20.x/22.x)
+- Security Audit failed — preexisting vuln in `flatted` + `node-telegram-bot-api` dependency chain (see below)
+- Branch cleaned up (remote + local deleted)
 
-### Build-feature pipeline (all 6 phases)
-1. **Advisor (opus):** Approved with adjustments — Phase 6 (VPS deploy) removed from scope
-2. **Product Owner (opus):** 14 tasks, 6 deliverables, ~51 tests estimated
-3. **Tech Lead (opus):** 7 adjustments (root config excludes, ESLint removal, type sharing, error handling)
-4. **Developer (sonnet):** 14 tasks implemented, 57 tests
-5. **Code Reviewer (opus):** 2 blockers (HTML injection, heuristic stats), 6 warnings, 5 suggestions
-   - Round 2: Developer fixed B1 (escapeHtml), B2 (recordHeuristicCheck), W1 (shared Anthropic client), W3 (dedup before Sonnet), W6 (PR failing checks sensor) — 65 tests
-6. **QA (sonnet):** 29/29 acceptance criteria PASS, approved
+### Dependabot PRs
+- ✅ #54 — eslint 10.0.2 → 10.0.3
+- ✅ #55 — @clack/prompts 1.0.1 → 1.1.0
+- ✅ #57 — vitest 4.0.18 → 4.1.0
+- ❌ #56 — @vitest/coverage-v8 4.0.18 → 4.1.0 (CONFLICTING after #57 merge, awaiting Dependabot rebase)
 
-### What was built
-- `packages/watchdog/` — TypeScript ESM package with:
-  - Adaptive heartbeat scheduler (15min → 4h backoff)
-  - GitHub CI + PR sensors (Layer 1, $0)
-  - Heuristic classifier (Layer 2, $0)
-  - LLM module: Haiku triage + Sonnet action (Layer 3)
-  - Telegram bot (notifications + 5 commands)
-  - Workspace I/O (events, state, crash recovery)
-  - Stats tracking (per-layer cost accounting)
-  - Main pipeline loop orchestrating everything
-  - PM2 ecosystem config
-  - CI workflow integration (separate job in ci.yml)
-- Root `vitest.config.js` and `eslint.config.js` updated to exclude `packages/`
-- 25 commits on feature branch
+### Security audit findings
+7 vulnerabilities total (5 moderate, 2 critical):
+- `node-telegram-bot-api@0.66.0` → `@cypress/request-promise` → `request@2.88.2` (deprecated)
+  - `form-data` <2.5.4 (critical), `qs` (moderate), `tough-cookie` (moderate)
+- `flatted` ≤3.4.1 → from `flat-cache` → `eslint` (dev dependency)
+- Options: migrate to grammy/telegraf, or accept risk (request only used for internal polling)
+
+### Coordinated session
+- Two Claude Code sessions worked in parallel via claude-peers
+- Split: one ran tests + monitored CI, other created PR + merged Dependabot PRs
 
 ## Key decisions
 
@@ -69,9 +58,12 @@
 - **Agents**: 10 templates
 - **Skills**: 15 templates (12 workflow + 3 discipline)
 - **Node**: v24.12.0 local, CI matrix 20.x/22.x
+- **Dependencies updated**: eslint 10.0.3, @clack/prompts 1.1.0, vitest 4.1.0
 
 ## Next steps
-1. **Test Watchdog locally** — Set up .env with GitHub/Anthropic/Telegram tokens, run `npm run dev` in packages/watchdog. Consider a sensor-only test script first (no API keys needed)
-2. **Create PR** — `/create-pr` from feature/guild-watchdog to develop
-3. **Merge + deploy** — After CI green, merge PR, then manual VPS setup
-4. **Skill Eval Component 2** — full execution with Claude, with-skill vs baseline comparison (future)
+1. **Resolve #56** — wait for Dependabot rebase or bump @vitest/coverage-v8 manually
+2. **Security audit** — decide on node-telegram-bot-api alternative (grammy/telegraf) vs accept risk
+3. **Watchdog local test** — set up .env with GitHub/Anthropic/Telegram tokens, smoke test
+4. **Watchdog VPS deploy** — manual PM2 setup on VPS
+5. **Workspaces v1.2.1** — cross-repo execution (feature/cross-repo-commands branch exists)
+6. **Skill Eval Component 2** — full execution with Claude, with-skill vs baseline comparison
