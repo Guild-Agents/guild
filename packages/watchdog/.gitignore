@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+workspace/events/
+workspace/stats/
+workspace/heartbeat-state.json
+workspace/MEMORY.md
+.env
+logs/
