@@ -1,0 +1,16 @@
+{
+  "skill": "create-pr",
+  "matcherType": "keyword",
+  "description": "Create a pull request from the current branch with structured summary",
+  "threshold": 0.3,
+  "tests": [
+    { "prompt": "create a pull request", "shouldTrigger": true },
+    { "prompt": "open a PR for this branch", "shouldTrigger": true },
+    { "prompt": "push and create PR", "shouldTrigger": true },
+    { "prompt": "I'm ready to submit this for review", "shouldTrigger": true, "keywordExpected": false },
+    { "prompt": "review my code changes", "shouldTrigger": false },
+    { "prompt": "start a new feature", "shouldTrigger": false },
+    { "prompt": "deploy to production", "shouldTrigger": false },
+    { "prompt": "save my session", "shouldTrigger": false }
+  ]
+}
