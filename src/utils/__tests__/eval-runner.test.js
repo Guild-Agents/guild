@@ -105,7 +105,7 @@ describe('loadEvals', () => {
   });
 
   it('returns null for a skill without evals', () => {
-    const evals = loadEvals('session-start');
+    const evals = loadEvals('tdd');
     expect(evals).toBeNull();
   });
 });
@@ -136,6 +136,6 @@ describe('runEvals', () => {
   });
 
   it('throws for skill without evals', () => {
-    expect(() => runEvals('session-start')).toThrow('No evals found');
+    expect(() => runEvals('tdd')).toThrow('No evals found');
   });
 });

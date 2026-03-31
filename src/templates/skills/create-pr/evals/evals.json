@@ -1,0 +1,44 @@
+{
+  "skill": "create-pr",
+  "evals": [
+    {
+      "id": "cpr-has-core-steps",
+      "description": "PR creation has verify, gather, generate, create steps",
+      "expectations": [
+        { "text": "Has verify-branch step", "assertion": "step-exists:verify-branch" },
+        { "text": "Has gather-context step", "assertion": "step-exists:gather-context" },
+        { "text": "Has generate-description step", "assertion": "step-exists:generate-description" },
+        { "text": "Has create-pr step", "assertion": "step-exists:create-pr" }
+      ]
+    },
+    {
+      "id": "cpr-all-system-role",
+      "description": "All steps use system role (no agent delegation)",
+      "expectations": [
+        { "text": "verify-branch is system", "assertion": "step-role:verify-branch:system" },
+        { "text": "gather-context is system", "assertion": "step-role:gather-context:system" },
+        { "text": "generate-description is system", "assertion": "step-role:generate-description:system" },
+        { "text": "create-pr is system", "assertion": "step-role:create-pr:system" },
+        { "text": "post-creation is system", "assertion": "step-role:post-creation:system" }
+      ]
+    },
+    {
+      "id": "cpr-gates",
+      "description": "Gates at description generation and post-creation",
+      "expectations": [
+        { "text": "Generate-description has gate", "assertion": "gate-exists:generate-description" },
+        { "text": "Post-creation has gate", "assertion": "gate-exists:post-creation" }
+      ]
+    },
+    {
+      "id": "cpr-dependencies",
+      "description": "Steps have correct dependency chain",
+      "expectations": [
+        { "text": "gather-context requires branch-state", "assertion": "step-requires:gather-context:branch-state" },
+        { "text": "generate-description requires commit-list", "assertion": "step-requires:generate-description:commit-list" },
+        { "text": "create-pr requires pr-description", "assertion": "step-requires:create-pr:pr-description" },
+        { "text": "post-creation requires pr-url", "assertion": "step-requires:post-creation:pr-url" }
+      ]
+    }
+  ]
+}

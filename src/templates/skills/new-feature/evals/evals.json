@@ -1,0 +1,41 @@
+{
+  "skill": "new-feature",
+  "evals": [
+    {
+      "id": "nf-has-core-steps",
+      "description": "New feature has name, branch, session, confirm steps",
+      "expectations": [
+        { "text": "Has get-name step", "assertion": "step-exists:get-name" },
+        { "text": "Has create-branch step", "assertion": "step-exists:create-branch" },
+        { "text": "Has update-session step", "assertion": "step-exists:update-session" },
+        { "text": "Has confirm step", "assertion": "step-exists:confirm" }
+      ]
+    },
+    {
+      "id": "nf-optional-issue",
+      "description": "GitHub issue creation step exists",
+      "expectations": [
+        { "text": "Has create-issue step", "assertion": "step-exists:create-issue" }
+      ]
+    },
+    {
+      "id": "nf-gates",
+      "description": "Gates at name input, session update, and confirmation",
+      "expectations": [
+        { "text": "get-name has gate", "assertion": "gate-exists:get-name" },
+        { "text": "update-session has gate", "assertion": "gate-exists:update-session" },
+        { "text": "confirm has gate", "assertion": "gate-exists:confirm" }
+      ]
+    },
+    {
+      "id": "nf-all-system",
+      "description": "All steps are system role",
+      "expectations": [
+        { "text": "get-name is system", "assertion": "step-role:get-name:system" },
+        { "text": "create-branch is system", "assertion": "step-role:create-branch:system" },
+        { "text": "update-session is system", "assertion": "step-role:update-session:system" },
+        { "text": "confirm is system", "assertion": "step-role:confirm:system" }
+      ]
+    }
+  ]
+}
