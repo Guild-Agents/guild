@@ -1,4 +1,4 @@
-import TelegramBot from 'node-telegram-bot-api';
+import { Bot } from 'grammy';
 import { loadConfig } from './config.js';
 import { createInitialState, computeNextInterval, isInActiveHours } from './heartbeat.js';
 import type { HeartbeatState } from './heartbeat.js';
@@ -39,7 +39,7 @@ const startedAt = Date.now();
 const llm = createLlmClient(config.anthropic.apiKey);
 
 // Telegram
-const telegramBot = new TelegramBot(config.telegram.botToken, { polling: true });
+const telegramBot = new Bot(config.telegram.botToken);
 const bot = createTelegramBot(telegramBot, config.telegram.chatId);
 
 const commands: CommandHandlers = {
@@ -68,6 +68,7 @@ const commands: CommandHandlers = {
 };
 
 bot.registerCommands(commands);
+telegramBot.start();
 
 // Pipeline
 async function runPipeline(): Promise<'ok' | 'alert'> {

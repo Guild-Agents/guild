@@ -1,4 +1,4 @@
-import type TelegramBotApi from 'node-telegram-bot-api';
+import type { Bot } from 'grammy';
 
 export interface Notification {
   severity: 'info' | 'warning' | 'critical';
@@ -44,38 +44,38 @@ export interface CommandHandlers {
   onResume: () => string;
 }
 
-export function createTelegramBot(bot: TelegramBotApi, chatId: string): WatchdogBot {
+export function createTelegramBot(bot: Bot, chatId: string): WatchdogBot {
   return {
     async sendNotification(notification: Notification) {
       const text = formatNotification(notification);
-      await bot.sendMessage(chatId, text, { parse_mode: 'HTML' });
+      await bot.api.sendMessage(chatId, text, { parse_mode: 'HTML' });
     },
 
     registerCommands(handlers: CommandHandlers) {
-      bot.onText(/\/status/, async (msg) => {
-        if (String(msg.chat.id) !== chatId) return;
-        await bot.sendMessage(chatId, handlers.onStatus());
+      bot.command('status', async (ctx) => {
+        if (String(ctx.chat.id) !== chatId) return;
+        await ctx.reply(handlers.onStatus());
       });
 
-      bot.onText(/\/stats/, async (msg) => {
-        if (String(msg.chat.id) !== chatId) return;
-        await bot.sendMessage(chatId, handlers.onStats());
+      bot.command('stats', async (ctx) => {
+        if (String(ctx.chat.id) !== chatId) return;
+        await ctx.reply(handlers.onStats());
       });
 
-      bot.onText(/\/interval (.+)/, async (msg, match) => {
-        if (String(msg.chat.id) !== chatId) return;
-        const response = handlers.onInterval(match?.[1] ?? '15m');
-        await bot.sendMessage(chatId, response);
+      bot.command('interval', async (ctx) => {
+        if (String(ctx.chat.id) !== chatId) return;
+        const response = handlers.onInterval(ctx.match || '15m');
+        await ctx.reply(response);
       });
 
-      bot.onText(/\/pause/, async (msg) => {
-        if (String(msg.chat.id) !== chatId) return;
-        await bot.sendMessage(chatId, handlers.onPause());
+      bot.command('pause', async (ctx) => {
+        if (String(ctx.chat.id) !== chatId) return;
+        await ctx.reply(handlers.onPause());
       });
 
-      bot.onText(/\/resume/, async (msg) => {
-        if (String(msg.chat.id) !== chatId) return;
-        await bot.sendMessage(chatId, handlers.onResume());
+      bot.command('resume', async (ctx) => {
+        if (String(ctx.chat.id) !== chatId) return;
+        await ctx.reply(handlers.onResume());
       });
     },
   };

@@ -63,18 +63,18 @@ describe('telegram', () => {
   describe('createTelegramBot', () => {
     it('creates bot with sendNotification method', () => {
       const mockBot = {
-        sendMessage: vi.fn().mockResolvedValue({}),
-        onText: vi.fn(),
+        api: { sendMessage: vi.fn().mockResolvedValue({}) },
+        command: vi.fn(),
       };
 
       const bot = createTelegramBot(mockBot as any, '12345');
       expect(bot.sendNotification).toBeTypeOf('function');
     });
 
-    it('sendNotification calls sendMessage with correct chat ID', async () => {
+    it('sendNotification calls bot.api.sendMessage with correct chat ID', async () => {
       const mockBot = {
-        sendMessage: vi.fn().mockResolvedValue({}),
-        onText: vi.fn(),
+        api: { sendMessage: vi.fn().mockResolvedValue({}) },
+        command: vi.fn(),
       };
 
       const bot = createTelegramBot(mockBot as any, '12345');
@@ -83,7 +83,7 @@ describe('telegram', () => {
         summary: 'Test message',
       });
 
-      expect(mockBot.sendMessage).toHaveBeenCalledWith(
+      expect(mockBot.api.sendMessage).toHaveBeenCalledWith(
         '12345',
         expect.stringContaining('Test message'),
         expect.any(Object),
