@@ -1,0 +1,16 @@
+{
+  "skill": "verify",
+  "matcherType": "keyword",
+  "description": "Discipline skill — verification before completion. Use when about to claim work is complete, fixed, or passing, before committing or creating PRs.",
+  "threshold": 0.3,
+  "tests": [
+    { "prompt": "verify before committing", "shouldTrigger": true },
+    { "prompt": "run verification before completion", "shouldTrigger": true },
+    { "prompt": "verify the work is complete", "shouldTrigger": true },
+    { "prompt": "make sure everything passes before the PR", "shouldTrigger": true, "keywordExpected": false },
+    { "prompt": "create a pull request", "shouldTrigger": false },
+    { "prompt": "review my code", "shouldTrigger": false },
+    { "prompt": "debug this bug", "shouldTrigger": false },
+    { "prompt": "save my session", "shouldTrigger": false }
+  ]
+}

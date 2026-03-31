@@ -3,7 +3,7 @@ import { loadTriggers, runTriggerTests, computeAccuracy } from '../trigger-runne
 
 describe('loadTriggers', () => {
   it('returns null for skill without triggers', () => {
-    const triggers = loadTriggers('status');
+    const triggers = loadTriggers('nonexistent-skill');
     expect(triggers).toBeNull();
   });
 });

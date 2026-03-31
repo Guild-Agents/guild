@@ -1,0 +1,16 @@
+{
+  "skill": "council",
+  "matcherType": "keyword",
+  "description": "Convenes multiple agents to debate an important decision",
+  "threshold": 0.3,
+  "tests": [
+    { "prompt": "convene a council to debate this decision", "shouldTrigger": true },
+    { "prompt": "I need multiple agents to debate this", "shouldTrigger": true },
+    { "prompt": "let the council decide", "shouldTrigger": true, "keywordExpected": false },
+    { "prompt": "I need help making a decision", "shouldTrigger": true, "keywordExpected": false },
+    { "prompt": "build a new feature", "shouldTrigger": false },
+    { "prompt": "review my code", "shouldTrigger": false },
+    { "prompt": "save my session", "shouldTrigger": false },
+    { "prompt": "debug this bug", "shouldTrigger": false }
+  ]
+}

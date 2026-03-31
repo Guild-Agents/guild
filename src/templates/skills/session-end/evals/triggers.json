@@ -1,0 +1,16 @@
+{
+  "skill": "session-end",
+  "matcherType": "keyword",
+  "description": "Saves current state to SESSION.md",
+  "threshold": 0.3,
+  "tests": [
+    { "prompt": "save the session state", "shouldTrigger": true },
+    { "prompt": "end my session and save to SESSION.md", "shouldTrigger": true },
+    { "prompt": "save current state to SESSION", "shouldTrigger": true },
+    { "prompt": "I'm done for today, save my progress", "shouldTrigger": true, "keywordExpected": false },
+    { "prompt": "start my session", "shouldTrigger": false },
+    { "prompt": "create a pull request", "shouldTrigger": false },
+    { "prompt": "review my code", "shouldTrigger": false },
+    { "prompt": "debug this bug", "shouldTrigger": false }
+  ]
+}

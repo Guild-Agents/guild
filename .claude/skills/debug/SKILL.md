@@ -1,6 +1,6 @@
 ---
 name: debug
-description: "Discipline skill — systematic debugging process. Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes."
+description: "Discipline skill — systematic debugging process. Use when encountering any bug, debug issue, test failure, broken function, or unexpected behavior, before proposing fixes."
 user-invocable: true
 ---
 
