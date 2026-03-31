@@ -78,3 +78,62 @@ export function recordStep(root, params) {
   updateTotals(usage.totals, entry);
   saveUsage(root, usage);
 }
+
+const PROFILES = {
+  max: { reasoning: 'claude-opus-4-6', execution: 'claude-sonnet-4-5', routine: 'claude-haiku-4-5' },
+  pro: { reasoning: 'claude-sonnet-4-5', execution: 'claude-sonnet-4-5', routine: 'claude-haiku-4-5' },
+  'all-opus': { reasoning: 'claude-opus-4-6', execution: 'claude-opus-4-6', routine: 'claude-opus-4-6' },
+};
+
+export function aggregate(root, period) {
+  const usage = loadUsage(root);
+  const now = new Date();
+  let cutoff;
+
+  switch (period) {
+    case 'today':
+      cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      break;
+    case 'week':
+      cutoff = new Date(now);
+      cutoff.setDate(cutoff.getDate() - 7);
+      break;
+    case 'month':
+      cutoff = new Date(now);
+      cutoff.setDate(cutoff.getDate() - 30);
+      break;
+    default:
+      cutoff = new Date(0);
+  }
+
+  const filtered = usage.entries.filter(e => new Date(e.timestamp) >= cutoff);
+
+  const totals = {
+    totalTokens: 0,
+    totalInputTokens: 0,
+    totalOutputTokens: 0,
+    totalCostUSD: 0,
+    tokensByModel: {},
+    tokensByTier: {},
+    tokensByWorkflow: {},
+    workflowCount: 0,
+  };
+
+  for (const entry of filtered) {
+    updateTotals(totals, entry);
+  }
+
+  return totals;
+}
+
+export function estimateWithProfile(entries, profileName) {
+  const profile = PROFILES[profileName];
+  if (!profile) return 0;
+
+  let cost = 0;
+  for (const entry of entries) {
+    const model = profile[entry.tier] || entry.model;
+    cost += estimateCost(model, entry.inputTokens, entry.outputTokens);
+  }
+  return cost;
+}
