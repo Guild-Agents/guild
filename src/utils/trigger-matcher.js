@@ -13,7 +13,7 @@
 function tokenize(text) {
   return text
     .toLowerCase()
-    .replace(/[—–\-\/]/g, ' ')
+    .replace(/[—–\-/]/g, ' ')
     .replace(/[^\w\s]/g, '')
     .split(/\s+/)
     .filter(w => w.length > 1);
