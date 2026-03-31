@@ -168,6 +168,21 @@ logsCmd
     }
   });
 
+// guild eval
+program
+  .command('eval')
+  .description('Run skill structural evaluations')
+  .argument('[skill]', 'Skill name to evaluate (or all if omitted)')
+  .action(async (skill) => {
+    try {
+      const { runEval } = await import('../src/commands/eval.js');
+      await runEval(skill);
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  });
+
 // guild workspace
 const workspaceCmd = program
   .command('workspace')
