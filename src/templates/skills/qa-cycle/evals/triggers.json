@@ -1,0 +1,16 @@
+{
+  "skill": "qa-cycle",
+  "matcherType": "keyword",
+  "description": "QA + bugfix cycle until it passes",
+  "threshold": 0.3,
+  "tests": [
+    { "prompt": "run a QA cycle on this", "shouldTrigger": true },
+    { "prompt": "QA and bugfix until it passes", "shouldTrigger": true },
+    { "prompt": "validate with QA cycle", "shouldTrigger": true },
+    { "prompt": "check if my implementation is correct", "shouldTrigger": true, "keywordExpected": false },
+    { "prompt": "create a pull request", "shouldTrigger": false },
+    { "prompt": "review my code", "shouldTrigger": false },
+    { "prompt": "save my session", "shouldTrigger": false },
+    { "prompt": "start a new feature", "shouldTrigger": false }
+  ]
+}

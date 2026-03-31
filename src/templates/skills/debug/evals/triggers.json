@@ -1,0 +1,16 @@
+{
+  "skill": "debug",
+  "matcherType": "keyword",
+  "description": "Discipline skill — systematic debugging process. Use when encountering any bug, debug issue, test failure, broken function, or unexpected behavior, before proposing fixes.",
+  "threshold": 0.3,
+  "tests": [
+    { "prompt": "I have a bug in the login flow", "shouldTrigger": true, "keywordExpected": false },
+    { "prompt": "tests are failing unexpectedly", "shouldTrigger": true },
+    { "prompt": "unexpected behavior in the API", "shouldTrigger": true },
+    { "prompt": "help me debug this function", "shouldTrigger": true },
+    { "prompt": "create a new feature", "shouldTrigger": false },
+    { "prompt": "review my code", "shouldTrigger": false },
+    { "prompt": "save my session", "shouldTrigger": false },
+    { "prompt": "what phase am I in", "shouldTrigger": false }
+  ]
+}

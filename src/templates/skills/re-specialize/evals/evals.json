@@ -1,0 +1,48 @@
+{
+  "skill": "re-specialize",
+  "evals": [
+    {
+      "id": "rs-has-core-steps",
+      "description": "Re-specialize has read, explore, check-zones, regenerate, update, confirm, commit steps",
+      "expectations": [
+        { "text": "Has read-current step", "assertion": "step-exists:read-current" },
+        { "text": "Has explore-project step", "assertion": "step-exists:explore-project" },
+        { "text": "Has check-zones step", "assertion": "step-exists:check-zones" },
+        { "text": "Has regenerate-zones step", "assertion": "step-exists:regenerate-zones" },
+        { "text": "Has update-agents step", "assertion": "step-exists:update-agents" },
+        { "text": "Has confirm step", "assertion": "step-exists:confirm" },
+        { "text": "Has commit step", "assertion": "step-exists:commit" }
+      ]
+    },
+    {
+      "id": "rs-reasoning-for-regeneration",
+      "description": "Zone regeneration uses reasoning tier (opus)",
+      "expectations": [
+        { "text": "regenerate-zones uses reasoning", "assertion": "step-model-tier:regenerate-zones:reasoning" }
+      ]
+    },
+    {
+      "id": "rs-execution-for-agents",
+      "description": "Agent updates use execution tier (sonnet)",
+      "expectations": [
+        { "text": "update-agents uses execution", "assertion": "step-model-tier:update-agents:execution" }
+      ]
+    },
+    {
+      "id": "rs-gates",
+      "description": "Gates at exploration, zone check, and confirmation",
+      "expectations": [
+        { "text": "explore-project has gate", "assertion": "gate-exists:explore-project" },
+        { "text": "check-zones has gate", "assertion": "gate-exists:check-zones" },
+        { "text": "confirm has gate", "assertion": "gate-exists:confirm" }
+      ]
+    },
+    {
+      "id": "rs-minimum-steps",
+      "description": "Has at least 7 steps",
+      "expectations": [
+        { "text": "At least 7 steps", "assertion": "step-count:7" }
+      ]
+    }
+  ]
+}

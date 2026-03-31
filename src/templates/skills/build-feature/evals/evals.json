@@ -1,0 +1,53 @@
+{
+  "skill": "build-feature",
+  "evals": [
+    {
+      "id": "bf-has-core-phases",
+      "description": "Plan contains evaluate, specify, design, implement phases",
+      "expectations": [
+        { "text": "Has evaluate step", "assertion": "step-exists:evaluate" },
+        { "text": "Has specify step", "assertion": "step-exists:specify" },
+        { "text": "Has design step", "assertion": "step-exists:design" },
+        { "text": "Has implement step", "assertion": "step-exists:implement" }
+      ]
+    },
+    {
+      "id": "bf-has-quality-phases",
+      "description": "Plan contains review, QA, and completion phases",
+      "expectations": [
+        { "text": "Has review step", "assertion": "step-exists:review" },
+        { "text": "Has QA phase", "assertion": "step-exists:qa-phase" },
+        { "text": "Has completion step", "assertion": "step-exists:completion" }
+      ]
+    },
+    {
+      "id": "bf-advisor-uses-reasoning",
+      "description": "Advisor (evaluate) uses reasoning tier",
+      "expectations": [
+        { "text": "Evaluate uses reasoning tier", "assertion": "step-model-tier:evaluate:reasoning" }
+      ]
+    },
+    {
+      "id": "bf-developer-uses-execution",
+      "description": "Developer (implement) uses execution tier",
+      "expectations": [
+        { "text": "Implement uses execution tier", "assertion": "step-model-tier:implement:execution" }
+      ]
+    },
+    {
+      "id": "bf-gates-exist",
+      "description": "Quality gates exist at pre-review and final",
+      "expectations": [
+        { "text": "Pre-review gate exists", "assertion": "gate-exists:gate-pre-review" },
+        { "text": "Final gate exists", "assertion": "gate-exists:gate-final" }
+      ]
+    },
+    {
+      "id": "bf-minimum-steps",
+      "description": "Plan has at least 10 steps",
+      "expectations": [
+        { "text": "At least 10 steps", "assertion": "step-count:10" }
+      ]
+    }
+  ]
+}

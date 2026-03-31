@@ -5,6 +5,7 @@ export default defineConfig({
     exclude: [
       '**/node_modules/**',
       '.claude/worktrees/**',
+      'packages/**',
     ],
     coverage: {
       include: ['src/**/*.js'],

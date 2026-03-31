@@ -1,0 +1,46 @@
+{
+  "skill": "qa-cycle",
+  "evals": [
+    {
+      "id": "qa-has-core-steps",
+      "description": "QA cycle has pre-gate, validate, bugfix, post-gate steps",
+      "expectations": [
+        { "text": "Has gate-pre-qa step", "assertion": "step-exists:gate-pre-qa" },
+        { "text": "Has qa-validate step", "assertion": "step-exists:qa-validate" },
+        { "text": "Has bugfix step", "assertion": "step-exists:bugfix" },
+        { "text": "Has gate-post-qa step", "assertion": "step-exists:gate-post-qa" }
+      ]
+    },
+    {
+      "id": "qa-agent-roles",
+      "description": "QA and bugfix steps use correct agent roles",
+      "expectations": [
+        { "text": "qa-validate uses qa role", "assertion": "step-role:qa-validate:qa" },
+        { "text": "bugfix uses bugfix role", "assertion": "step-role:bugfix:bugfix" }
+      ]
+    },
+    {
+      "id": "qa-execution-tier",
+      "description": "QA and bugfix use execution tier (sonnet)",
+      "expectations": [
+        { "text": "qa-validate uses execution", "assertion": "step-model-tier:qa-validate:execution" },
+        { "text": "bugfix uses execution", "assertion": "step-model-tier:bugfix:execution" }
+      ]
+    },
+    {
+      "id": "qa-gates",
+      "description": "Pre and post QA gates exist",
+      "expectations": [
+        { "text": "gate-pre-qa has gate", "assertion": "gate-exists:gate-pre-qa" },
+        { "text": "gate-post-qa has gate", "assertion": "gate-exists:gate-post-qa" }
+      ]
+    },
+    {
+      "id": "qa-bugfix-requires-report",
+      "description": "Bugfix step requires QA report",
+      "expectations": [
+        { "text": "bugfix requires qa-report", "assertion": "step-requires:bugfix:qa-report" }
+      ]
+    }
+  ]
+}

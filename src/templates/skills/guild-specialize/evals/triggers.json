@@ -1,0 +1,16 @@
+{
+  "skill": "guild-specialize",
+  "matcherType": "keyword",
+  "description": "Enriches CLAUDE.md by exploring the project and specializes agents to the real stack",
+  "threshold": 0.3,
+  "tests": [
+    { "prompt": "specialize the agents for this project", "shouldTrigger": true },
+    { "prompt": "enrich CLAUDE.md with the project stack", "shouldTrigger": true },
+    { "prompt": "explore the project and specialize agents", "shouldTrigger": true },
+    { "prompt": "set up Guild for this codebase", "shouldTrigger": true, "keywordExpected": false },
+    { "prompt": "create a pull request", "shouldTrigger": false },
+    { "prompt": "review my code", "shouldTrigger": false },
+    { "prompt": "debug this bug", "shouldTrigger": false },
+    { "prompt": "save my session", "shouldTrigger": false }
+  ]
+}

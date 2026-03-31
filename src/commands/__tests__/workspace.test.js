@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mkdirSync, rmSync, existsSync, readFileSync, realpathSync, mkdtempSync } from 'fs';
+import { mkdirSync, rmSync, existsSync, readFileSync, writeFileSync, realpathSync, mkdtempSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
@@ -105,5 +105,79 @@ describe('guild workspace status', () => {
     expect(status.members).toHaveLength(2);
     expect(status.members[0].initialized).toBe(true);
     expect(status.members[1].initialized).toBe(false);
+  });
+});
+
+describe('guild workspace run', () => {
+  let tempDir;
+  let originalCwd;
+
+  beforeEach(() => {
+    originalCwd = process.cwd();
+    tempDir = realpathSync(mkdtempSync(join(tmpdir(), 'guild-ws-cmd-')));
+    process.chdir(tempDir);
+  });
+
+  afterEach(() => {
+    process.chdir(originalCwd);
+    rmSync(tempDir, { recursive: true, force: true });
+  });
+
+  it('runs a preset command in a specific member', async () => {
+    const { createWorkspaceFile, runWorkspaceCommand } = await import('../workspace.js');
+    await createWorkspaceFile('test', ['./app']);
+    mkdirSync(join(tempDir, 'app'), { recursive: true });
+    writeFileSync(join(tempDir, 'app', 'package.json'), JSON.stringify({
+      name: 'app',
+      scripts: { test: 'echo ok' },
+    }));
+
+    const results = runWorkspaceCommand('app', 'test', {});
+    expect(results).toHaveLength(1);
+    expect(results[0].status).toBe('passed');
+  });
+
+  it('runs a custom command with --cmd', async () => {
+    const { createWorkspaceFile, runWorkspaceCommand } = await import('../workspace.js');
+    await createWorkspaceFile('test', ['./app']);
+    mkdirSync(join(tempDir, 'app'), { recursive: true });
+
+    const results = runWorkspaceCommand('app', null, { cmd: 'node -e console.log(42)' });
+    expect(results).toHaveLength(1);
+    expect(results[0].output).toContain('42');
+  });
+
+  it('runs in all members with --all', async () => {
+    const { createWorkspaceFile, runWorkspaceCommand } = await import('../workspace.js');
+    await createWorkspaceFile('test', ['./api', './web']);
+    mkdirSync(join(tempDir, 'api'), { recursive: true });
+    mkdirSync(join(tempDir, 'web'), { recursive: true });
+    writeFileSync(join(tempDir, 'api', 'package.json'), JSON.stringify({
+      name: 'api',
+      scripts: { test: 'echo ok' },
+    }));
+    writeFileSync(join(tempDir, 'web', 'package.json'), JSON.stringify({
+      name: 'web',
+      scripts: { test: 'echo ok' },
+    }));
+
+    const results = runWorkspaceCommand(null, 'test', { all: true });
+    expect(results).toHaveLength(2);
+    expect(results[0].status).toBe('passed');
+    expect(results[1].status).toBe('passed');
+  });
+
+  it('throws when member is not found', async () => {
+    const { createWorkspaceFile, runWorkspaceCommand } = await import('../workspace.js');
+    await createWorkspaceFile('test', ['./app']);
+
+    expect(() => runWorkspaceCommand('ghost', 'test', {})).toThrow('Available: app');
+  });
+
+  it('throws when no preset and no --cmd given', async () => {
+    const { createWorkspaceFile, runWorkspaceCommand } = await import('../workspace.js');
+    await createWorkspaceFile('test', ['./app']);
+
+    expect(() => runWorkspaceCommand('app', null, {})).toThrow('Unknown command');
   });
 });

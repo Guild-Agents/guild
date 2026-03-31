@@ -1,0 +1,43 @@
+{
+  "skill": "review",
+  "evals": [
+    {
+      "id": "rv-has-core-steps",
+      "description": "Review has gather-diff, review, and present steps",
+      "expectations": [
+        { "text": "Has gather-diff step", "assertion": "step-exists:gather-diff" },
+        { "text": "Has review step", "assertion": "step-exists:review" },
+        { "text": "Has present step", "assertion": "step-exists:present" }
+      ]
+    },
+    {
+      "id": "rv-reviewer-role",
+      "description": "Review step uses code-reviewer role",
+      "expectations": [
+        { "text": "review uses code-reviewer role", "assertion": "step-role:review:code-reviewer" }
+      ]
+    },
+    {
+      "id": "rv-reasoning-tier",
+      "description": "Code review uses reasoning tier (opus)",
+      "expectations": [
+        { "text": "review uses reasoning tier", "assertion": "step-model-tier:review:reasoning" }
+      ]
+    },
+    {
+      "id": "rv-presentation-gate",
+      "description": "Present step has gate for user review",
+      "expectations": [
+        { "text": "present has gate", "assertion": "gate-exists:present" }
+      ]
+    },
+    {
+      "id": "rv-dependencies",
+      "description": "Review requires diff content, present requires report",
+      "expectations": [
+        { "text": "review requires diff-content", "assertion": "step-requires:review:diff-content" },
+        { "text": "present requires review-report", "assertion": "step-requires:present:review-report" }
+      ]
+    }
+  ]
+}

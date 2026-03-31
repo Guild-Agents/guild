@@ -1,0 +1,40 @@
+{
+  "skill": "session-end",
+  "evals": [
+    {
+      "id": "se-has-core-steps",
+      "description": "Session end has gather, update, wip-commit, confirm steps",
+      "expectations": [
+        { "text": "Has gather-state step", "assertion": "step-exists:gather-state" },
+        { "text": "Has update-session step", "assertion": "step-exists:update-session" },
+        { "text": "Has commit-wip step", "assertion": "step-exists:commit-wip" },
+        { "text": "Has confirm step", "assertion": "step-exists:confirm" }
+      ]
+    },
+    {
+      "id": "se-all-system",
+      "description": "All steps are system role",
+      "expectations": [
+        { "text": "gather-state is system", "assertion": "step-role:gather-state:system" },
+        { "text": "update-session is system", "assertion": "step-role:update-session:system" },
+        { "text": "commit-wip is system", "assertion": "step-role:commit-wip:system" },
+        { "text": "confirm is system", "assertion": "step-role:confirm:system" }
+      ]
+    },
+    {
+      "id": "se-gates",
+      "description": "Gates at session update and confirmation",
+      "expectations": [
+        { "text": "update-session has gate", "assertion": "gate-exists:update-session" },
+        { "text": "confirm has gate", "assertion": "gate-exists:confirm" }
+      ]
+    },
+    {
+      "id": "se-wip-requires-files",
+      "description": "WIP commit requires knowledge of modified files",
+      "expectations": [
+        { "text": "commit-wip requires modified-files", "assertion": "step-requires:commit-wip:modified-files" }
+      ]
+    }
+  ]
+}

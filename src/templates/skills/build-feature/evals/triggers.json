@@ -1,0 +1,16 @@
+{
+  "skill": "build-feature",
+  "matcherType": "keyword",
+  "description": "Full pipeline: evaluation -> spec -> implementation -> review -> QA",
+  "threshold": 0.3,
+  "tests": [
+    { "prompt": "build a new feature with full pipeline", "shouldTrigger": true },
+    { "prompt": "implement this feature end to end", "shouldTrigger": true, "keywordExpected": false },
+    { "prompt": "run the full implementation pipeline", "shouldTrigger": true },
+    { "prompt": "I want to ship this end to end", "shouldTrigger": true, "keywordExpected": false },
+    { "prompt": "review my code", "shouldTrigger": false },
+    { "prompt": "create a pull request", "shouldTrigger": false },
+    { "prompt": "save my session", "shouldTrigger": false },
+    { "prompt": "debug this bug", "shouldTrigger": false }
+  ]
+}

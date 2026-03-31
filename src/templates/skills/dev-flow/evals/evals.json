@@ -1,0 +1,36 @@
+{
+  "skill": "dev-flow",
+  "evals": [
+    {
+      "id": "df-has-steps",
+      "description": "Dev flow has read-state and present-flow steps",
+      "expectations": [
+        { "text": "Has read-state step", "assertion": "step-exists:read-state" },
+        { "text": "Has present-flow step", "assertion": "step-exists:present-flow" }
+      ]
+    },
+    {
+      "id": "df-all-system",
+      "description": "All steps are system role",
+      "expectations": [
+        { "text": "read-state is system", "assertion": "step-role:read-state:system" },
+        { "text": "present-flow is system", "assertion": "step-role:present-flow:system" }
+      ]
+    },
+    {
+      "id": "df-presentation-gate",
+      "description": "Present-flow step has a gate for user confirmation",
+      "expectations": [
+        { "text": "present-flow has gate", "assertion": "gate-exists:present-flow" }
+      ]
+    },
+    {
+      "id": "df-dependencies",
+      "description": "Present-flow requires session state",
+      "expectations": [
+        { "text": "present-flow requires session-state", "assertion": "step-requires:present-flow:session-state" },
+        { "text": "present-flow requires current-phase", "assertion": "step-requires:present-flow:current-phase" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "skill": "council",
+  "evals": [
+    {
+      "id": "council-three-parallel-agents",
+      "description": "Council has 3 agent steps in parallel",
+      "expectations": [
+        { "text": "Agent-1 exists", "assertion": "step-exists:agent-1" },
+        { "text": "Agent-2 exists", "assertion": "step-exists:agent-2" },
+        { "text": "Agent-3 exists", "assertion": "step-exists:agent-3" },
+        { "text": "Agent-1 is parallel", "assertion": "step-parallel:agent-1" },
+        { "text": "Agent-2 is parallel", "assertion": "step-parallel:agent-2" },
+        { "text": "Agent-3 is parallel", "assertion": "step-parallel:agent-3" }
+      ]
+    },
+    {
+      "id": "council-agents-use-reasoning",
+      "description": "All council agents use reasoning tier",
+      "expectations": [
+        { "text": "Agent-1 uses reasoning", "assertion": "step-model-tier:agent-1:reasoning" },
+        { "text": "Agent-2 uses reasoning", "assertion": "step-model-tier:agent-2:reasoning" },
+        { "text": "Agent-3 uses reasoning", "assertion": "step-model-tier:agent-3:reasoning" }
+      ]
+    },
+    {
+      "id": "council-synthesize-gate",
+      "description": "Synthesize step exists with gate",
+      "expectations": [
+        { "text": "Synthesize step exists", "assertion": "step-exists:synthesize" },
+        { "text": "Synthesize has gate", "assertion": "gate-exists:synthesize" }
+      ]
+    },
+    {
+      "id": "council-workspace-context",
+      "description": "Workspace context step exists with condition",
+      "expectations": [
+        { "text": "Workspace-context step exists", "assertion": "step-exists:workspace-context" }
+      ]
+    }
+  ]
+}

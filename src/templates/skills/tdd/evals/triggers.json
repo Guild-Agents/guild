@@ -1,0 +1,16 @@
+{
+  "skill": "tdd",
+  "matcherType": "keyword",
+  "description": "Discipline skill — TDD red-green-refactor cycle. Use when implementing any feature or bugfix, before writing implementation code.",
+  "threshold": 0.3,
+  "tests": [
+    { "prompt": "use TDD for this implementation", "shouldTrigger": true },
+    { "prompt": "red green refactor cycle", "shouldTrigger": true },
+    { "prompt": "follow the TDD red-green-refactor discipline", "shouldTrigger": true },
+    { "prompt": "implement this feature with TDD", "shouldTrigger": true },
+    { "prompt": "create a pull request", "shouldTrigger": false },
+    { "prompt": "review my code", "shouldTrigger": false },
+    { "prompt": "save my session", "shouldTrigger": false },
+    { "prompt": "show project status", "shouldTrigger": false }
+  ]
+}

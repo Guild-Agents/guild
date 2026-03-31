@@ -1,0 +1,40 @@
+{
+  "skill": "status",
+  "evals": [
+    {
+      "id": "st-has-core-steps",
+      "description": "Status has read-state, scan-resources, present steps",
+      "expectations": [
+        { "text": "Has read-state step", "assertion": "step-exists:read-state" },
+        { "text": "Has scan-resources step", "assertion": "step-exists:scan-resources" },
+        { "text": "Has present-status step", "assertion": "step-exists:present-status" }
+      ]
+    },
+    {
+      "id": "st-all-system",
+      "description": "All steps are system role",
+      "expectations": [
+        { "text": "read-state is system", "assertion": "step-role:read-state:system" },
+        { "text": "scan-resources is system", "assertion": "step-role:scan-resources:system" },
+        { "text": "present-status is system", "assertion": "step-role:present-status:system" }
+      ]
+    },
+    {
+      "id": "st-presentation-gate",
+      "description": "Present-status has gate",
+      "expectations": [
+        { "text": "present-status has gate", "assertion": "gate-exists:present-status" }
+      ]
+    },
+    {
+      "id": "st-dependencies",
+      "description": "Present-status requires project and session data",
+      "expectations": [
+        { "text": "present-status requires project-md", "assertion": "step-requires:present-status:project-md" },
+        { "text": "present-status requires session-md", "assertion": "step-requires:present-status:session-md" },
+        { "text": "present-status requires agent-list", "assertion": "step-requires:present-status:agent-list" },
+        { "text": "present-status requires skill-list", "assertion": "step-requires:present-status:skill-list" }
+      ]
+    }
+  ]
+}

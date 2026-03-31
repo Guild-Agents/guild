@@ -1,0 +1,54 @@
+{
+  "skill": "guild-specialize",
+  "evals": [
+    {
+      "id": "gs-has-core-steps",
+      "description": "Guild specialize has read, explore, enrich, specialize, confirm, commit steps",
+      "expectations": [
+        { "text": "Has read-base step", "assertion": "step-exists:read-base" },
+        { "text": "Has explore-project step", "assertion": "step-exists:explore-project" },
+        { "text": "Has enrich-claude-md step", "assertion": "step-exists:enrich-claude-md" },
+        { "text": "Has specialize-agents step", "assertion": "step-exists:specialize-agents" },
+        { "text": "Has confirm step", "assertion": "step-exists:confirm" },
+        { "text": "Has commit-enrichment step", "assertion": "step-exists:commit-enrichment" }
+      ]
+    },
+    {
+      "id": "gs-enrichment-uses-reasoning",
+      "description": "CLAUDE.md enrichment uses reasoning tier (opus)",
+      "expectations": [
+        { "text": "enrich-claude-md uses reasoning", "assertion": "step-model-tier:enrich-claude-md:reasoning" }
+      ]
+    },
+    {
+      "id": "gs-agents-use-execution",
+      "description": "Agent specialization uses execution tier (sonnet)",
+      "expectations": [
+        { "text": "specialize-agents uses execution", "assertion": "step-model-tier:specialize-agents:execution" }
+      ]
+    },
+    {
+      "id": "gs-gates",
+      "description": "Gates at exploration and confirmation",
+      "expectations": [
+        { "text": "explore-project has gate", "assertion": "gate-exists:explore-project" },
+        { "text": "confirm has gate", "assertion": "gate-exists:confirm" }
+      ]
+    },
+    {
+      "id": "gs-tech-lead-role",
+      "description": "Enrichment and specialization use tech-lead role",
+      "expectations": [
+        { "text": "enrich-claude-md is tech-lead", "assertion": "step-role:enrich-claude-md:tech-lead" },
+        { "text": "specialize-agents is tech-lead", "assertion": "step-role:specialize-agents:tech-lead" }
+      ]
+    },
+    {
+      "id": "gs-minimum-steps",
+      "description": "Has at least 6 steps",
+      "expectations": [
+        { "text": "At least 6 steps", "assertion": "step-count:6" }
+      ]
+    }
+  ]
+}

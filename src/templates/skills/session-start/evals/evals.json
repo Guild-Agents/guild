@@ -1,0 +1,50 @@
+{
+  "skill": "session-start",
+  "evals": [
+    {
+      "id": "ss-has-core-steps",
+      "description": "Session start has load, detect, present, suggest, update steps",
+      "expectations": [
+        { "text": "Has load-context step", "assertion": "step-exists:load-context" },
+        { "text": "Has detect-resumable step", "assertion": "step-exists:detect-resumable" },
+        { "text": "Has present-state step", "assertion": "step-exists:present-state" },
+        { "text": "Has suggest-continuation step", "assertion": "step-exists:suggest-continuation" },
+        { "text": "Has update-session step", "assertion": "step-exists:update-session" }
+      ]
+    },
+    {
+      "id": "ss-all-system",
+      "description": "All steps are system role",
+      "expectations": [
+        { "text": "load-context is system", "assertion": "step-role:load-context:system" },
+        { "text": "detect-resumable is system", "assertion": "step-role:detect-resumable:system" },
+        { "text": "present-state is system", "assertion": "step-role:present-state:system" },
+        { "text": "suggest-continuation is system", "assertion": "step-role:suggest-continuation:system" },
+        { "text": "update-session is system", "assertion": "step-role:update-session:system" }
+      ]
+    },
+    {
+      "id": "ss-gates",
+      "description": "Gates at presentation, suggestion, and session update",
+      "expectations": [
+        { "text": "present-state has gate", "assertion": "gate-exists:present-state" },
+        { "text": "suggest-continuation has gate", "assertion": "gate-exists:suggest-continuation" },
+        { "text": "update-session has gate", "assertion": "gate-exists:update-session" }
+      ]
+    },
+    {
+      "id": "ss-detect-requires-session",
+      "description": "Detect-resumable requires session state",
+      "expectations": [
+        { "text": "detect-resumable requires session-md", "assertion": "step-requires:detect-resumable:session-md" }
+      ]
+    },
+    {
+      "id": "ss-minimum-steps",
+      "description": "Has at least 5 steps",
+      "expectations": [
+        { "text": "At least 5 steps", "assertion": "step-count:5" }
+      ]
+    }
+  ]
+}

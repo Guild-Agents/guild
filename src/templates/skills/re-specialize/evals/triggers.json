@@ -1,0 +1,16 @@
+{
+  "skill": "re-specialize",
+  "matcherType": "keyword",
+  "description": "Incremental re-specialization — re-scans the project and updates only auto-generated zones in CLAUDE.md and agents",
+  "threshold": 0.3,
+  "tests": [
+    { "prompt": "run incremental re-specialization", "shouldTrigger": true },
+    { "prompt": "re-scan the project and update CLAUDE.md zones", "shouldTrigger": true },
+    { "prompt": "update the auto-generated zones in agents", "shouldTrigger": true },
+    { "prompt": "my stack changed, update the agents", "shouldTrigger": true, "keywordExpected": false },
+    { "prompt": "create a pull request", "shouldTrigger": false },
+    { "prompt": "review my code", "shouldTrigger": false },
+    { "prompt": "debug this bug", "shouldTrigger": false },
+    { "prompt": "save my session", "shouldTrigger": false }
+  ]
+}

@@ -11,24 +11,30 @@ workflow:
       requires: [user-question]
       produces: [council-type, participant-roles]
       gate: true
+    - id: workspace-context
+      role: system
+      intent: "Detect workspace membership. If in a workspace, collect context from sibling repos (CLAUDE.md, PROJECT.md, SESSION.md) and build workspace context block."
+      requires: [council-type]
+      produces: [workspace-context]
+      condition: in-workspace
     - id: agent-1
       role: dynamic
       intent: "Analyze the question from specialized perspective. State position with concrete arguments."
-      requires: [user-question, council-type]
+      requires: [user-question, council-type, workspace-context]
       produces: [perspective-1]
       model-tier: reasoning
       parallel: [agent-2, agent-3]
     - id: agent-2
       role: dynamic
       intent: "Analyze the question from specialized perspective. State position with concrete arguments."
-      requires: [user-question, council-type]
+      requires: [user-question, council-type, workspace-context]
       produces: [perspective-2]
       model-tier: reasoning
       parallel: [agent-1, agent-3]
     - id: agent-3
       role: dynamic
       intent: "Analyze the question from specialized perspective. State position with concrete arguments."
-      requires: [user-question, council-type]
+      requires: [user-question, council-type, workspace-context]
       produces: [perspective-3]
       model-tier: reasoning
       parallel: [agent-1, agent-2]
@@ -114,12 +120,23 @@ Analyze the user's question and determine which council type applies:
 
 ### Step 2 — Convene agents
 
+**Workspace detection:** Before invoking agents, check if the project is inside a workspace:
+
+1. Look for a `guild-workspace.json` file by searching upward from the project root
+2. If found, load the workspace config and identify which member this project is
+3. Read CLAUDE.md, PROJECT.md, and SESSION.md from each sibling member repo
+4. Build a workspace context block with:
+   - Workspace name
+   - Each sibling's stack, structure summary, and current task
+   - Absolute paths so the agent can read any sibling file for deeper analysis
+
 Invoke the 3 corresponding agents IN PARALLEL using Task tool with `model: "opus"` (all council agents use reasoning tier). Each agent:
 
 1. Reads their `.claude/agents/[name].md` file to assume their role
 2. Reads `CLAUDE.md` and `SESSION.md` for project context
-3. Analyzes the question from their specialized perspective
-4. States their position with concrete arguments
+3. **If in a workspace:** receives the workspace context block and considers cross-repo impact as part of their analysis. They may read files from sibling repos using the provided paths.
+4. Analyzes the question from their specialized perspective
+5. States their position with concrete arguments
 
 ### Step 3 — Present debate
 
@@ -191,7 +208,11 @@ Example:
 Task tool with:
   subagent_type: "general-purpose"
   model: "opus"
-  prompt: "Read .claude/agents/tech-lead.md and assume that role. Then: [debate question]"
+  prompt: "Read .claude/agents/tech-lead.md and assume that role. Then: [debate question]
+
+[If in workspace, append:]
+## Workspace context
+[workspace context block from Step 2]"
 ```
 
 The `model` parameter is resolved from the step's `model-tier`: all council agents use reasoning→`"opus"`.
