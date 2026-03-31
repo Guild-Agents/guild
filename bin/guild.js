@@ -173,10 +173,16 @@ program
   .command('eval')
   .description('Run skill structural evaluations')
   .argument('[skill]', 'Skill name to evaluate (or all if omitted)')
-  .action(async (skill) => {
+  .option('--triggers', 'Run trigger tests instead of structural evals')
+  .action(async (skill, options) => {
     try {
-      const { runEval } = await import('../src/commands/eval.js');
-      await runEval(skill);
+      if (options.triggers) {
+        const { runEvalTriggers } = await import('../src/commands/eval.js');
+        await runEvalTriggers(skill);
+      } else {
+        const { runEval } = await import('../src/commands/eval.js');
+        await runEval(skill);
+      }
     } catch (err) {
       console.error(err.message);
       process.exit(1);

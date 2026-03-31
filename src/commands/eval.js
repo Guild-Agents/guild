@@ -12,6 +12,7 @@ import { readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { loadEvals, runEvals } from '../utils/eval-runner.js';
+import { loadTriggers, runTriggerTests, computeAccuracy, loadAllSkillDescriptions } from '../utils/trigger-runner.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SKILLS_DIR = join(__dirname, '..', 'templates', 'skills');
@@ -58,4 +59,53 @@ export async function runEval(skillName) {
   p.outro(summary);
 
   if (totalFailed > 0) process.exit(1);
+}
+
+/**
+ * Runs trigger evaluations.
+ * @param {string} [skillName] - Specific skill or all
+ */
+export async function runEvalTriggers(skillName) {
+  const allSkills = loadAllSkillDescriptions();
+
+  const skills = skillName
+    ? [skillName]
+    : readdirSync(SKILLS_DIR, { withFileTypes: true })
+        .filter(d => d.isDirectory())
+        .map(d => d.name)
+        .filter(name => loadTriggers(name) !== null);
+
+  p.intro(chalk.bold.cyan(`Guild Trigger Tests — ${skillName || 'all skills'}`));
+
+  let totalSkills = 0;
+  let totalTests = 0;
+  let totalCorrect = 0;
+
+  for (const skill of skills) {
+    const triggers = loadTriggers(skill);
+    if (!triggers) {
+      p.log.warn(`${skill}: no triggers.json`);
+      continue;
+    }
+
+    const results = runTriggerTests(triggers, allSkills);
+    const acc = computeAccuracy(results);
+    totalSkills++;
+    totalTests += acc.total;
+    totalCorrect += acc.tp + acc.tn;
+
+    const icon = acc.accuracy === 1 ? chalk.green('✓') : acc.accuracy >= 0.75 ? chalk.yellow('~') : chalk.red('✗');
+    p.log.info(`${icon} ${chalk.bold(skill)}  accuracy=${(acc.accuracy * 100).toFixed(0)}%  precision=${(acc.precision * 100).toFixed(0)}%  recall=${(acc.recall * 100).toFixed(0)}%`);
+
+    // Show failures
+    for (const r of results) {
+      if (r.expected !== r.actual) {
+        const label = r.expected ? chalk.red('MISS') : chalk.yellow('FALSE+');
+        p.log.info(chalk.gray(`    ${label} "${r.prompt}" (score=${r.score.toFixed(2)}, rank=#${r.rank})`));
+      }
+    }
+  }
+
+  const overallAcc = totalTests > 0 ? ((totalCorrect / totalTests) * 100).toFixed(0) : 0;
+  p.outro(`${totalSkills} skills, ${totalTests} tests, ${overallAcc}% overall accuracy`);
 }
