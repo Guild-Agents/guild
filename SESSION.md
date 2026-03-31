@@ -5,55 +5,64 @@
 - **Current task:** none
 - **Branch:** `develop`
 - **Active agent:** none
-- **Status:** Watchdog deployed and running on VPS
+- **Status:** All P0/P1/P2 roadmap items complete
 
 ## What happened this session
 
-### Dependabot cleanup
-- 5 Dependabot PRs closed (#59–#63), all superseded by manual update
-- Updated: vitest 4.1.2, @vitest/coverage-v8 4.1.2, eslint 10.1.0, yaml 2.8.3
-- Fixed picomatch + yaml audit vulnerabilities → 0 vulnerabilities
-- Skipped markdownlint-cli2 0.22.0 (introduces smol-toml vuln)
-
-### CI matrix update
-- Changed from Node 20.x/22.x to 22.x/24.x
-- Root cause: npm 11 (Node 24) generates lock files with unresolved peer deps (@emnapi/core, @emnapi/runtime) that npm 10 (Node 20/22) rejects
-- Fix: regenerated lock file from scratch + updated CI matrix
-- All 5 CI jobs green
-
-### Grammy migration (Watchdog)
-- Replaced `node-telegram-bot-api` with `grammy` in packages/watchdog
-- Eliminates 7 vulnerabilities from deprecated `request@2.88.2` dependency chain
-- grammy is TypeScript-native, aligns with Watchdog's TS codebase
-- WatchdogBot abstraction isolated the swap — only telegram.ts, index.ts, and tests changed
-- 65 watchdog tests passing, 0 vulnerabilities
-
 ### Watchdog VPS deploy (complete)
-- VPS: `aldo@45.55.53.146` (Digital Ocean droplet)
-- Node 22.22.0, npm 10.9.4, PM2 running `trader-consigliere` + `guild-watchdog`
-- Files deployed to `~/guild-watchdog/`: src, dist (compiled), workspace, ecosystem.config.cjs
-- Fix: added `node_args: '--env-file=.env'` to ecosystem.config.cjs (PM2 wasn't loading .env)
-- Watchdog running, first health check passed, Telegram bot responding
+- Tokens configured, PM2 started
+- Fix: `node_args: '--env-file=.env'` in ecosystem.config.cjs (PM2 wasn't loading .env)
+- Watchdog running 4h+, 0 restarts, adaptive backoff working
+- Telegram bot responding to `/status`
 
-### Roadmap imported
-- Consolidated backlog from Claude Desktop ("Uso de IA") imported and saved to memory
-- Compared roadmap vs current implementation state
+### Skill Evals — Component 1 complete
+- Added evals.json for 10 remaining workflow skills (12/12 total, 56 assertions)
+- Updated test fixture (`tdd` as no-evals example instead of `session-start`)
+
+### `guild stats` command (PR #64, merged)
+- `src/utils/pricing.js` — model pricing table (Opus/Sonnet/Haiku)
+- `src/utils/accounting.js` — usage recording, persistence, aggregation, profile comparison
+- `src/commands/stats.js` — CLI with --period, --compare, --reset, --export csv
+- 25 new tests
+
+### `guild eval` command
+- Wrapped eval-runner into CLI command with clack UI
+- `guild eval [skill]` runs structural evals
+- Registered in bin/guild.js
+
+### Skills deploy
+- Deployed re-specialize, debug, tdd, verify to .claude/skills/ (15/15 active)
+
+### Trigger Tests — Component 2 start
+- `src/utils/trigger-matcher.js` — keyword overlap scoring engine
+- `src/utils/trigger-runner.js` — test execution, precision/recall/accuracy metrics
+- `matcherType: "keyword"` in triggers.json, `keywordExpected` override for semantic gaps
+- triggers.json for all 15 skills (120 tests, 100% keyword accuracy)
+- `guild eval --triggers` flag integrated
+- Improved debug description for better keyword matching (75% → 100%)
+
+### Housekeeping
+- Merged PR #64 (guild stats) → develop
+- Merged PR #65 (develop → main) — 73 commits, resolves 3 Dependabot vulns
+- Deleted stale branches: feature/cross-repo-commands, feature/cross-repo-council
 
 ## Key decisions
-- CI matrix 22.x/24.x (drop Node 20, align with dev environment)
-- Skip markdownlint-cli2 0.22.0 until smol-toml vuln is fixed upstream
-- grammy over telegraf (TypeScript-native, lighter)
+- Separate API keys per service (Watchdog vs Consigliere) for isolation + cost tracking
+- `keywordExpected` field in triggers.json to be honest about keyword matcher limitations
+- Trigger tests use keyword matching only (no Claude) — semantic matcher deferred
 
 ## Technical context
 - **Version**: 1.3.0
-- **Tests**: 553 passing (27 files) + 65 watchdog tests (8 files) = 618 total
+- **Tests**: 597 passing (33 files) + 65 watchdog tests (8 files) = 662 total
+- **Evals**: 56 structural assertions + 120 trigger tests = 176 total
 - **Agents**: 10 templates
-- **Skills**: 15 templates (12 workflow + 3 discipline)
+- **Skills**: 15 templates (12 workflow + 3 discipline), all deployed
 - **Node**: v24.12.0 local, CI matrix 22.x/24.x
-- **Vulnerabilities**: 0 (main project + watchdog)
+- **Vulnerabilities**: 0
+- **VPS**: Watchdog running on aldo@45.55.53.146 via PM2
 
 ## Next steps
-1. **Workspaces v1.2.1** — cross-repo execution (branches feature/cross-repo-commands and feature/cross-repo-council exist)
-2. **Skill Eval Component 2** — full execution with Claude
-3. **Token Accounting / `guild stats`** — P0 from roadmap, partially implemented
-4. **Commit ecosystem.config.cjs fix** — `node_args: '--env-file=.env'` change on develop
+1. **Skill Eval Component 2 — semantic matcher** — replace/complement keyword matcher with LLM-based scoring
+2. **Benchmark aggregation** — benchmark.json + benchmark.md per eval run
+3. **Description optimization** — use trigger accuracy data to improve skill descriptions
+4. **Backlog**: MCP server, Agent Teams v2, Multi-Runtime v3
