@@ -1,0 +1,16 @@
+{
+  "skill": "review",
+  "matcherType": "keyword",
+  "description": "Standalone code review on the current diff",
+  "threshold": 0.3,
+  "tests": [
+    { "prompt": "review my code", "shouldTrigger": true },
+    { "prompt": "do a code review on the current changes", "shouldTrigger": true },
+    { "prompt": "check my diff for issues", "shouldTrigger": true },
+    { "prompt": "review the current diff", "shouldTrigger": true },
+    { "prompt": "create a pull request", "shouldTrigger": false },
+    { "prompt": "save my session", "shouldTrigger": false },
+    { "prompt": "what phase am I in", "shouldTrigger": false },
+    { "prompt": "start a new feature", "shouldTrigger": false }
+  ]
+}
