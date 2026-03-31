@@ -65,4 +65,35 @@ describe('runStats', () => {
     expect(csv).toContain('timestamp,workflow,agent,tier,model,inputTokens,outputTokens,totalTokens,estimatedCostUSD');
     expect(csv).toContain('build-feature');
   });
+
+  it('shows compare output with multiple entries', async () => {
+    recordStep(tempDir, {
+      workflow: 'build-feature', agent: 'advisor', tier: 'reasoning',
+      model: 'claude-opus-4-6', inputTokens: 10000, outputTokens: 3000,
+    });
+    recordStep(tempDir, {
+      workflow: 'build-feature', agent: 'developer', tier: 'execution',
+      model: 'claude-sonnet-4-5', inputTokens: 20000, outputTokens: 8000,
+    });
+    recordStep(tempDir, {
+      workflow: 'review', agent: 'reviewer', tier: 'reasoning',
+      model: 'claude-opus-4-6', inputTokens: 5000, outputTokens: 2000,
+    });
+
+    process.chdir(tempDir);
+    const { runStats } = await import('../stats.js');
+    await expect(runStats({ compare: true })).resolves.toBeUndefined();
+  });
+
+  it('filters by period', async () => {
+    recordStep(tempDir, {
+      workflow: 'build-feature', agent: 'advisor', tier: 'reasoning',
+      model: 'claude-opus-4-6', inputTokens: 10000, outputTokens: 3000,
+    });
+
+    process.chdir(tempDir);
+    const { runStats } = await import('../stats.js');
+    await expect(runStats({ period: 'today' })).resolves.toBeUndefined();
+    await expect(runStats({ period: 'all' })).resolves.toBeUndefined();
+  });
 });
