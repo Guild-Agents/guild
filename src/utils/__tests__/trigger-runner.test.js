@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { loadTriggers, runTriggerTests, computeAccuracy } from '../trigger-runner.js';
 
 describe('loadTriggers', () => {
@@ -47,7 +47,7 @@ describe('computeAccuracy', () => {
 });
 
 describe('runTriggerTests', () => {
-  it('returns results with expected and actual fields', () => {
+  it('returns results with expected and actual fields', async () => {
     const triggers = {
       skill: 'test-skill',
       matcherType: 'keyword',
@@ -64,7 +64,7 @@ describe('runTriggerTests', () => {
       { name: 'other-skill', description: 'Saves current state to SESSION.md' },
     ];
 
-    const results = runTriggerTests(triggers, allSkills);
+    const results = await runTriggerTests(triggers, allSkills);
     expect(results).toHaveLength(2);
     expect(results[0].expected).toBe(true);
     expect(results[0]).toHaveProperty('actual');
@@ -73,7 +73,7 @@ describe('runTriggerTests', () => {
     expect(results[1].expected).toBe(false);
   });
 
-  it('uses keywordExpected when present for keyword matcher', () => {
+  it('uses keywordExpected when present for keyword matcher', async () => {
     const triggers = {
       skill: 'test-skill',
       matcherType: 'keyword',
@@ -89,8 +89,87 @@ describe('runTriggerTests', () => {
       { name: 'other-skill', description: 'Saves current state to SESSION.md' },
     ];
 
-    const results = runTriggerTests(triggers, allSkills);
+    const results = await runTriggerTests(triggers, allSkills);
     expect(results[0].expected).toBe(false);
     expect(results[0].semanticExpected).toBe(true);
+  });
+});
+
+describe('runTriggerTests with semantic option', () => {
+  it('uses semantic matcher when semantic option is true', async () => {
+    const mockSemantic = vi.fn().mockResolvedValue({ score: 0.9, reasoning: 'Strong match' });
+
+    const triggers = {
+      skill: 'test-skill',
+      matcherType: 'keyword',
+      description: 'Create a pull request',
+      threshold: 0.3,
+      tests: [
+        { prompt: 'submit this for review', shouldTrigger: true, keywordExpected: false },
+      ],
+    };
+
+    const allSkills = [
+      { name: 'test-skill', description: 'Create a pull request' },
+      { name: 'other-skill', description: 'Save session state' },
+    ];
+
+    const results = await runTriggerTests(triggers, allSkills, {
+      semantic: true,
+      scoreMatchSemantic: mockSemantic,
+    });
+
+    expect(mockSemantic).toHaveBeenCalledWith('submit this for review', 'test-skill', 'Create a pull request');
+    expect(results[0].matcherUsed).toBe('semantic');
+    expect(results[0].reasoning).toBe('Strong match');
+    expect(results[0].expected).toBe(true); // uses shouldTrigger, not keywordExpected
+  });
+
+  it('defaults to keyword matcher when semantic option is false', async () => {
+    const triggers = {
+      skill: 'test-skill',
+      matcherType: 'keyword',
+      description: 'Create a pull request from the current branch',
+      threshold: 0.3,
+      tests: [
+        { prompt: 'create a pull request', shouldTrigger: true },
+      ],
+    };
+
+    const allSkills = [
+      { name: 'test-skill', description: 'Create a pull request from the current branch' },
+      { name: 'other-skill', description: 'Saves current state to SESSION.md' },
+    ];
+
+    const results = await runTriggerTests(triggers, allSkills, { semantic: false });
+    expect(results[0].matcherUsed).toBe('keyword');
+    expect(results[0].reasoning).toBeUndefined();
+  });
+
+  it('ignores keywordExpected in semantic mode', async () => {
+    const mockSemantic = vi.fn().mockResolvedValue({ score: 0.1, reasoning: 'No match' });
+
+    const triggers = {
+      skill: 'test-skill',
+      matcherType: 'keyword',
+      description: 'Create a pull request',
+      threshold: 0.3,
+      tests: [
+        { prompt: 'something unrelated', shouldTrigger: true, keywordExpected: false },
+      ],
+    };
+
+    const allSkills = [
+      { name: 'test-skill', description: 'Create a pull request' },
+    ];
+
+    const results = await runTriggerTests(triggers, allSkills, {
+      semantic: true,
+      scoreMatchSemantic: mockSemantic,
+    });
+
+    // In semantic mode, expected comes from shouldTrigger (true), not keywordExpected (false)
+    expect(results[0].expected).toBe(true);
+    expect(results[0]).not.toHaveProperty('semanticExpected');
   });
 });

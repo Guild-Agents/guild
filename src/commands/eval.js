@@ -88,7 +88,7 @@ export async function runEvalTriggers(skillName) {
       continue;
     }
 
-    const results = runTriggerTests(triggers, allSkills);
+    const results = await runTriggerTests(triggers, allSkills);
     const acc = computeAccuracy(results);
     totalSkills++;
     totalTests += acc.total;
