@@ -1,69 +1,62 @@
 # SESSION.md
 
 ## Active session
-- **Date:** 2026-03-23
-- **Current task:** Post-watchdog cleanup — merged PR + Dependabot updates
+- **Date:** 2026-03-31
+- **Current task:** Housekeeping + Watchdog deploy
 - **Branch:** `develop`
 - **Active agent:** none
-- **Status:** Watchdog merged, 4/5 Dependabot PRs merged, develop up to date
+- **Status:** Deps updated, grammy migrated, Watchdog deployed to VPS (pending tokens)
 
 ## What happened this session
 
-### Guild Watchdog — merged to develop
-- PR #58 created and merged (`feature/guild-watchdog` → `develop`)
-- CI: 4/5 checks passed (lint + test on Node 20.x/22.x, watchdog lint + test on 20.x/22.x)
-- Security Audit failed — preexisting vuln in `flatted` + `node-telegram-bot-api` dependency chain (see below)
-- Branch cleaned up (remote + local deleted)
+### Dependabot cleanup
+- 5 Dependabot PRs closed (#59–#63), all superseded by manual update
+- Updated: vitest 4.1.2, @vitest/coverage-v8 4.1.2, eslint 10.1.0, yaml 2.8.3
+- Fixed picomatch + yaml audit vulnerabilities → 0 vulnerabilities
+- Skipped markdownlint-cli2 0.22.0 (introduces smol-toml vuln)
 
-### Dependabot PRs
-- ✅ #54 — eslint 10.0.2 → 10.0.3
-- ✅ #55 — @clack/prompts 1.0.1 → 1.1.0
-- ✅ #57 — vitest 4.0.18 → 4.1.0
-- ❌ #56 — @vitest/coverage-v8 4.0.18 → 4.1.0 (CONFLICTING after #57 merge, awaiting Dependabot rebase)
+### CI matrix update
+- Changed from Node 20.x/22.x to 22.x/24.x
+- Root cause: npm 11 (Node 24) generates lock files with unresolved peer deps (@emnapi/core, @emnapi/runtime) that npm 10 (Node 20/22) rejects
+- Fix: regenerated lock file from scratch + updated CI matrix
+- All 5 CI jobs green
 
-### Security audit findings
-7 vulnerabilities total (5 moderate, 2 critical):
-- `node-telegram-bot-api@0.66.0` → `@cypress/request-promise` → `request@2.88.2` (deprecated)
-  - `form-data` <2.5.4 (critical), `qs` (moderate), `tough-cookie` (moderate)
-- `flatted` ≤3.4.1 → from `flat-cache` → `eslint` (dev dependency)
-- Options: migrate to grammy/telegraf, or accept risk (request only used for internal polling)
+### Grammy migration (Watchdog)
+- Replaced `node-telegram-bot-api` with `grammy` in packages/watchdog
+- Eliminates 7 vulnerabilities from deprecated `request@2.88.2` dependency chain
+- grammy is TypeScript-native, aligns with Watchdog's TS codebase
+- WatchdogBot abstraction isolated the swap — only telegram.ts, index.ts, and tests changed
+- 65 watchdog tests passing, 0 vulnerabilities
 
-### Coordinated session
-- Two Claude Code sessions worked in parallel via claude-peers
-- Split: one ran tests + monitored CI, other created PR + merged Dependabot PRs
+### Watchdog VPS deploy (in progress)
+- VPS: `aldo@45.55.53.146` (Digital Ocean droplet)
+- Node 22.22.0, npm 10.9.4, PM2 running `trader-consigliere`
+- Files deployed to `~/guild-watchdog/`: src, dist (compiled), workspace, ecosystem.config.cjs
+- npm ci + tsc build successful on server
+- **BLOCKED: .env tokens not yet filled** — user will set GITHUB_TOKEN, ANTHROPIC_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+- After tokens: `pm2 start ecosystem.config.cjs` to launch
+
+### Roadmap imported
+- Consolidated backlog from Claude Desktop ("Uso de IA") imported and saved to memory
+- Compared roadmap vs current implementation state
 
 ## Key decisions
-
-1. **Superpowers = complement, not replacement** — Guild covers orchestration, Superpowers covers individual discipline
-2. **Import 3 skills from Superpowers** — TDD, systematic-debugging, verification-before-completion
-3. **Workspaces → v1.2** — execution first (v1.1), workspaces MVP second (v1.2)
-4. **Provider-agnostic vision** — Guild targets any AI runtime; Claude Code CLI is just the first provider
-5. **CLI subprocess dispatch** — `claude -p` for agent steps, no API key needed
-6. **Full auto with abort** — designed for unattended/CI execution
-7. **Sequential only v1.1** — parallel groups deferred to v1.2
-8. **Simple function provider** — `(step, dispatch, context) → { status, output, tokens }`
-9. **--dry-run flag** — preserves v1.0 plan-only behavior as opt-in mode
-10. **Keep develop branch** — user prefers develop→main flow over trunk-based
-11. **Backlog priority (Council, Option B)** — re-specialize before Workspaces, Watchdog P3, Skill Eval Component 1 only
-12. **Workspace parent dir pattern** — `guild-workspace.json` + `.guild/` in parent directory, merge + local-wins resolution
-13. **Workspace v1.2.0 vs v1.2.1** — context + read first, cross-repo execution second
-14. **Post-v1.2.0 priority (Council, unanimous)** — Dependabot fix → Workspaces v1.2.1 → Skill Eval design → Watchdog deferred to post-v1.3
-15. **Watchdog inside Guild repo** — `packages/watchdog/` as TypeScript, shares CI, deploys independently
-16. **Watchdog uses direct API** — `@anthropic-ai/sdk` not Agent SDK, simpler for targeted LLM calls
-17. **Watchdog deploy deferred** — VPS provisioning is manual, not part of build-feature pipeline
+- CI matrix 22.x/24.x (drop Node 20, align with dev environment)
+- Skip markdownlint-cli2 0.22.0 until smol-toml vuln is fixed upstream
+- grammy over telegraf (TypeScript-native, lighter)
 
 ## Technical context
 - **Version**: 1.3.0
 - **Tests**: 553 passing (27 files) + 65 watchdog tests (8 files) = 618 total
 - **Agents**: 10 templates
 - **Skills**: 15 templates (12 workflow + 3 discipline)
-- **Node**: v24.12.0 local, CI matrix 20.x/22.x
-- **Dependencies updated**: eslint 10.0.3, @clack/prompts 1.1.0, vitest 4.1.0
+- **Node**: v24.12.0 local, CI matrix 22.x/24.x
+- **Vulnerabilities**: 0 (main project + watchdog)
 
 ## Next steps
-1. **Resolve #56** — wait for Dependabot rebase or bump @vitest/coverage-v8 manually
-2. **Security audit** — decide on node-telegram-bot-api alternative (grammy/telegraf) vs accept risk
-3. **Watchdog local test** — set up .env with GitHub/Anthropic/Telegram tokens, smoke test
-4. **Watchdog VPS deploy** — manual PM2 setup on VPS
-5. **Workspaces v1.2.1** — cross-repo execution (feature/cross-repo-commands branch exists)
-6. **Skill Eval Component 2** — full execution with Claude, with-skill vs baseline comparison
+1. **Fill .env tokens on VPS** — `ssh aldo@45.55.53.146` → `vim ~/guild-watchdog/.env` → set 4 tokens
+2. **Start Watchdog with PM2** — `pm2 start ecosystem.config.cjs` → verify Telegram bot responds
+3. **Watchdog smoke test** — send `/status`, `/stats` commands, verify heartbeat loop runs
+4. **Workspaces v1.2.1** — cross-repo execution (branches feature/cross-repo-commands and feature/cross-repo-council exist)
+5. **Skill Eval Component 2** — full execution with Claude
+6. **Token Accounting / `guild stats`** — P0 from roadmap, partially implemented
