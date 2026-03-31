@@ -65,6 +65,7 @@ SESSION.md                            # Session state — persists across conver
 - `npm run lint:js` — ESLint only
 - `npm run lint:md` — markdownlint only
 - `npm run dev` — run CLI locally (`node bin/guild.js`)
+- `guild eval [skill]` — run skill structural evaluations
 - `guild workspace init <name> <members...>` — create a workspace
 - `guild workspace add <path>` — add a member repo
 - `guild workspace status` — show workspace members and state
