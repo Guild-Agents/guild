@@ -8,6 +8,7 @@
  *   guild status         — view project status
  *   guild doctor         — verify setup and report issues
  *   guild list           — list installed agents and skills
+ *   guild stats          — view token usage and cost stats
  */
 
 import { program } from 'commander';
@@ -162,6 +163,25 @@ logsCmd
     try {
       const { runLogs } = await import('../src/commands/logs.js');
       await runLogs('clean', options);
+    } catch (err) {
+      console.error(err.message);
+      process.exit(1);
+    }
+  });
+
+// guild stats
+program
+  .command('stats')
+  .description('View token usage stats and cost estimates')
+  .option('--period <period>', 'Filter by period: today, week, month, all', 'month')
+  .option('--compare', 'Compare cost across model profiles')
+  .option('--reset', 'Delete all usage history')
+  .option('-f, --force', 'Skip confirmation prompt (for --reset)')
+  .option('--export <format>', 'Export data (csv)')
+  .action(async (options) => {
+    try {
+      const { runStats } = await import('../src/commands/stats.js');
+      await runStats(options);
     } catch (err) {
       console.error(err.message);
       process.exit(1);
