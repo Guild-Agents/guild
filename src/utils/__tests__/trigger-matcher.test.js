@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { scoreMatch, rankSkills } from '../trigger-matcher.js';
+import { scoreMatch, rankSkills, tokenize } from '../trigger-matcher.js';
 
 describe('scoreMatch', () => {
   it('scores high when prompt keywords match description', () => {
@@ -62,5 +62,22 @@ describe('rankSkills', () => {
       expect(r).toHaveProperty('name');
       expect(r).toHaveProperty('score');
     }
+  });
+});
+
+describe('tokenize', () => {
+  it('splits text into lowercase words', () => {
+    const tokens = tokenize('Build a Feature');
+    expect(tokens).toEqual(['build', 'feature']);
+  });
+
+  it('strips punctuation and splits on dashes', () => {
+    const tokens = tokenize('red-green-refactor cycle!');
+    expect(tokens).toEqual(['red', 'green', 'refactor', 'cycle']);
+  });
+
+  it('filters single-character words', () => {
+    const tokens = tokenize('I am a dev');
+    expect(tokens).toEqual(['am', 'dev']);
   });
 });

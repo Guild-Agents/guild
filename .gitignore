@@ -29,3 +29,6 @@ guild-specs-post-implementation-feedback.md
 guild-ideas-eval-and-respecialize.md
 ~$*
 ideas/
+
+# Benchmark rolling data (generated each eval run)
+benchmarks/benchmark.json
