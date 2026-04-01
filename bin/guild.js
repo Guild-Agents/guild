@@ -175,11 +175,16 @@ program
   .description('Run skill structural evaluations')
   .argument('[skill]', 'Skill name to evaluate (or all if omitted)')
   .option('--triggers', 'Run trigger tests instead of structural evals')
+  .option('--semantic', 'Use LLM-based semantic matcher for trigger tests')
+  .option('--suggest', 'Show description improvement suggestions')
   .action(async (skill, options) => {
     try {
-      if (options.triggers) {
+      if (options.triggers || options.semantic || options.suggest) {
         const { runEvalTriggers } = await import('../src/commands/eval.js');
-        await runEvalTriggers(skill);
+        await runEvalTriggers(skill, {
+          semantic: options.semantic || false,
+          suggest: options.suggest || false,
+        });
       } else {
         const { runEval } = await import('../src/commands/eval.js');
         await runEval(skill);

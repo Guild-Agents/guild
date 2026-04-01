@@ -93,10 +93,26 @@ guild list              # List agents and skills
 guild run <skill>       # Preview a skill's execution plan (dry-run)
 guild logs              # View execution traces
 guild logs clean        # Remove old traces (--days N, --all)
+guild stats             # Token usage and cost estimates
+guild eval              # Run structural skill evaluations
+guild eval --triggers   # Run trigger accuracy tests (keyword matcher)
+guild eval --semantic   # Run trigger tests with LLM semantic matcher
+guild eval --suggest    # Show description improvement suggestions
 guild workspace init <name> <members...>  # Create a workspace
 guild workspace add <path>                # Add a member repo
 guild workspace status                    # Show workspace state
 ```
+
+## Skill Evaluations
+
+Guild includes a built-in evaluation framework for validating skill quality:
+
+- **Structural evals** (`guild eval`) -- assert workflow structure: steps exist, roles are correct, gates are present
+- **Trigger tests** (`guild eval --triggers`) -- verify that user prompts route to the correct skill using keyword overlap scoring
+- **Semantic matcher** (`guild eval --semantic`) -- optional LLM-based scoring via Anthropic Haiku for higher-fidelity trigger testing (requires `ANTHROPIC_API_KEY`)
+- **Description suggestions** (`guild eval --suggest`) -- analyzes keyword gaps in skill descriptions based on failed triggers
+
+Every trigger run automatically records results to `benchmarks/benchmark.json` (rolling 30-entry history) and generates `benchmarks/benchmark.md` with per-skill accuracy, precision, recall, and delta vs previous run. Regressions (>5% accuracy drop with 2+ tests flipped) are flagged automatically.
 
 ## Under the Hood
 

@@ -10,7 +10,7 @@
  * @param {string} text
  * @returns {string[]}
  */
-function tokenize(text) {
+export function tokenize(text) {
   return text
     .toLowerCase()
     .replace(/[—–\-/]/g, ' ')

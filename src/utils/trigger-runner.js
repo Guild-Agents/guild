@@ -53,18 +53,36 @@ export function loadAllSkillDescriptions() {
  * that value overrides shouldTrigger for accuracy calculation. This lets
  * tests document the ideal (semantic) expectation while being honest
  * about what keyword matching can achieve.
+ *
+ * @param {object} triggers - Trigger test config from triggers.json
+ * @param {Array} allSkills - All skill descriptions
+ * @param {object} [options] - Options
+ * @param {boolean} [options.semantic=false] - Use semantic matcher
+ * @param {Function} [options.scoreMatchSemantic] - Semantic scoring function (injected for testability)
  */
-export function runTriggerTests(triggers, allSkills) {
+export async function runTriggerTests(triggers, allSkills, options = {}) {
+  const { semantic = false, scoreMatchSemantic: semanticFn } = options;
   const threshold = triggers.threshold || 0.3;
-  const isKeyword = triggers.matcherType === 'keyword';
+  const isKeyword = !semantic && triggers.matcherType === 'keyword';
   const results = [];
 
   for (const test of triggers.tests) {
-    const ranked = rankSkills(test.prompt, allSkills);
-    const targetRank = ranked.findIndex(s => s.name === triggers.skill);
-    const targetScore = targetRank >= 0 ? ranked[targetRank].score : 0;
+    let actual, score, rank, reasoning;
 
-    const actual = targetRank === 0 && targetScore >= threshold;
+    if (semantic && semanticFn) {
+      const targetSkill = allSkills.find(s => s.name === triggers.skill);
+      const semanticResult = await semanticFn(test.prompt, triggers.skill, targetSkill?.description || triggers.description);
+      score = semanticResult.score;
+      actual = score >= threshold;
+      rank = null;
+      reasoning = semanticResult.reasoning;
+    } else {
+      const ranked = rankSkills(test.prompt, allSkills);
+      const targetRank = ranked.findIndex(s => s.name === triggers.skill);
+      score = targetRank >= 0 ? ranked[targetRank].score : 0;
+      actual = targetRank === 0 && score >= threshold;
+      rank = targetRank + 1;
+    }
 
     const hasOverride = isKeyword && test.keywordExpected !== undefined;
     const expected = hasOverride ? test.keywordExpected : test.shouldTrigger;
@@ -73,9 +91,14 @@ export function runTriggerTests(triggers, allSkills) {
       prompt: test.prompt,
       expected,
       actual,
-      score: targetScore,
-      rank: targetRank + 1,
+      score,
+      rank,
+      matcherUsed: semantic ? 'semantic' : 'keyword',
     };
+
+    if (reasoning) {
+      result.reasoning = reasoning;
+    }
 
     if (hasOverride) {
       result.semanticExpected = test.shouldTrigger;
