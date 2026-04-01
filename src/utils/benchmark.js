@@ -107,7 +107,7 @@ export function detectRegressions(current, previous) {
     if (!prev) continue;
 
     const delta = skill.accuracy - prev.accuracy;
-    if (delta >= -0.05) continue;
+    if (delta > -0.05) continue;
 
     const currentCorrect = skill.tp + skill.tn;
     const prevCorrect = prev.tp + prev.tn;
