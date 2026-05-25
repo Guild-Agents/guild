@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 380" role="img" aria-label="Animated demonstration of Guild's /council command spawning three parallel perspectives and synthesizing a design spec">
+  <title>Guild /council — animated demo</title>
+  <desc>The /council command spawns three perspectives (advisor, tech-lead, code-reviewer) in parallel, each produces a verdict, then Guild synthesizes them into a design spec at docs/specs/.</desc>
+
+  <defs>
+    <clipPath id="window-clip">
+      <rect x="0" y="0" width="880" height="380" rx="10"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#window-clip)">
+    <rect x="0" y="0" width="880" height="380" fill="#1a1b26"/>
+    <rect x="0" y="0" width="880" height="36" fill="#16161e"/>
+    <line x1="0" y1="36" x2="880" y2="36" stroke="#292e42" stroke-width="0.5"/>
+    <circle cx="22" cy="18" r="6" fill="#f7768e"/>
+    <circle cx="42" cy="18" r="6" fill="#e0af68"/>
+    <circle cx="62" cy="18" r="6" fill="#9ece6a"/>
+    <text x="88" y="22" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12" fill="#565f89">auth-service — claude code</text>
+
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.033;0.063;0.917;0.975;1" dur="12s" repeatCount="indefinite"/>
+      <text x="22" y="74" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="13" fill="#c0caf5"><tspan fill="#bb9af7">$</tspan> /council "Add JWT auth"</text>
+      <rect x="266" y="64" width="7" height="13" fill="#c0caf5">
+        <animate attributeName="opacity" values="1;0;1" keyTimes="0;0.5;1" dur="1s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.166;0.196;0.917;0.975;1" dur="12s" repeatCount="indefinite"/>
+      <text x="22" y="104" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12" fill="#7aa2f7">⟳ Spawning 3 perspectives in parallel</text>
+    </g>
+
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.225;0.255;0.917;0.975;1" dur="12s" repeatCount="indefinite"/>
+
+      <rect x="22" y="124" width="270" height="120" rx="6" fill="#1f2335" stroke="#292e42" stroke-width="0.5"/>
+      <text x="36" y="144" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12" font-weight="500" fill="#e0af68">advisor</text>
+      <g opacity="0">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.225;0.245;0.4;0.425;1" dur="12s" repeatCount="indefinite"/>
+        <text x="36" y="172" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" fill="#565f89">thinking…<animate attributeName="opacity" values="0.4;0.9;0.4" keyTimes="0;0.5;1" dur="1s" repeatCount="indefinite"/></text>
+      </g>
+      <g opacity="0">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.4;0.425;0.917;0.975;1" dur="12s" repeatCount="indefinite"/>
+        <text font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" fill="#a9b1d6">
+          <tspan x="36" y="172"><tspan fill="#7dcfff">→</tspan> Need refresh tokens.</tspan>
+          <tspan x="36" dy="17">Session-only won't</tspan>
+          <tspan x="36" dy="17">survive production.</tspan>
+        </text>
+      </g>
+
+      <rect x="304" y="124" width="270" height="120" rx="6" fill="#1f2335" stroke="#292e42" stroke-width="0.5"/>
+      <text x="318" y="144" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12" font-weight="500" fill="#e0af68">tech-lead</text>
+      <g opacity="0">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.225;0.245;0.458;0.483;1" dur="12s" repeatCount="indefinite"/>
+        <text x="318" y="172" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" fill="#565f89">thinking…<animate attributeName="opacity" values="0.4;0.9;0.4" keyTimes="0;0.5;1" dur="1s" repeatCount="indefinite"/></text>
+      </g>
+      <g opacity="0">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.458;0.483;0.917;0.975;1" dur="12s" repeatCount="indefinite"/>
+        <text font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" fill="#a9b1d6">
+          <tspan x="318" y="172"><tspan fill="#7dcfff">→</tspan> Use RS256 over HS256.</tspan>
+          <tspan x="318" dy="17">Enables safe key</tspan>
+          <tspan x="318" dy="17">rotation.</tspan>
+        </text>
+      </g>
+
+      <rect x="586" y="124" width="270" height="120" rx="6" fill="#1f2335" stroke="#292e42" stroke-width="0.5"/>
+      <text x="600" y="144" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12" font-weight="500" fill="#e0af68">code-reviewer</text>
+      <g opacity="0">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.225;0.245;0.517;0.542;1" dur="12s" repeatCount="indefinite"/>
+        <text x="600" y="172" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" fill="#565f89">thinking…<animate attributeName="opacity" values="0.4;0.9;0.4" keyTimes="0;0.5;1" dur="1s" repeatCount="indefinite"/></text>
+      </g>
+      <g opacity="0">
+        <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.517;0.542;0.917;0.975;1" dur="12s" repeatCount="indefinite"/>
+        <text font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" fill="#a9b1d6">
+          <tspan x="600" y="172"><tspan fill="#7dcfff">→</tspan> Watch token leakage</tspan>
+          <tspan x="600" dy="17">in logs. Sanitize</tspan>
+          <tspan x="600" dy="17">auth headers.</tspan>
+        </text>
+      </g>
+    </g>
+
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.617;0.642;0.917;0.975;1" dur="12s" repeatCount="indefinite"/>
+      <text x="22" y="276" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12" fill="#7dcfff">⟳ Synthesizing decision from 3 perspectives</text>
+    </g>
+
+    <g opacity="0">
+      <animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="0;0.7;0.725;0.917;0.975;1" dur="12s" repeatCount="indefinite"/>
+      <rect x="22" y="294" width="836" height="62" fill="#16161e"/>
+      <rect x="22" y="294" width="3" height="62" fill="#9ece6a"/>
+      <text x="40" y="318" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="12" fill="#a9b1d6"><tspan fill="#9ece6a">✓</tspan> Wrote <tspan fill="#7dcfff">docs/specs/jwt-auth.md</tspan></text>
+      <text x="40" y="340" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, monospace" font-size="11" fill="#565f89">10 sections · 3 council perspectives · ready for /build-feature</text>
+    </g>
+  </g>
+</svg>

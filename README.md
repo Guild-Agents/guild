@@ -7,6 +7,10 @@
 
 **Guild makes Claude Code think before it builds.**
 
+<p align="center">
+  <img src="docs/assets/council-demo.gif" alt="Guild council demo" width="600">
+</p>
+
 Without Guild, Claude Code writes code immediately. No evaluation, no design, no review. With Guild, every feature goes through structured phases — evaluated by an advisor, designed by a tech lead, reviewed, and validated — before anything ships.
 
 ```bash
