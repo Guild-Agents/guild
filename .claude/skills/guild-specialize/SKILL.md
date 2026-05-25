@@ -113,19 +113,36 @@ Invoke the Tech Lead agent using Task tool with `model: "opus"` (reasoning tier)
 - **Visible limitations and technical debt**: outdated dependencies, TODOs found
 - **Useful project commands**: detected npm/make/cargo scripts
 
+CLAUDE.md now uses zone markers (`<!-- guild:auto-start:ID -->` / `<!-- guild:auto-end:ID -->`) to delimit auto-generated sections. When enriching:
+
+- Replace content BETWEEN the markers, preserving the markers themselves
+- The following zones exist: `structure`, `architecture`, `conventions`, `env-vars`
+- Do NOT modify content outside of zone markers (user-owned sections)
+- If markers are missing (legacy project), replace `[PENDING: guild-specialize]` placeholders directly
+
 ### Step 4 — Specialize agents
 
 Invoke the Tech Lead agent using Task tool with `model: "sonnet"` (execution tier) to add project-specific context for each agent in `.claude/agents/*.md`:
 
 - **advisor.md**: real project domain, target users
 - **tech-lead.md**: specific stack, detected patterns, architecture decisions
-- **product-owner.md**: existing functionality, visible backlog
 - **developer.md**: code conventions, main framework, file structure
 - **code-reviewer.md**: lint rules, project patterns, anti-patterns to watch
 - **qa.md**: testing framework, commands to run tests, current coverage
 - **bugfix.md**: debugging stack, logs, available tools
-- **db-migration.md**: ORM, migration tool, current schema (if applicable)
-- **platform-expert.md**: Claude Code version, known permission bugs, hook configuration
+
+When specializing agents, append a zone at the bottom of each agent file:
+
+```markdown
+<!-- guild:auto-start:agent-context -->
+## Project-Specific Context
+- Stack: [detected stack]
+- Architecture: [detected patterns]
+- Conventions: [detected conventions]
+<!-- guild:auto-end:agent-context -->
+```
+
+This zone allows `guild-re-specialize` to update agent context later without touching the agent's core role definition.
 
 Use the `Task` tool with `model: "sonnet"` to invoke each agent by reading their `.claude/agents/[name].md` if you need a specialized perspective to enrich their configuration.
 
@@ -184,7 +201,6 @@ Tech Lead (sonnet) — Specializing agents...
 Agents updated:
 - developer.md: Specialized for Next.js + TypeScript
 - qa.md: Configured for Vitest + Playwright
-- db-migration.md: Configured for Prisma
 
 Run /status to see the full state.
 ```

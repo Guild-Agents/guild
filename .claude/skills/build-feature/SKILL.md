@@ -12,19 +12,13 @@ workflow:
       produces: [evaluation-report, verdict]
       model-tier: reasoning
       on-failure: abort
-    - id: specify
-      role: product-owner
-      intent: "Break the feature into concrete tasks with verifiable acceptance criteria. Estimate effort and suggest implementation order."
-      requires: [feature-description, evaluation-report]
-      produces: [task-list, acceptance-criteria]
-      model-tier: reasoning
-      condition: step.evaluate.verdict != rejected
     - id: design
       role: tech-lead
-      intent: "Define implementation approach: files to modify, patterns to follow, interfaces, and technical risks."
-      requires: [task-list, acceptance-criteria]
-      produces: [technical-plan]
+      intent: "Break the feature into concrete tasks with acceptance criteria. Define implementation approach: files to modify, patterns to follow, interfaces, and technical risks."
+      requires: [feature-description, evaluation-report]
+      produces: [task-list, acceptance-criteria, technical-plan]
       model-tier: reasoning
+      condition: step.evaluate.verdict != rejected
     - id: implement
       role: developer
       intent: "Implement the feature following the technical plan. Write unit tests. Make atomic commits."
@@ -131,19 +125,18 @@ git worktree remove .claude/worktrees/[branch-name]
 
 When running a single build-feature, a simple `git checkout -b` is sufficient.
 
-## 6-Phase Pipeline
+## 5-Phase Pipeline
 
 ### Progress Display
 
 At the start of each phase, display a progress indicator to the user before any agent output:
 
 ```text
-[1/6] Advisor (opus) — Evaluating feature...
-[2/6] Product Owner (opus) — Defining spec...
-[3/6] Tech Lead (opus) — Defining technical approach...
-[4/6] Developer (sonnet) — Implementing...
-[5/6] Code Reviewer (opus) — Reviewing changes...
-[6/6] QA (sonnet) — Validating acceptance criteria...
+[1/5] Advisor (opus) — Evaluating feature...
+[2/5] Tech Lead (opus) — Defining spec and technical approach...
+[3/5] Developer (sonnet) — Implementing...
+[4/5] Code Reviewer (opus) — Reviewing changes...
+[5/5] QA (sonnet) — Validating acceptance criteria...
 ```
 
 Model names are resolved from the step's `model-tier` using the `max` profile: reasoning=opus, execution=sonnet, routine=haiku. System/gate steps do not show a model name.
@@ -151,15 +144,15 @@ Model names are resolved from the step's `model-tier` using the `max` profile: r
 When a phase loops (review-fix or QA-review cycles), show the iteration:
 
 ```text
-[5/6 · round 2] Code Reviewer (opus) — Re-reviewing after fixes...
-[4/6 · round 2] Developer (sonnet) — Fixing review blockers...
+[4/5 · round 2] Code Reviewer (opus) — Re-reviewing after fixes...
+[3/5 · round 2] Developer (sonnet) — Fixing review blockers...
 ```
 
 This indicator MUST be displayed before spawning the agent for that phase.
 
 ### Phase 1 — Evaluation (Advisor)
 
-**Progress:** `[1/6] Advisor (opus) — Evaluating feature...`
+**Progress:** `[1/5] Advisor (opus) — Evaluating feature...`
 **Agent:** Reads `.claude/agents/advisor.md` via Task tool with `model: "opus"`
 **Input:** The feature description provided by the user
 **Process:**
@@ -172,39 +165,26 @@ This indicator MUST be displayed before spawning the agent for that phase.
 **Trace data:** Verdict (Approved/Rejected/Approved with conditions), risks identified, conditions if any
 **Exit condition:** If the Advisor rejects the feature, the pipeline stops here. Inform the user of the reason and suggest adjustments if any.
 
-### Phase 2 — Specification (Product Owner)
+### Phase 2 — Specification & Technical Approach (Tech Lead)
 
-**Progress:** `[2/6] Product Owner (opus) — Defining spec...`
-**Agent:** Reads `.claude/agents/product-owner.md` via Task tool with `model: "opus"`
+**Progress:** `[2/5] Tech Lead (opus) — Defining spec and technical approach...`
+**Agent:** Reads `.claude/agents/tech-lead.md` via Task tool with `model: "opus"`
 **Input:** The feature approved by the Advisor + their observations
 **Process:**
 
-1. The Product Owner breaks the feature into concrete tasks
-2. Defines verifiable acceptance criteria for each task
-3. Estimates effort and suggests implementation order
-
-**Output:** Task list with acceptance criteria, estimation, and order
-**Trace data:** Tasks defined count, acceptance criteria count, estimated effort
-
-### Phase 3 — Technical Approach (Tech Lead)
-
-**Progress:** `[3/6] Tech Lead (opus) — Defining technical approach...`
-**Agent:** Reads `.claude/agents/tech-lead.md` via Task tool with `model: "opus"`
-**Input:** Product Owner tasks + acceptance criteria
-**Process:**
-
-1. The Tech Lead defines the implementation approach
-2. Identifies files to modify, patterns to follow, interfaces
+1. The Tech Lead breaks the feature into concrete tasks with verifiable acceptance criteria
+2. Defines the implementation approach: files to modify, patterns to follow, interfaces
 3. Anticipates technical risks and proposes mitigations
+4. Estimates effort and suggests implementation order
 
-**Output:** Technical plan with files, patterns, interfaces, and risks
-**Trace data:** Key patterns identified, files to modify, technical risks
+**Output:** Task list with acceptance criteria + technical plan with files, patterns, interfaces, and risks
+**Trace data:** Tasks defined count, acceptance criteria count, key patterns identified, files to modify, technical risks
 
-### Phase 4 — Implementation (Developer)
+### Phase 3 — Implementation (Developer)
 
-**Progress:** `[4/6] Developer (sonnet) — Implementing...`
+**Progress:** `[3/5] Developer (sonnet) — Implementing...`
 **Agent:** Reads `.claude/agents/developer.md` via Task tool with `model: "sonnet"`
-**Input:** Tech Lead technical plan + PO acceptance criteria
+**Input:** Tech Lead technical plan + acceptance criteria
 **Process:**
 
 1. The Developer implements following the technical plan
@@ -217,7 +197,7 @@ This indicator MUST be displayed before spawning the agent for that phase.
 
 ### Pre-Review Gate (mandatory)
 
-Before advancing to Phase 5, run automated verification:
+Before advancing to Phase 4, run automated verification:
 
 1. Run the project test commands (e.g., `npm test`) — if it fails, the Developer must fix before advancing
 2. Run the project lint commands (e.g., `npm run lint`) — if it fails, the Developer must fix before advancing
@@ -227,9 +207,9 @@ This gate CANNOT be skipped, even if the user requested phase skipping. The spec
 
 **Trace data:** Tests pass/fail, lint pass/fail
 
-### Phase 5 — Review (Code Reviewer)
+### Phase 4 — Review (Code Reviewer)
 
-**Progress:** `[5/6] Code Reviewer (opus) — Reviewing changes...`
+**Progress:** `[4/5] Code Reviewer (opus) — Reviewing changes...`
 **Agent:** Reads `.claude/agents/code-reviewer.md` via Task tool with `model: "opus"`
 **Input:** The implemented changes (git diff)
 **Process:**
@@ -239,13 +219,13 @@ This gate CANNOT be skipped, even if the user requested phase skipping. The spec
 
 **Output:** Review report with classified findings
 **Trace data:** Blockers count, warnings count, suggestions count, review-fix loops
-**Loop condition:** If there are Blocker findings, return to **Phase 4** for the Developer to fix them. Maximum 2 review-fix iterations.
+**Loop condition:** If there are Blocker findings, return to **Phase 3** for the Developer to fix them. Maximum 2 review-fix iterations.
 
-### Phase 6 — QA (delegates to /qa-cycle)
+### Phase 5 — QA (delegates to /qa-cycle)
 
-**Progress:** `[6/6] QA (sonnet) — Validating acceptance criteria...`
+**Progress:** `[5/5] QA (sonnet) — Validating acceptance criteria...`
 
-Runs the `/qa-cycle` skill passing the PO acceptance criteria as context. The qa-cycle handles:
+Runs the `/qa-cycle` skill passing the acceptance criteria as context. The qa-cycle handles:
 
 1. Running project tests and lint
 2. Validating acceptance criteria
@@ -253,7 +233,7 @@ Runs the `/qa-cycle` skill passing the PO acceptance criteria as context. The qa
 4. Bugfix cycle if issues arise (maximum 3 cycles)
 
 **Trace data:** Acceptance criteria verified count, bugs found, QA cycles
-**Additional loop condition:** If the qa-cycle bugfix introduces significant changes, return to **Phase 5** (Review) for verification. Maximum 2 review-QA cycles.
+**Additional loop condition:** If the qa-cycle bugfix introduces significant changes, return to **Phase 4** (Review) for verification. Maximum 2 review-QA cycles.
 
 ## Checkpoint Commits
 
@@ -267,11 +247,10 @@ git commit -m "wip: [feature-name] phase N complete — [phase-name]"
 Pattern for each phase:
 
 - After Phase 1: `wip: [feature] phase 1 — advisor approved`
-- After Phase 2: `wip: [feature] phase 2 — PO spec ready`
-- After Phase 3: `wip: [feature] phase 3 — tech approach defined`
-- After Phase 4: `wip: [feature] phase 4 — implementation done` -- also write partial trace (phases 1-4) to spec and update status to `implementing`
-- After Phase 5: `wip: [feature] phase 5 — review passed`
-- After Phase 6: `wip: [feature] phase 6 — QA passed`
+- After Phase 2: `wip: [feature] phase 2 — spec and tech approach defined`
+- After Phase 3: `wip: [feature] phase 3 — implementation done` -- also write partial trace (phases 1-3) to spec and update status to `implementing`
+- After Phase 4: `wip: [feature] phase 4 — review passed`
+- After Phase 5: `wip: [feature] phase 5 — QA passed`
 
 Also update SESSION.md at each phase transition:
 
@@ -325,7 +304,7 @@ Append this section to the spec file:
 
 pipeline-start: [YYYY-MM-DD]
 pipeline-end: [YYYY-MM-DD]
-phases-completed: [N]/6
+phases-completed: [N]/5
 review-fix-loops: [N]
 qa-cycles: [N]
 final-gate: pass | fail
@@ -335,19 +314,16 @@ final-gate: pass | fail
 - **Verdict**: [Approved/Rejected/Approved with conditions]
 - **Risks identified**: [list or "None"]
 
-### Phase 2 — Specification
+### Phase 2 — Specification & Technical Approach
 
 - **Tasks defined**: [N]
 - **Acceptance criteria**: [N]
-- **Estimated effort**: [summary]
-
-### Phase 3 — Technical Approach
-
 - **Key patterns**: [list]
 - **Files to modify**: [list]
 - **Technical risks**: [list or "None"]
+- **Estimated effort**: [summary]
 
-### Phase 4 — Implementation
+### Phase 3 — Implementation
 
 - **Files created/modified**: [list]
 - **Tests added**: [N]
@@ -358,14 +334,14 @@ final-gate: pass | fail
 - **Tests**: pass | fail
 - **Lint**: pass | fail
 
-### Phase 5 — Review
+### Phase 4 — Review
 
 - **Blockers**: [N]
 - **Warnings**: [N]
 - **Suggestions**: [N]
 - **Review-fix loops**: [N]
 
-### Phase 6 — QA
+### Phase 5 — QA
 
 - **Acceptance criteria verified**: [N]/[total]
 - **Bugs found**: [N]
@@ -380,15 +356,15 @@ final-gate: pass | fail
 
 ### When to write the trace
 
-- **Phase 4 checkpoint:** Write a partial trace covering phases 1-4 to the spec file. Set status to `implementing`. Include the spec file in the checkpoint commit.
+- **Phase 3 checkpoint:** Write a partial trace covering phases 1-3 to the spec file. Set status to `implementing`. Include the spec file in the checkpoint commit.
 - **Pipeline completion:** Write the complete trace (all phases) to the spec file. Set status to `implemented`. Include the spec file in the final checkpoint commit.
 
 ## Final Gate (mandatory before Completion)
 
 Before declaring the pipeline as complete, run final verification:
 
-1. Run project tests — if it fails, return to Phase 6 (QA/Bugfix)
-2. Run project lint — if it fails, return to Phase 4 (Developer)
+1. Run project tests — if it fails, return to Phase 5 (QA/Bugfix)
+2. Run project lint — if it fails, return to Phase 3 (Developer)
 3. Both must pass with exit code 0
 
 This gate is the last safety net. It CANNOT be skipped under any circumstances.
@@ -423,7 +399,7 @@ When spawning agents via the Task tool, use these `subagent_type` values:
 
 | Guild Agent Role | subagent_type to use |
 | --- | --- |
-| advisor, product-owner, tech-lead | `"general-purpose"` |
+| advisor, tech-lead | `"general-purpose"` |
 | developer, bugfix | `"general-purpose"` |
 | code-reviewer, qa | `"general-purpose"` |
 
@@ -445,22 +421,19 @@ The `model` parameter is resolved from the step's `model-tier`: reasoning→`"op
 ```text
 User: /build-feature add dark mode toggle to settings page
 
-[1/6] Advisor (opus) — Evaluating feature...
+[1/5] Advisor (opus) — Evaluating feature...
   Approved. Low risk, aligns with UX roadmap.
 
-[2/6] Product Owner (opus) — Defining spec...
-  3 tasks defined with acceptance criteria.
+[2/5] Tech Lead (opus) — Defining spec and technical approach...
+  3 tasks defined. Use CSS variables + context provider pattern.
 
-[3/6] Tech Lead (opus) — Defining technical approach...
-  Use CSS variables + context provider pattern.
-
-[4/6] Developer (sonnet) — Implementing...
+[3/5] Developer (sonnet) — Implementing...
   Implemented ThemeContext, toggle component, CSS vars.
 
-[5/6] Code Reviewer (opus) — Reviewing changes...
+[4/5] Code Reviewer (opus) — Reviewing changes...
   Passed. 1 suggestion (memoize context value).
 
-[6/6] QA (sonnet) — Validating acceptance criteria...
+[5/5] QA (sonnet) — Validating acceptance criteria...
   All 3 acceptance criteria verified. 0 bugs.
 
 Feature complete. PR ready for merge.
@@ -468,7 +441,7 @@ Feature complete. PR ready for merge.
 
 ## Notes
 
-- If the user wants to skip phases (e.g., "already evaluated, implement directly"), allow skipping to Phase 4 but warn that validation is lost. Verification gates (pre-Review and final) are NEVER skipped
+- If the user wants to skip phases (e.g., "already evaluated, implement directly"), allow skipping to Phase 3 but warn that validation is lost. Verification gates (pre-Review and final) are NEVER skipped
 - The pipeline is sequential: each phase depends on the output of the previous one
 - Review/QA loops have limits to prevent infinite cycles
 - In v1.x, parallel pipeline execution (multiple build-features via worktrees) is best-effort and depends on the host environment supporting concurrent agents

@@ -47,11 +47,10 @@ Read `SESSION.md` to determine:
 The pipeline phases are:
 
 1. **Evaluation** (Advisor) — go/no-go
-2. **Specification** (Product Owner) — acceptance criteria
-3. **Technical Approach** (Tech Lead) — implementation plan
-4. **Implementation** (Developer) — code and tests
-5. **Review** (Code Reviewer) — quality review
-6. **QA** — functional validation
+2. **Specification & Technical Approach** (Tech Lead) — tasks, acceptance criteria, implementation plan
+3. **Implementation** (Developer) — code and tests
+4. **Review** (Code Reviewer) — quality review
+5. **QA** — functional validation
 
 ### Step 3 — Present flow state
 
@@ -59,11 +58,10 @@ The pipeline phases are:
 Dev Flow — [feature name]
 
 [x] Phase 1 — Evaluation (completed)
-[x] Phase 2 — Specification (completed)
-[ ] Phase 3 — Technical Approach (pending) <-- you are here
-[ ] Phase 4 — Implementation
-[ ] Phase 5 — Review
-[ ] Phase 6 — QA
+[x] Phase 2 — Specification & Technical Approach (completed)
+[ ] Phase 3 — Implementation (pending) <-- you are here
+[ ] Phase 4 — Review
+[ ] Phase 5 — QA
 
 Next step: Run /build-feature to continue from Phase 3.
 ```
@@ -76,8 +74,8 @@ If there is no feature in progress, report that there is no active pipeline and 
 User: /dev-flow
 
 Current pipeline: build-feature "add user preferences"
-Phase: 4 of 6 — Implementation
+Phase: 3 of 5 — Implementation
 Developer agent active.
 
-Next: Phase 5 — Code Review
+Next: Phase 4 — Code Review
 ```
