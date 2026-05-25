@@ -425,7 +425,7 @@ describe('validateWorkflow — full build-feature workflow', () => {
       '      model-tier: reasoning',
       '      on-failure: abort',
       '    - id: specify',
-      '      role: product-owner',
+      '      role: tech-lead',
       '      intent: "Define tasks and acceptance criteria"',
       '      requires: [feature-description, evaluation-report]',
       '      produces: [task-list, acceptance-criteria]',

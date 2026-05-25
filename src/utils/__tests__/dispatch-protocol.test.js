@@ -33,13 +33,12 @@ describe('FAILURE_STRATEGIES', () => {
 });
 
 describe('DEFAULT_AGENT_TIERS', () => {
-  it('covers 10 agents', () => {
-    expect(Object.keys(DEFAULT_AGENT_TIERS)).toHaveLength(10);
+  it('covers 7 agents', () => {
+    expect(Object.keys(DEFAULT_AGENT_TIERS)).toHaveLength(7);
   });
 
   it('maps reasoning agents correctly', () => {
     expect(DEFAULT_AGENT_TIERS['advisor']).toBe('reasoning');
-    expect(DEFAULT_AGENT_TIERS['product-owner']).toBe('reasoning');
     expect(DEFAULT_AGENT_TIERS['tech-lead']).toBe('reasoning');
     expect(DEFAULT_AGENT_TIERS['code-reviewer']).toBe('reasoning');
   });
@@ -47,9 +46,7 @@ describe('DEFAULT_AGENT_TIERS', () => {
   it('maps execution agents correctly', () => {
     expect(DEFAULT_AGENT_TIERS['developer']).toBe('execution');
     expect(DEFAULT_AGENT_TIERS['bugfix']).toBe('execution');
-    expect(DEFAULT_AGENT_TIERS['db-migration']).toBe('execution');
     expect(DEFAULT_AGENT_TIERS['qa']).toBe('execution');
-    expect(DEFAULT_AGENT_TIERS['platform-expert']).toBe('execution');
   });
 
   it('maps routine agents correctly', () => {
