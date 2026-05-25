@@ -7,6 +7,59 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.1.0] - 2026-05-25
+
+### Added
+
+- **Claude Code plugin support**: Guild is now installable as a Claude Code plugin via `/plugin install Guild-Agents/guild`. Skills are namespaced as `/guild:build-feature`, `/guild:council`, etc.
+- `.claude-plugin/plugin.json` manifest with metadata, keywords, and skill/agent paths
+- `agents/` symlink at plugin root for native agent discovery
+
+## [2.0.0] - 2026-05-25
+
+### Removed
+
+- **Orchestration runtime** (~9,500 lines): executor, orchestrator, dispatch, trace, accounting, pricing, learnings, skill-loader, and Claude Code provider. Guild no longer competes with Claude Code's native Agent/Task tools.
+- **CLI commands**: `guild run`, `guild stats`, `guild logs`, `guild reset-learnings`
+- **Skills**: `/review` (collides with Claude Code built-in `/code-review`), `/verify` (collides with built-in `/verify`), `/new-feature`, `/status`, `/dev-flow` (trivial operations Claude does natively)
+- **Agents**: `product-owner` (redundant with advisor + tech-lead), `db-migration` (stack-specific, unused), `platform-expert` (volatile knowledge), `learnings-extractor` (orphaned after learnings system removal)
+
+### Changed
+
+- Guild is now a **template library + eval framework**, not a runtime. Claude Code executes skill workflows natively.
+- `workflow-parser.js` replaced by minimal `skill-parser.js` for the eval system
+- Workflow YAML simplified: removed executor-specific fields (`commands`, `on-failure`, `retry`, `condition`, `blocking`, `delegates-to`, `parallel`). Only `id`, `role`, `intent`, `requires`, `produces`, `gate`, `model-tier` remain.
+- build-feature pipeline collapsed from 6 phases to 5 (Tech Lead absorbs specification duties)
+- `/session-start` and `/session-end` now integrate with Claude Code's native memory system (SESSION.md for ephemeral state + memory for durable learnings)
+- README and GitHub Pages rewritten for template library positioning
+
+### Final state
+
+- 6 agents, 10 skills, 242 tests, 7 CLI commands
+
+## [1.5.0] - 2026-05-25
+
+### Added
+
+- **Parallel execution** in executor: groups marked with `parallel` in workflow YAML dispatch all steps concurrently via `Promise.all`
+- **Delegation** in executor: steps with `delegates-to` load the sub-skill, create a sub-plan, and recursively execute with depth limiting (`MAX_DELEGATION_DEPTH=2`)
+
+### Changed
+
+- Dependabot updates: vitest 4.1.5, coverage-v8 4.1.5, markdownlint-cli2 0.22.1, eslint 10.3.0, yaml 2.8.4, softprops/action-gh-release v3
+- Resolved `brace-expansion` vulnerability via `npm audit fix`
+- SESSION.md removed from git tracking (stays local for /session-start and /session-end)
+
+## [1.4.0] - 2026-03-31
+
+### Added
+
+- **Semantic matcher**: LLM-based trigger testing via Anthropic Haiku (`guild eval --semantic`)
+- **Benchmark aggregation**: rolling 30-entry history with per-skill accuracy, precision, recall, and delta vs previous run. Regressions (>5% accuracy drop) flagged automatically.
+- **Description analyzer**: keyword gap detection with improvement suggestions (`guild eval --suggest`)
+- **Trigger tests** for all 15 skills (120 total test cases)
+- `guild eval --triggers` for keyword-based trigger accuracy testing
+
 ## [1.3.0] - 2026-03-06
 
 ### Added
