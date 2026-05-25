@@ -8,12 +8,10 @@ workflow:
     - id: load-context
       role: system
       intent: "Read CLAUDE.md, SESSION.md, and PROJECT.md to load project context."
-      commands: [cat CLAUDE.md, cat SESSION.md, cat PROJECT.md]
       produces: [claude-md, session-md, project-md]
     - id: detect-resumable
       role: system
       intent: "Check for wip: checkpoint commits on feature and fix branches."
-      commands: [git branch --list "feature/*" --list "fix/*", git log --oneline -1]
       requires: [session-md]
       produces: [resumable-branches, last-phase]
     - id: present-state
@@ -93,8 +91,6 @@ If there is a task in progress:
 If there is no task in progress, suggest options:
 
 - `/build-feature [description]` — to implement a new feature
-- `/new-feature [name]` — to prepare the environment for a feature
-- `/status` — to see the general project state
 - `/council [question]` — to debate an important decision
 
 ### Step 5 — Update session

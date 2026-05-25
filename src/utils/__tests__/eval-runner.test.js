@@ -51,16 +51,6 @@ describe('evaluateAssertion', () => {
     expect(result.passed).toBe(false);
   });
 
-  it('step-parallel passes when step has parallel group', () => {
-    const result = evaluateAssertion(MOCK_WORKFLOW, 'step-parallel:agent-1');
-    expect(result.passed).toBe(true);
-  });
-
-  it('step-parallel fails when step has no parallel group', () => {
-    const result = evaluateAssertion(MOCK_WORKFLOW, 'step-parallel:evaluate');
-    expect(result.passed).toBe(false);
-  });
-
   it('gate-exists passes when step has gate: true', () => {
     const result = evaluateAssertion(MOCK_WORKFLOW, 'gate-exists:gate-pre-review');
     expect(result.passed).toBe(true);

@@ -23,8 +23,8 @@ src/
     github.js                         #   GitHub CLI (gh) integration
     __tests__/                        #   Co-located tests
   templates/                          # Scaffolding templates copied to user projects
-    agents/*.md                       #   Agent definitions (7 agents)
-    skills/*/SKILL.md                 #   Skill definitions (11 skills)
+    agents/*.md                       #   Agent definitions (6 agents)
+    skills/*/SKILL.md                 #   Skill definitions (10 skills)
 CLAUDE.md                             # Project instructions (enriched by guild-specialize)
 PROJECT.md                            # Project identity and stack
 SESSION.md                            # Session state — persists across conversations
@@ -104,16 +104,11 @@ SESSION.md                            # Session state — persists across conver
 ## Available skills
 - /guild-specialize  — enrich CLAUDE.md by exploring the actual project
 - /build-feature     — full development pipeline
-- /new-feature       — create branch and scaffold for a feature
 - /create-pr         — create a structured pull request from current branch
 - /council           — debate decisions with multiple agents
-- /review            — code review on the current diff
 - /qa-cycle          — QA + bugfix cycle
-- /status            — view project status
-- /dev-flow          — view current pipeline phase
 - /session-start     — load context and resume work
 - /session-end       — save state to SESSION.md
 - /tdd               — TDD red-green-refactor discipline
 - /debug             — systematic 4-phase debugging
 - /re-specialize     — incremental re-specialization of auto-generated zones
-- /verify            — evidence-before-claims verification

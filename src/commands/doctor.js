@@ -4,10 +4,10 @@
 
 import * as p from '@clack/prompts';
 import chalk from 'chalk';
-import { existsSync, readdirSync } from 'fs';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { resolveProjectRoot } from '../utils/files.js';
-import { loadAllSkills } from '../utils/skill-loader.js';
+import { parseSkill } from '../utils/skill-parser.js';
 
 export async function runDoctor() {
   const root = resolveProjectRoot();
@@ -86,27 +86,26 @@ export async function runDoctor() {
 
   // Check workflow validation in skills
   if (existsSync(skillsDir)) {
-    const skills = loadAllSkills(skillsDir);
+    const skillDirs = readdirSync(skillsDir, { withFileTypes: true })
+      .filter(d => d.isDirectory())
+      .filter(d => existsSync(join(skillsDir, d.name, 'SKILL.md')));
+
     let workflowCount = 0;
     let workflowErrors = 0;
     const errorDetails = [];
 
-    for (const [name, skill] of skills) {
+    for (const dir of skillDirs) {
+      const content = readFileSync(join(skillsDir, dir.name, 'SKILL.md'), 'utf8');
+      const skill = parseSkill(content);
+
       if (skill.workflow) {
         workflowCount++;
-        if (skill.errors.length > 0) {
-          workflowErrors++;
-          errorDetails.push(`${name}: ${skill.errors.join('; ')}`);
-        }
-      }
 
-      // Check that agent references exist
-      if (skill.workflow) {
         for (const step of skill.workflow.steps) {
           if (step.role !== 'system' && step.role !== 'dynamic') {
             const agentPath = join(agentsDir, `${step.role}.md`);
             if (!existsSync(agentPath)) {
-              errorDetails.push(`${name}: step "${step.id}" references agent "${step.role}" — agent not found`);
+              errorDetails.push(`${dir.name}: step "${step.id}" references agent "${step.role}" — agent not found`);
               workflowErrors++;
             }
           }
@@ -123,27 +122,6 @@ export async function runDoctor() {
         fix: errorDetails.join('\n    '),
       });
       healthy = false;
-    }
-    // If workflowCount === 0, don't add a check (no workflows to validate)
-
-    // Check for dual-format skills (workflow frontmatter + body step/phase headings)
-    // Matches "### Step 1", "## Phase 2", etc. — requires digit after Step/Phase
-    const STEP_PHASE_RE = /^#{1,3}\s+(Step|Phase)\s+\d/im;
-    const dualFormatWarnings = [];
-
-    for (const [name, skill] of skills) {
-      if (skill.workflow && skill.body && STEP_PHASE_RE.test(skill.body)) {
-        dualFormatWarnings.push(name);
-      }
-    }
-
-    if (dualFormatWarnings.length > 0) {
-      checks.push({
-        name: `Dual-format skills (${dualFormatWarnings.length} warning(s))`,
-        pass: true,
-        warn: true,
-        detail: `Skills with both workflow frontmatter and body step/phase headings: ${dualFormatWarnings.join(', ')}. Workflow steps take precedence — consider removing prose steps from body.`,
-      });
     }
   }
 

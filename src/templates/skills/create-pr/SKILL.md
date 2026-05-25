@@ -8,12 +8,10 @@ workflow:
     - id: verify-branch
       role: system
       intent: "Verify not on main/develop, check for uncommitted changes, get commits ahead of main."
-      commands: [git branch --show-current, git status, git log main..HEAD --oneline]
       produces: [branch-name, branch-state, commit-list]
     - id: gather-context
       role: system
       intent: "Collect diff stats, run tests and lint for PR description context."
-      commands: [git diff main..HEAD --stat, npm test, npm run lint]
       requires: [branch-state]
       produces: [diff-summary, test-result, lint-result]
     - id: generate-description
@@ -25,7 +23,6 @@ workflow:
     - id: create-pr
       role: system
       intent: "Push branch to origin and create PR via gh CLI."
-      commands: [git push -u origin, gh pr create]
       requires: [pr-description, pr-title, branch-name]
       produces: [pr-url]
     - id: post-creation
@@ -102,7 +99,7 @@ Build a structured PR description:
 1. Display the PR URL
 2. Suggest next steps:
    - "Request review from a teammate"
-   - "Run `/review` for an AI code review"
+   - "Run `/code-review` for an AI code review"
    - "Merge when ready with `gh pr merge [number]`"
 
 ## Example Session
@@ -121,7 +118,7 @@ https://github.com/org/repo/pull/42
 
 Next steps:
 - Request review from a teammate
-- Run /review for AI code review
+- Run /code-review for AI code review
 - Merge when ready
 ```
 

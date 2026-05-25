@@ -8,12 +8,10 @@ workflow:
     - id: read-current
       role: system
       intent: "Read current CLAUDE.md and agent files to identify existing zones."
-      commands: [cat CLAUDE.md]
       produces: [current-claude-md, current-agents]
     - id: explore-project
       role: system
       intent: "Scan project for current stack, dependencies, architecture, conventions."
-      commands: [ls -R src/, cat package.json]
       produces: [detected-stack, detected-architecture, detected-conventions]
       gate: true
     - id: check-zones
@@ -43,7 +41,6 @@ workflow:
     - id: commit
       role: system
       intent: "Commit re-specialized files."
-      commands: [git add CLAUDE.md .claude/agents/*.md, git commit -m "chore: re-specialize via guild-re-specialize"]
       requires: [updated-claude-md, updated-agents, confirmation]
       produces: [re-specialize-commit]
 ---
