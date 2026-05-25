@@ -108,7 +108,16 @@ At the start of each phase, display a progress indicator to the user before any 
 [5/5] QA (sonnet) — Validating acceptance criteria...
 ```
 
-Model names are resolved from the step's `model-tier` using the `max` profile: reasoning=opus, execution=sonnet, routine=haiku. System/gate steps do not show a model name.
+When the preferred model for a tier is unavailable, show the fallback with an arrow indicating what was attempted:
+
+```text
+[1/5] Advisor (sonnet ← opus) — Evaluating feature...
+[3/5] Developer (haiku ← sonnet) — Implementing...
+```
+
+Display the normal format (just the model name) when the preferred model resolves successfully. Display the fallback format `(actual ← preferred)` only when a fallback was required.
+
+Model names are resolved from the step's `model-tier` using the preferred model defined in Model Resolution (see Subagent Configuration). System/gate steps do not show a model name.
 
 When a phase loops (review-fix or QA-review cycles), show the iteration:
 
@@ -117,11 +126,16 @@ When a phase loops (review-fix or QA-review cycles), show the iteration:
 [3/5 · round 2] Developer (sonnet) — Fixing review blockers...
 ```
 
-This indicator MUST be displayed before spawning the agent for that phase.
+This indicator MUST be displayed after model resolution completes but before processing the agent's response. If the preferred model fails and fallback is triggered, display the fallback notation `(actual ← preferred)` — the user sees the resolved model, never the failed attempt.
+
+The fallback notation applies to all progress lines, including loop iterations.
 
 ### Phase 1 — Evaluation (Advisor)
 
 **Progress:** `[1/5] Advisor (opus) — Evaluating feature...`
+
+The model name in parentheses is always the resolved model after applying Model Resolution rules. If a fallback was used, it shows `(actual ← preferred)` instead. This applies to all phases — the `model:` values shown in each phase description are the preferred models, subject to the resolution process defined in Subagent Configuration.
+
 **Agent:** Reads `.claude/agents/advisor.md` via Task tool with `model: "opus"`
 **Input:** The feature description provided by the user
 **Process:**
@@ -385,6 +399,26 @@ Task tool with:
 
 The `model` parameter is resolved from the step's `model-tier`: reasoning→`"opus"`, execution→`"sonnet"`, routine→`"haiku"`. System/gate steps run inline (no Task tool).
 
+### Model Resolution
+
+Each `model-tier` maps to a preferred model and a fallback:
+
+| model-tier | Preferred | Fallback |
+| --- | --- | --- |
+| reasoning | opus | sonnet |
+| execution | sonnet | haiku |
+| routine | haiku | sonnet |
+
+The `routine` tier falls back up to sonnet because haiku has no lower-tier fallback — sonnet serves as the universal backup.
+
+**Resolution process:**
+
+1. Attempt the Task tool call with the preferred model for the step's `model-tier`
+2. If the call fails or is rejected (model unavailable, rate-limited, or not accessible on the current plan), retry immediately with the fallback model
+3. Display the progress indicator showing which model was actually used (with fallback notation if applicable) before processing the agent's response
+
+A single retry is sufficient. If both preferred and fallback fail, surface the error to the user and halt the pipeline.
+
 ## Example Session
 
 ```text
@@ -393,7 +427,7 @@ User: /build-feature add dark mode toggle to settings page
 [1/5] Advisor (opus) — Evaluating feature...
   Approved. Low risk, aligns with UX roadmap.
 
-[2/5] Tech Lead (opus) — Defining spec and technical approach...
+[2/5] Tech Lead (sonnet ← opus) — Defining spec and technical approach...
   3 tasks defined. Use CSS variables + context provider pattern.
 
 [3/5] Developer (sonnet) — Implementing...
@@ -407,6 +441,8 @@ User: /build-feature add dark mode toggle to settings page
 
 Feature complete. PR ready for merge.
 ```
+
+In this example, opus was unavailable during Phase 2 so the Tech Lead fell back to sonnet. All other phases used their preferred model.
 
 ## Notes
 
