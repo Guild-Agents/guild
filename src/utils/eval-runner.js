@@ -8,7 +8,7 @@
 import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { parseSkill } from './workflow-parser.js';
+import { parseSkill } from './skill-parser.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEMPLATES_DIR = join(__dirname, '..', 'templates', 'skills');
@@ -63,13 +63,7 @@ export function evaluateAssertion(workflow, assertion) {
         : { passed: false, evidence: `Step "${stepId}" requires [${step.requires.join(', ')}], missing "${dep}"` };
     }
 
-    case 'step-parallel': {
-      const step = workflow.steps.find(s => s.id === args);
-      if (!step) return { passed: false, evidence: `Step "${args}" not found` };
-      return step.parallel && step.parallel.length > 0
-        ? { passed: true, evidence: `Step "${args}" is parallel with [${step.parallel.join(', ')}]` }
-        : { passed: false, evidence: `Step "${args}" has no parallel group` };
-    }
+
 
     case 'gate-exists': {
       const step = workflow.steps.find(s => s.id === args);

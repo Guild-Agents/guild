@@ -6,7 +6,7 @@ import { readFileSync, existsSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { rankSkills } from './trigger-matcher.js';
-import { extractFrontmatterBlock, parseYamlFrontmatter } from './workflow-parser.js';
+import { extractFrontmatterBlock, parseYamlFrontmatter } from './skill-parser.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEMPLATES_DIR = join(__dirname, '..', 'templates', 'skills');

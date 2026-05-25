@@ -8,12 +8,10 @@ workflow:
     - id: read-base
       role: system
       intent: "Read CLAUDE.md, PROJECT.md, and SESSION.md for current Guild configuration."
-      commands: [cat CLAUDE.md, cat PROJECT.md, cat SESSION.md]
       produces: [claude-md, project-md, session-md]
     - id: explore-project
       role: system
       intent: "Scan project structure, dependency files, configs, CI, and documentation to detect stack and architecture."
-      commands: [ls -R src/, cat package.json]
       produces: [detected-stack, detected-architecture, detected-conventions]
       gate: true
     - id: enrich-claude-md
@@ -37,7 +35,6 @@ workflow:
     - id: commit-enrichment
       role: system
       intent: "Commit enriched CLAUDE.md and agent files as an atomic commit."
-      commands: [git add CLAUDE.md .claude/agents/*.md, git commit]
       requires: [enriched-claude-md, specialized-agents]
       produces: [enrichment-commit]
 ---
@@ -165,7 +162,7 @@ Architecture:
 Updated agents:
 - [list of agents with their applied specialization]
 
-Run /status to see the full state.
+Run /session-start to see the full state.
 ```
 
 ### Step 6 — Commit enrichment immediately
@@ -202,7 +199,7 @@ Agents updated:
 - developer.md: Specialized for Next.js + TypeScript
 - qa.md: Configured for Vitest + Playwright
 
-Run /status to see the full state.
+Run /session-start to see the full state.
 ```
 
 ## Important Notes

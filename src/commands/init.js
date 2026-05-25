@@ -135,7 +135,7 @@ export async function runInit() {
 
   const relevantSkills = projectData.hasExistingCode
     ? ['/guild-specialize', '/council', '/build-feature']
-    : ['/council', '/build-feature', '/new-feature'];
+    : ['/council', '/build-feature'];
   p.log.info(`Start with: ${relevantSkills.join('  ')}`);
 
   const quickStart = projectData.hasExistingCode

@@ -2,15 +2,12 @@
   "skill": "council",
   "evals": [
     {
-      "id": "council-three-parallel-agents",
-      "description": "Council has 3 agent steps in parallel",
+      "id": "council-three-agents",
+      "description": "Council has 3 agent steps",
       "expectations": [
         { "text": "Agent-1 exists", "assertion": "step-exists:agent-1" },
         { "text": "Agent-2 exists", "assertion": "step-exists:agent-2" },
-        { "text": "Agent-3 exists", "assertion": "step-exists:agent-3" },
-        { "text": "Agent-1 is parallel", "assertion": "step-parallel:agent-1" },
-        { "text": "Agent-2 is parallel", "assertion": "step-parallel:agent-2" },
-        { "text": "Agent-3 is parallel", "assertion": "step-parallel:agent-3" }
+        { "text": "Agent-3 exists", "assertion": "step-exists:agent-3" }
       ]
     },
     {
@@ -28,13 +25,6 @@
       "expectations": [
         { "text": "Synthesize step exists", "assertion": "step-exists:synthesize" },
         { "text": "Synthesize has gate", "assertion": "gate-exists:synthesize" }
-      ]
-    },
-    {
-      "id": "council-workspace-context",
-      "description": "Workspace context step exists with condition",
-      "expectations": [
-        { "text": "Workspace-context step exists", "assertion": "step-exists:workspace-context" }
       ]
     }
   ]

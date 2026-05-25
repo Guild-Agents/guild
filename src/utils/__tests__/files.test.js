@@ -14,14 +14,13 @@ describe('getAgentNames', () => {
   it('reads agent names from the templates directory', () => {
     const names = getAgentNames();
     // Should match the .md files in src/templates/agents/
-    expect(names).toHaveLength(7);
+    expect(names).toHaveLength(6);
     expect(names).toContain('advisor');
     expect(names).toContain('tech-lead');
     expect(names).toContain('developer');
     expect(names).toContain('code-reviewer');
     expect(names).toContain('qa');
     expect(names).toContain('bugfix');
-    expect(names).toContain('learnings-extractor');
   });
 
   it('returns names sorted alphabetically', () => {
@@ -42,22 +41,17 @@ describe('getSkillNames', () => {
   it('reads skill names from the templates directory', () => {
     const names = getSkillNames();
     // Should match the directories in src/templates/skills/
-    expect(names).toHaveLength(15);
+    expect(names).toHaveLength(10);
     expect(names).toContain('build-feature');
     expect(names).toContain('council');
     expect(names).toContain('create-pr');
     expect(names).toContain('debug');
-    expect(names).toContain('dev-flow');
     expect(names).toContain('guild-specialize');
-    expect(names).toContain('new-feature');
     expect(names).toContain('qa-cycle');
     expect(names).toContain('re-specialize');
-    expect(names).toContain('review');
     expect(names).toContain('session-end');
     expect(names).toContain('session-start');
     expect(names).toContain('tdd');
-    expect(names).toContain('verify');
-    expect(names).toContain('status');
   });
 
   it('returns names sorted alphabetically', () => {
@@ -81,13 +75,13 @@ describe('copyTemplates', () => {
     if (existsSync(TEST_DIR)) rmSync(TEST_DIR, { recursive: true });
   });
 
-  it('creates .claude/agents/ with 7 flat .md files', async () => {
+  it('creates .claude/agents/ with 6 flat .md files', async () => {
     await copyTemplates();
     const agentsDir = join('.claude', 'agents');
     expect(existsSync(agentsDir)).toBe(true);
 
     const files = readdirSync(agentsDir);
-    expect(files).toHaveLength(7);
+    expect(files).toHaveLength(6);
     for (const name of getAgentNames()) {
       expect(files).toContain(`${name}.md`);
     }
@@ -99,8 +93,8 @@ describe('copyTemplates', () => {
     expect(existsSync(skillsDir)).toBe(true);
 
     const expectedSkills = [
-      'guild-specialize', 'build-feature', 'council', 'create-pr', 'new-feature',
-      'qa-cycle', 'review', 'status', 'dev-flow', 'session-start', 'session-end',
+      'guild-specialize', 'build-feature', 'council', 'create-pr',
+      'qa-cycle', 'session-start', 'session-end',
     ];
     for (const skill of expectedSkills) {
       expect(existsSync(join(skillsDir, skill, 'SKILL.md'))).toBe(true);

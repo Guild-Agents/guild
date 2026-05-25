@@ -7,7 +7,7 @@
 
 **Guild makes Claude Code think before it builds.**
 
-Guild is a spec-driven development CLI for Claude Code. It installs structured design and development workflows as `.claude/` markdown files in any project. Before code is written, features are evaluated, debated by independent AI perspectives, and specified in a design doc. Everything is markdown, tracked by git, works offline, zero infrastructure.
+Without Guild, Claude Code writes code immediately. No evaluation, no design, no review. With Guild, every feature goes through structured phases — evaluated by an advisor, designed by a tech lead, reviewed by a code reviewer, validated by QA — before anything ships. Everything is markdown in `.claude/`, tracked by git, works offline, zero infrastructure.
 
 ## The Problem
 
@@ -20,10 +20,11 @@ Without structure, Claude Code:
 
 ## How Guild Solves It
 
-- **Spec before code**: every feature starts with a design doc
-- **Structured deliberation**: `/council` runs parallel independent analysis -- multiple perspectives evaluate independently, then synthesize
-- **Decisions that persist**: design docs, session state, and project context live in git-tracked markdown
-- **Zero infrastructure**: no servers, no APIs, just markdown files and Claude Code
+- **Spec before code**: `/build-feature` enforces evaluation, design, and review phases — code comes after the design doc
+- **Independent perspectives**: `/council` spawns parallel agents that each analyze your idea independently, then synthesize into a decision
+- **Session continuity**: `/session-start` and `/session-end` combine SESSION.md with Claude Code's memory system — you never lose context between sessions
+- **Behavioral discipline**: `/tdd` and `/debug` prevent the most common LLM anti-patterns: code before tests, fixes before root cause analysis
+- **Quality you can measure**: `guild eval` validates skill structure, trigger accuracy, and description quality with automated benchmarks
 
 ## Quick Start
 
@@ -43,46 +44,56 @@ Then use skills as slash commands in Claude Code:
 ## The Pipeline
 
 ```text
-You ──> /council "Add JWT auth"
+You ──> /build-feature "Add JWT auth"
          │
          ▼
-    ┌──────────┐     ┌──────────────┐     ┌──────────┐
-    │ Evaluate │────>│  Design Doc  │────>│  Build   │
-    │ debate   │     │  spec        │     │ implement│
-    └──────────┘     └──────────────┘     └────┬─────┘
-                                               │
-                                         ┌─────┴─────┐
-                                         ▼           ▼
-                                   ┌──────────┐┌──────────┐
-                                   │  Review  ││    QA    │
-                                   └──────────┘└──────────┘
+    ┌──────────┐     ┌──────────┐     ┌──────────┐
+    │ Evaluate │────>│  Design  │────>│  Build   │
+    │ advisor  │     │ tech-lead│     │developer │
+    └──────────┘     └──────────┘     └────┬─────┘
+                                           │
+                                     ┌─────┴─────┐
+                                     ▼           ▼
+                               ┌──────────┐┌──────────┐
+                               │  Review  ││    QA    │
+                               └──────────┘└──────────┘
 ```
 
 Five phases: **evaluate**, **design**, **implement**, **review**, **validate**. Phases 1-2 happen before any code is written.
 
-## Skills Reference
+## Skills
 
-All 15 skills, grouped by function:
+10 skills, available as slash commands in Claude Code:
 
-| Skill | Group | Description |
-| --- | --- | --- |
-| `/build-feature` | Pipeline | Full pipeline: evaluate, spec, implement, review, QA |
-| `/new-feature` | Pipeline | Create branch and scaffold for a new feature |
-| `/create-pr` | Pipeline | Create a structured pull request from current branch |
-| `/council` | Decision | Multi-perspective deliberation on a decision or feature |
-| `/review` | Quality | Code review on the current diff |
-| `/qa-cycle` | Quality | QA and bugfix loop until clean |
-| `/tdd` | Discipline | TDD red-green-refactor cycle |
-| `/debug` | Discipline | Systematic 4-phase debugging |
-| `/verify` | Discipline | Evidence-before-claims verification |
-| `/guild-specialize` | Context | Explore codebase, enrich CLAUDE.md with real conventions |
-| `/re-specialize` | Context | Incremental update of auto-generated CLAUDE.md zones |
-| `/session-start` | Context | Load context and resume work |
-| `/session-end` | Context | Save state to SESSION.md |
-| `/status` | Context | Project and session state overview |
-| `/dev-flow` | Context | Show current pipeline phase and next step |
+| Skill | What it does |
+| --- | --- |
+| `/build-feature` | Full pipeline: evaluate, design, implement, review, QA |
+| `/council` | Multi-perspective deliberation — 3 agents debate independently, then synthesize |
+| `/create-pr` | Structured pull request from current branch |
+| `/qa-cycle` | QA and bugfix loop until clean |
+| `/tdd` | TDD red-green-refactor — no code without a failing test |
+| `/debug` | Systematic 4-phase debugging — no fixes without root cause |
+| `/guild-specialize` | Explore your codebase, enrich CLAUDE.md with real conventions |
+| `/re-specialize` | Incremental update of CLAUDE.md when your stack changes |
+| `/session-start` | Resume work from SESSION.md + Claude Code memory |
+| `/session-end` | Save state to SESSION.md + durable learnings to memory |
 
-## CLI Commands
+## Agents
+
+6 specialized roles that give Claude Code distinct perspectives:
+
+| Agent | Role |
+| --- | --- |
+| advisor | Evaluates ideas and provides strategic direction. First gate before any work begins |
+| tech-lead | Breaks features into tasks. Defines technical approach and architecture |
+| developer | Implements features following project conventions. Writes tests, makes atomic commits |
+| code-reviewer | Reviews quality, patterns, and technical debt |
+| qa | Testing, edge cases, regression. Validates the implementation meets acceptance criteria |
+| bugfix | Diagnosis and bug resolution. Isolates root causes and applies targeted fixes |
+
+Each agent is a flat `.md` file with identity, responsibilities, and boundaries. Claude Code reads them via its native Agent tool and assumes the role.
+
+## CLI
 
 ```bash
 guild init              # Interactive project onboarding
@@ -90,45 +101,38 @@ guild new-agent <name>  # Create a custom agent
 guild status            # Show project status
 guild doctor            # Diagnose setup
 guild list              # List agents and skills
-guild run <skill>       # Preview a skill's execution plan (dry-run)
-guild logs              # View execution traces
-guild logs clean        # Remove old traces (--days N, --all)
-guild stats             # Token usage and cost estimates
 guild eval              # Run structural skill evaluations
-guild eval --triggers   # Run trigger accuracy tests (keyword matcher)
-guild eval --semantic   # Run trigger tests with LLM semantic matcher
-guild eval --suggest    # Show description improvement suggestions
-guild workspace init <name> <members...>  # Create a workspace
-guild workspace add <path>                # Add a member repo
-guild workspace status                    # Show workspace state
+guild eval --triggers   # Run trigger accuracy tests
+guild eval --semantic   # LLM-based trigger tests (requires ANTHROPIC_API_KEY)
+guild eval --suggest    # Description improvement suggestions
+guild workspace init    # Create a multi-repo workspace
 ```
 
 ## Skill Evaluations
 
-Guild includes a built-in evaluation framework for validating skill quality:
+Guild includes a built-in framework for measuring skill quality:
 
-- **Structural evals** (`guild eval`) -- assert workflow structure: steps exist, roles are correct, gates are present
-- **Trigger tests** (`guild eval --triggers`) -- verify that user prompts route to the correct skill using keyword overlap scoring
-- **Semantic matcher** (`guild eval --semantic`) -- optional LLM-based scoring via Anthropic Haiku for higher-fidelity trigger testing (requires `ANTHROPIC_API_KEY`)
-- **Description suggestions** (`guild eval --suggest`) -- analyzes keyword gaps in skill descriptions based on failed triggers
+- **Structural evals** -- assert workflow structure: steps exist, roles are correct, gates are present
+- **Trigger tests** -- verify that user prompts route to the correct skill
+- **Semantic matcher** -- LLM-based scoring for higher-fidelity trigger testing
+- **Benchmarks** -- rolling history with per-skill accuracy, precision, recall, and regression detection
 
-Every trigger run automatically records results to `benchmarks/benchmark.json` (rolling 30-entry history) and generates `benchmarks/benchmark.md` with per-skill accuracy, precision, recall, and delta vs previous run. Regressions (>5% accuracy drop with 2+ tests flipped) are flagged automatically.
+## How It Works
 
-## Under the Hood
+Guild installs agent definitions and skill workflows as markdown files in your project's `.claude/` directory. Claude Code discovers and executes them natively — no custom runtime, no extra process, no API calls. When you type `/build-feature`, Claude Code reads the skill, follows the phases, and spawns agents using its own Agent tool.
 
-Guild coordinates 7 specialized agents through the pipeline. Each agent handles one phase.
+Guild defines **what** happens. Claude Code decides **how** to execute it.
 
-| Agent | Role |
-| --- | --- |
-| advisor | Evaluates ideas and provides strategic direction |
-| tech-lead | Defines technical approach, tasks, and architecture |
-| developer | Implements features following project conventions |
-| code-reviewer | Reviews quality, patterns, and technical debt |
-| qa | Testing, edge cases, regression validation |
-| bugfix | Bug diagnosis and resolution |
-| learnings-extractor | Extracts compound learnings from pipeline executions |
+## Session Continuity
 
-Agents are flat `.md` files with identity and expertise. Skills orchestrate agents through structured pipelines. Everything lives in `.claude/`, readable by humans, tracked by git.
+Claude Code's native memory system remembers who you are, lessons learned, and project context — knowledge that lasts months. But it explicitly does not store ephemeral work state: what you were building, which branch, what phase, what's next. That's the gap Guild fills.
+
+`/session-end` writes to **both layers**:
+
+- **SESSION.md** — where you stopped: task, branch, phase, next steps (overwritten each session)
+- **Claude Code memory** — what you learned: decisions, lessons, references (persists across sessions)
+
+`/session-start` reads from **both** and presents a unified summary. You resume exactly where you left off, with full context of what you know and what you were doing.
 
 ## Guild Builds Itself
 

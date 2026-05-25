@@ -11,14 +11,12 @@ workflow:
       requires: [feature-description]
       produces: [evaluation-report, verdict]
       model-tier: reasoning
-      on-failure: abort
     - id: design
       role: tech-lead
       intent: "Break the feature into concrete tasks with acceptance criteria. Define implementation approach: files to modify, patterns to follow, interfaces, and technical risks."
       requires: [feature-description, evaluation-report]
       produces: [task-list, acceptance-criteria, technical-plan]
       model-tier: reasoning
-      condition: step.evaluate.verdict != rejected
     - id: implement
       role: developer
       intent: "Implement the feature following the technical plan. Write unit tests. Make atomic commits."
@@ -28,13 +26,11 @@ workflow:
     - id: gate-pre-review
       role: system
       intent: "Run project tests and lint. Both must pass before review."
-      commands: [npm test, npm run lint]
       gate: true
       produces: [gate-pre-review-result]
-      on-failure: goto:implement
-    - id: checkpoint-phase4
+    - id: checkpoint
       role: system
-      intent: "Create checkpoint commit and write partial pipeline trace (phases 1-4) to spec file."
+      intent: "Create checkpoint commit and write partial pipeline trace to spec file."
       requires: [implementation, gate-pre-review-result]
       produces: [checkpoint-commit]
       gate: true
@@ -44,56 +40,29 @@ workflow:
       requires: [implementation, gate-pre-review-result]
       produces: [review-report]
       model-tier: reasoning
-      retry:
-        max: 2
-        on: has-blockers
     - id: fix-review-blockers
       role: developer
       intent: "Fix blocker findings from code review. Run tests after fixing."
       requires: [review-report]
       produces: [implementation]
       model-tier: execution
-      condition: step.review.has-blockers
-      on-failure: goto:review
     - id: qa-phase
-      role: system
-      intent: "Run QA validation with bugfix cycles."
-      delegates-to: qa-cycle
+      role: qa
+      intent: "Validate acceptance criteria, test edge cases, run bugfix cycles if needed."
       requires: [acceptance-criteria, implementation]
       produces: [qa-report]
-      retry:
-        max: 2
-        on: has-bugs
-    - id: post-qa-review
-      role: code-reviewer
-      intent: "Review changes introduced during QA bugfix cycles."
-      requires: [qa-report, implementation]
-      produces: [post-qa-review-report]
-      model-tier: reasoning
-      condition: step.qa-phase.had-significant-changes
-      retry:
-        max: 2
-        on: has-blockers
+      model-tier: execution
     - id: gate-final
       role: system
       intent: "Run project tests and lint as final verification. Both must pass."
-      commands: [npm test, npm run lint]
       gate: true
       produces: [final-gate-result]
-      on-failure: goto:qa-phase
     - id: completion
       role: system
-      intent: "Write complete pipeline trace to spec file. Update SESSION.md. Present summary to user."
+      intent: "Update SESSION.md. Present summary to user."
       requires: [final-gate-result, review-report, qa-report]
-      produces: [pipeline-trace, session-update]
+      produces: [session-update]
       gate: true
-    - id: extract-learnings
-      role: learnings-extractor
-      intent: "Extract compound learnings from this pipeline execution."
-      requires: [pipeline-trace]
-      produces: [updated-learnings]
-      model-tier: routine
-      blocking: false
 ---
 
 # Build Feature
