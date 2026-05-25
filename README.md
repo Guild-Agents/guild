@@ -69,7 +69,8 @@ Five phases. Phases 1-2 happen before any code is written. Gates between phases 
 **As a Claude Code plugin** (recommended):
 
 ```
-/plugin install Guild-Agents/guild
+/plugin marketplace add Guild-Agents/guild
+/plugin install guild
 ```
 
 All 10 skills and 6 roles are available immediately as `/guild:*` commands.
