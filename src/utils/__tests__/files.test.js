@@ -42,7 +42,7 @@ describe('getSkillNames', () => {
   it('reads skill names from the templates directory', () => {
     const names = getSkillNames();
     // Should match the directories in src/templates/skills/
-    expect(names).toHaveLength(15);
+    expect(names).toHaveLength(13);
     expect(names).toContain('build-feature');
     expect(names).toContain('council');
     expect(names).toContain('create-pr');
@@ -52,11 +52,9 @@ describe('getSkillNames', () => {
     expect(names).toContain('new-feature');
     expect(names).toContain('qa-cycle');
     expect(names).toContain('re-specialize');
-    expect(names).toContain('review');
     expect(names).toContain('session-end');
     expect(names).toContain('session-start');
     expect(names).toContain('tdd');
-    expect(names).toContain('verify');
     expect(names).toContain('status');
   });
 
@@ -100,7 +98,7 @@ describe('copyTemplates', () => {
 
     const expectedSkills = [
       'guild-specialize', 'build-feature', 'council', 'create-pr', 'new-feature',
-      'qa-cycle', 'review', 'status', 'dev-flow', 'session-start', 'session-end',
+      'qa-cycle', 'status', 'dev-flow', 'session-start', 'session-end',
     ];
     for (const skill of expectedSkills) {
       expect(existsSync(join(skillsDir, skill, 'SKILL.md'))).toBe(true);

@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 
 /**
- * Guild v1 — CLI entry point
+ * Guild v2 — CLI entry point
  * Usage:
- *   guild init           — interactive onboarding v1
+ *   guild init           — interactive onboarding
  *   guild new-agent      — create a new agent
  *   guild status         — view project status
  *   guild doctor         — verify setup and report issues
  *   guild list           — list installed agents and skills
- *   guild stats          — view token usage and cost stats
+ *   guild eval           — run skill structural evaluations
+ *   guild workspace      — manage multi-repo workspaces
  */
 
 import { program } from 'commander';
@@ -106,69 +107,6 @@ program
     }
   });
 
-// guild reset-learnings
-program
-  .command('reset-learnings')
-  .description('Reset the compound learnings file')
-  .option('-f, --force', 'Skip confirmation prompt')
-  .action(async (options) => {
-    try {
-      const { runResetLearnings } = await import('../src/commands/reset-learnings.js');
-      await runResetLearnings(options);
-    } catch (err) {
-      console.error(err.message);
-      process.exit(1);
-    }
-  });
-
-// guild run
-program
-  .command('run')
-  .description('Execute a skill workflow')
-  .argument('<skill>', 'Skill name to run')
-  .argument('[input]', 'Input text for the skill', '')
-  .option('--profile <profile>', 'Model profile (max, pro)', 'max')
-  .option('--dry-run', 'Display the execution plan without running it')
-  .action(async (skill, input, options) => {
-    try {
-      const { runRun } = await import('../src/commands/run.js');
-      await runRun(skill, input, options);
-    } catch (err) {
-      console.error(err.message);
-      process.exit(1);
-    }
-  });
-
-// guild logs (list traces)
-const logsCmd = program
-  .command('logs')
-  .description('View and manage execution traces')
-  .action(async (options) => {
-    try {
-      const { runLogs } = await import('../src/commands/logs.js');
-      await runLogs('list', options);
-    } catch (err) {
-      console.error(err.message);
-      process.exit(1);
-    }
-  });
-
-// guild logs clean
-logsCmd
-  .command('clean')
-  .description('Remove old execution traces')
-  .option('--days <days>', 'Remove traces older than N days', '30')
-  .option('--all', 'Remove all traces')
-  .action(async (options) => {
-    try {
-      const { runLogs } = await import('../src/commands/logs.js');
-      await runLogs('clean', options);
-    } catch (err) {
-      console.error(err.message);
-      process.exit(1);
-    }
-  });
-
 // guild eval
 program
   .command('eval')
@@ -189,25 +127,6 @@ program
         const { runEval } = await import('../src/commands/eval.js');
         await runEval(skill);
       }
-    } catch (err) {
-      console.error(err.message);
-      process.exit(1);
-    }
-  });
-
-// guild stats
-program
-  .command('stats')
-  .description('View token usage stats and cost estimates')
-  .option('--period <period>', 'Filter by period: today, week, month, all', 'month')
-  .option('--compare', 'Compare cost across model profiles')
-  .option('--reset', 'Delete all usage history')
-  .option('-f, --force', 'Skip confirmation prompt (for --reset)')
-  .option('--export <format>', 'Export data (csv)')
-  .action(async (options) => {
-    try {
-      const { runStats } = await import('../src/commands/stats.js');
-      await runStats(options);
     } catch (err) {
       console.error(err.message);
       process.exit(1);

@@ -62,7 +62,7 @@ Five phases: **evaluate**, **design**, **implement**, **review**, **validate**. 
 
 ## Skills Reference
 
-All 15 skills, grouped by function:
+All 13 skills, grouped by function:
 
 | Skill | Group | Description |
 | --- | --- | --- |
@@ -70,11 +70,9 @@ All 15 skills, grouped by function:
 | `/new-feature` | Pipeline | Create branch and scaffold for a new feature |
 | `/create-pr` | Pipeline | Create a structured pull request from current branch |
 | `/council` | Decision | Multi-perspective deliberation on a decision or feature |
-| `/review` | Quality | Code review on the current diff |
 | `/qa-cycle` | Quality | QA and bugfix loop until clean |
 | `/tdd` | Discipline | TDD red-green-refactor cycle |
 | `/debug` | Discipline | Systematic 4-phase debugging |
-| `/verify` | Discipline | Evidence-before-claims verification |
 | `/guild-specialize` | Context | Explore codebase, enrich CLAUDE.md with real conventions |
 | `/re-specialize` | Context | Incremental update of auto-generated CLAUDE.md zones |
 | `/session-start` | Context | Load context and resume work |
@@ -90,10 +88,6 @@ guild new-agent <name>  # Create a custom agent
 guild status            # Show project status
 guild doctor            # Diagnose setup
 guild list              # List agents and skills
-guild run <skill>       # Preview a skill's execution plan (dry-run)
-guild logs              # View execution traces
-guild logs clean        # Remove old traces (--days N, --all)
-guild stats             # Token usage and cost estimates
 guild eval              # Run structural skill evaluations
 guild eval --triggers   # Run trigger accuracy tests (keyword matcher)
 guild eval --semantic   # Run trigger tests with LLM semantic matcher
