@@ -91,8 +91,6 @@ If there is a task in progress:
 If there is no task in progress, suggest options:
 
 - `/build-feature [description]` — to implement a new feature
-- `/new-feature [name]` — to prepare the environment for a feature
-- `/status` — to see the general project state
 - `/council [question]` — to debate an important decision
 
 ### Step 5 — Update session

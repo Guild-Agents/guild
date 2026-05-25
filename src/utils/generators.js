@@ -137,15 +137,14 @@ ${workspaceSection}
 ## Available skills
 - /guild-specialize  — enrich CLAUDE.md by exploring the actual project
 - /build-feature     — full development pipeline
-- /new-feature       — create branch and scaffold for a feature
 - /create-pr         — create a structured pull request from current branch
 - /council           — debate decisions with multiple agents
-- /review            — code review on the current diff
 - /qa-cycle          — QA + bugfix cycle
-- /status            — view project status
-- /dev-flow          — view current pipeline phase
 - /session-start     — load context and resume work
 - /session-end       — save state to SESSION.md
+- /tdd               — TDD red-green-refactor discipline
+- /debug             — systematic 4-phase debugging
+- /re-specialize     — incremental re-specialization of auto-generated zones
 `;
 
   writeFileSync('CLAUDE.md', content, 'utf8');

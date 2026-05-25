@@ -56,11 +56,11 @@ For files in `src/templates/agents/` and `src/templates/skills/`.
 
 ### Agents
 
-Each agent is a flat `.md` file that defines identity, responsibilities, and process. The 7 agents live in `src/templates/agents/`:
+Each agent is a flat `.md` file that defines identity, responsibilities, and process. The 6 agents live in `src/templates/agents/`:
 
 ```text
 advisor.md, tech-lead.md, developer.md,
-code-reviewer.md, qa.md, bugfix.md, learnings-extractor.md
+code-reviewer.md, qa.md, bugfix.md
 ```
 
 When improving an agent, focus on making instructions clear and actionable. Agents should define what they do, when they act, and how they interact with other agents.

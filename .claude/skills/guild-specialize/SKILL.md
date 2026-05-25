@@ -162,7 +162,7 @@ Architecture:
 Updated agents:
 - [list of agents with their applied specialization]
 
-Run /status to see the full state.
+Run /session-start to see the full state.
 ```
 
 ### Step 6 — Commit enrichment immediately
@@ -199,7 +199,7 @@ Agents updated:
 - developer.md: Specialized for Next.js + TypeScript
 - qa.md: Configured for Vitest + Playwright
 
-Run /status to see the full state.
+Run /session-start to see the full state.
 ```
 
 ## Important Notes

@@ -99,7 +99,7 @@ Build a structured PR description:
 1. Display the PR URL
 2. Suggest next steps:
    - "Request review from a teammate"
-   - "Run `/review` for an AI code review"
+   - "Run `/code-review` for an AI code review"
    - "Merge when ready with `gh pr merge [number]`"
 
 ## Example Session
@@ -118,7 +118,7 @@ https://github.com/org/repo/pull/42
 
 Next steps:
 - Request review from a teammate
-- Run /review for AI code review
+- Run /code-review for AI code review
 - Merge when ready
 ```
 

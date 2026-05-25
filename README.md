@@ -107,7 +107,7 @@ Every trigger run automatically records results to `benchmarks/benchmark.json` (
 
 ## Under the Hood
 
-Guild coordinates 7 specialized agents through the pipeline. Each agent handles one phase.
+Guild coordinates 6 specialized agents through the pipeline. Each agent handles one phase.
 
 | Agent | Role |
 | --- | --- |
@@ -117,7 +117,6 @@ Guild coordinates 7 specialized agents through the pipeline. Each agent handles 
 | code-reviewer | Reviews quality, patterns, and technical debt |
 | qa | Testing, edge cases, regression validation |
 | bugfix | Bug diagnosis and resolution |
-| learnings-extractor | Extracts compound learnings from pipeline executions |
 
 Agents are flat `.md` files with identity and expertise. Skills orchestrate agents through structured pipelines. Everything lives in `.claude/`, readable by humans, tracked by git.
 
