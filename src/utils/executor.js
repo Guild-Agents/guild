@@ -3,7 +3,7 @@
  *
  * Drives a plan to completion by iterating through steps, dispatching
  * agent steps to a provider function and system steps to local commands.
- * Sequential execution only (v1.1); parallel groups deferred to v1.2.
+ * Supports parallel execution (v1.2) and delegation to sub-skills.
  */
 
 import { execFile } from 'child_process';
@@ -11,8 +11,15 @@ import {
   advanceStep,
   getNextSteps,
   isPlanComplete,
+  MAX_DELEGATION_DEPTH,
+  createExecutionPlan,
 } from './orchestrator.js';
-import { buildStepContext, recordStepTrace } from './orchestrator-io.js';
+import {
+  buildStepContext,
+  recordStepTrace,
+  loadWorkflow,
+  resolveStepDispatch,
+} from './orchestrator-io.js';
 
 const SYSTEM_STEP_TIMEOUT = 120_000; // 2 minutes
 
@@ -70,7 +77,7 @@ async function executeSystemStep(step, options = {}) {
   }
 
   if (step.delegatesTo) {
-    return { status: 'passed', output: `Delegation to "${step.delegatesTo}" skipped (v1.1)` };
+    return { status: 'passed', output: `System step with delegation — handled by executeDelegation` };
   }
 
   return { status: 'passed', output: 'System step completed' };
@@ -93,11 +100,110 @@ function findStepInPlan(plan, stepId) {
 }
 
 /**
+ * Dispatches a single step (agent or system) and returns its result.
+ *
+ * @param {object} step - Step definition
+ * @param {object} dispatch - Dispatch info for this step
+ * @param {object} context - Execution context
+ * @param {import('./orchestrator.js').ExecutionPlan} context.currentPlan - Current plan state
+ * @param {Function} context.provider - Agent step provider
+ * @param {string} context.projectRoot - Working directory
+ * @param {string} context.skillBody - Skill body text
+ * @param {object} context.executeOptions - Full options passed to execute()
+ * @returns {Promise<{ status: string, output: string, outcome?: object, error?: string }>}
+ */
+async function dispatchStep(step, dispatch, context) {
+  const { currentPlan, provider, projectRoot, skillBody, executeOptions } = context;
+
+  if (step.role === 'system' && step.delegatesTo) {
+    return executeDelegation(step, executeOptions);
+  }
+
+  if (step.role === 'system') {
+    return executeSystemStep(step, { projectRoot });
+  }
+
+  const stepContext = buildStepContext(step, currentPlan, { skillBody });
+  return provider(step, dispatch, stepContext);
+}
+
+/**
+ * Executes a delegation step by loading and running the sub-skill.
+ *
+ * @param {object} step - Delegation step (with delegatesTo field)
+ * @param {object} options - Execute options from parent
+ * @returns {Promise<{ status: string, output: string, error?: string }>}
+ */
+async function executeDelegation(step, options) {
+  const {
+    provider,
+    trace,
+    projectRoot,
+    profile = 'max',
+    onStepStart,
+    onStepEnd,
+    delegationDepth = 0,
+  } = options;
+
+  if (delegationDepth >= MAX_DELEGATION_DEPTH) {
+    return {
+      status: 'failed',
+      output: '',
+      error: `Delegation depth limit (${MAX_DELEGATION_DEPTH}) exceeded at step "${step.id}" delegating to "${step.delegatesTo}"`,
+    };
+  }
+
+  let subSkill;
+  try {
+    subSkill = loadWorkflow(step.delegatesTo);
+  } catch (err) {
+    return {
+      status: 'failed',
+      output: '',
+      error: `Failed to load delegated skill "${step.delegatesTo}": ${err.message}`,
+    };
+  }
+
+  const subPlan = createExecutionPlan(subSkill.workflow, {
+    skillName: subSkill.name || step.delegatesTo,
+  });
+
+  const subDispatchMap = {};
+  for (const group of subPlan.groups) {
+    for (const s of group.steps) {
+      subDispatchMap[s.id] = resolveStepDispatch(s, { profile, projectRoot });
+    }
+  }
+
+  const finalSubPlan = await execute(subPlan, subDispatchMap, {
+    provider,
+    trace,
+    projectRoot,
+    skillBody: subSkill.body || '',
+    onStepStart,
+    onStepEnd,
+    delegationDepth: delegationDepth + 1,
+    profile,
+  });
+
+  if (finalSubPlan.status === 'completed') {
+    return { status: 'passed', output: `Delegation to "${step.delegatesTo}" completed` };
+  }
+
+  return {
+    status: 'failed',
+    output: '',
+    error: `Delegated skill "${step.delegatesTo}" ended with status: ${finalSubPlan.status}`,
+  };
+}
+
+/**
  * Executes a workflow plan to completion.
  *
  * Drives the orchestrator state machine by repeatedly calling getNextSteps,
  * dispatching each step (agent via provider, system via local commands),
- * and advancing the plan with the result.
+ * and advancing the plan with the result. Parallel groups are dispatched
+ * concurrently via Promise.all.
  *
  * @param {import('./orchestrator.js').ExecutionPlan} plan - Initial execution plan
  * @param {Object.<string, import('./orchestrator-io.js').StepDispatchInfo>} dispatchInfoMap - Dispatch info per step
@@ -108,6 +214,8 @@ function findStepInPlan(plan, stepId) {
  * @param {string} [options.skillBody=''] - Skill body text for context building
  * @param {Function} [options.onStepStart] - Callback before each step: (step, dispatch) => void
  * @param {Function} [options.onStepEnd] - Callback after each step: (step, result) => void
+ * @param {number} [options.delegationDepth=0] - Current delegation nesting depth
+ * @param {string} [options.profile='max'] - Model profile for delegation dispatch
  * @returns {Promise<import('./orchestrator.js').ExecutionPlan>} Final plan state
  */
 export async function execute(plan, dispatchInfoMap, options = {}) {
@@ -127,7 +235,6 @@ export async function execute(plan, dispatchInfoMap, options = {}) {
   while (!isPlanComplete(currentPlan)) {
     const { steps, skipped } = getNextSteps(currentPlan);
 
-    // Advance skipped steps first
     for (const stepId of skipped) {
       currentPlan = advanceStep(currentPlan, stepId, { status: 'skipped' });
 
@@ -140,7 +247,6 @@ export async function execute(plan, dispatchInfoMap, options = {}) {
       }
     }
 
-    // If no executable steps remain, check completion again
     if (steps.length === 0) {
       if (isPlanComplete(currentPlan)) break;
       if (++emptyIterations > MAX_EMPTY_ITERATIONS) {
@@ -151,30 +257,34 @@ export async function execute(plan, dispatchInfoMap, options = {}) {
     }
     emptyIterations = 0;
 
-    // v1.1: sequential execution — one step at a time
-    const step = steps[0];
-    const dispatch = dispatchInfoMap[step.id] || {};
+    const dispatchContext = {
+      currentPlan,
+      provider,
+      projectRoot,
+      skillBody,
+      executeOptions: options,
+    };
 
-    onStepStart?.(step, dispatch);
+    const settled = await Promise.all(
+      steps.map(async (step) => {
+        const dispatch = dispatchInfoMap[step.id] || {};
+        onStepStart?.(step, dispatch);
+        const result = await dispatchStep(step, dispatch, dispatchContext);
+        return { step, dispatch, result };
+      })
+    );
 
-    let result;
-    if (step.role === 'system') {
-      result = await executeSystemStep(step, { projectRoot });
-    } else {
-      const context = buildStepContext(step, currentPlan, { skillBody });
-      result = await provider(step, dispatch, context);
+    for (const { step, dispatch, result } of settled) {
+      currentPlan = advanceStep(currentPlan, step.id, result);
+
+      if (trace) {
+        recordStepTrace(trace, step, currentPlan.stepStates[step.id], dispatch);
+      }
+
+      onStepEnd?.(step, result);
     }
-
-    currentPlan = advanceStep(currentPlan, step.id, result);
-
-    if (trace) {
-      recordStepTrace(trace, step, currentPlan.stepStates[step.id], dispatch);
-    }
-
-    onStepEnd?.(step, result);
   }
 
-  // Mark plan as completed if all steps reached terminal state and plan is still running
   if (currentPlan.status === 'running' && isPlanComplete(currentPlan)) {
     currentPlan = { ...currentPlan, status: 'completed' };
   }
