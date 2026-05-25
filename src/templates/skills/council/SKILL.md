@@ -87,13 +87,13 @@ Invokes all 3 agents IN PARALLEL using Task tool:
 
 ### 2. Council Feature-Scope
 
-**Participants:** Advisor + Product Owner + Tech Lead
+**Participants:** Advisor + Developer + Tech Lead
 **When it applies:** Defining feature scope, prioritizing functionality, evaluating product proposals
 
 Invokes all 3 agents IN PARALLEL using Task tool:
 
 - Task 1: Reads `.claude/agents/advisor.md` — domain and strategic vision perspective
-- Task 2: Reads `.claude/agents/product-owner.md` — user value and scope perspective
+- Task 2: Reads `.claude/agents/developer.md` — implementability and pragmatism perspective
 - Task 3: Reads `.claude/agents/tech-lead.md` — technical feasibility and effort perspective
 
 ### 3. Council Tech-Debt

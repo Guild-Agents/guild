@@ -3,10 +3,9 @@
   "evals": [
     {
       "id": "bf-has-core-phases",
-      "description": "Plan contains evaluate, specify, design, implement phases",
+      "description": "Plan contains evaluate, design, implement phases",
       "expectations": [
         { "text": "Has evaluate step", "assertion": "step-exists:evaluate" },
-        { "text": "Has specify step", "assertion": "step-exists:specify" },
         { "text": "Has design step", "assertion": "step-exists:design" },
         { "text": "Has implement step", "assertion": "step-exists:implement" }
       ]

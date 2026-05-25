@@ -56,11 +56,11 @@ For files in `src/templates/agents/` and `src/templates/skills/`.
 
 ### Agents
 
-Each agent is a flat `.md` file that defines identity, responsibilities, and process. The 9 agents live in `src/templates/agents/`:
+Each agent is a flat `.md` file that defines identity, responsibilities, and process. The 7 agents live in `src/templates/agents/`:
 
 ```text
-advisor.md, product-owner.md, tech-lead.md, developer.md,
-code-reviewer.md, qa.md, bugfix.md, db-migration.md, platform-expert.md
+advisor.md, tech-lead.md, developer.md,
+code-reviewer.md, qa.md, bugfix.md, learnings-extractor.md
 ```
 
 When improving an agent, focus on making instructions clear and actionable. Agents should define what they do, when they act, and how they interact with other agents.
@@ -69,11 +69,12 @@ When improving an agent, focus on making instructions clear and actionable. Agen
 
 Each skill is a `SKILL.md` file inside `src/templates/skills/<skill-name>/`. Skills define workflows that orchestrate agents through structured processes.
 
-The 11 skills:
+The 15 skills:
 
 ```text
-guild-specialize, build-feature, new-feature, create-pr, council,
-qa-cycle, review, dev-flow, status, session-start, session-end
+guild-specialize, re-specialize, build-feature, new-feature, create-pr,
+council, qa-cycle, review, tdd, debug, verify, dev-flow, status,
+session-start, session-end
 ```
 
 When improving a skill, focus on the workflow steps, agent coordination, and clear exit criteria.
