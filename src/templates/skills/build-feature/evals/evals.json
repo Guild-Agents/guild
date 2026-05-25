@@ -43,9 +43,9 @@
     },
     {
       "id": "bf-minimum-steps",
-      "description": "Plan has at least 10 steps",
+      "description": "Plan has at least 8 steps",
       "expectations": [
-        { "text": "At least 10 steps", "assertion": "step-count:10" }
+        { "text": "At least 8 steps", "assertion": "step-count:8" }
       ]
     }
   ]

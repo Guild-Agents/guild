@@ -69,11 +69,11 @@ When improving an agent, focus on making instructions clear and actionable. Agen
 
 Each skill is a `SKILL.md` file inside `src/templates/skills/<skill-name>/`. Skills define workflows that orchestrate agents through structured processes.
 
-The 13 skills:
+The 10 skills:
 
 ```text
-guild-specialize, re-specialize, build-feature, new-feature, create-pr,
-council, qa-cycle, tdd, debug, dev-flow, status, session-start, session-end
+guild-specialize, re-specialize, build-feature, create-pr,
+council, qa-cycle, tdd, debug, session-start, session-end
 ```
 
 When improving a skill, focus on the workflow steps, agent coordination, and clear exit criteria.

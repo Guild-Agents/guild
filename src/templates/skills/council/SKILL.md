@@ -11,33 +11,24 @@ workflow:
       requires: [user-question]
       produces: [council-type, participant-roles]
       gate: true
-    - id: workspace-context
-      role: system
-      intent: "Detect workspace membership. If in a workspace, collect context from sibling repos (CLAUDE.md, PROJECT.md, SESSION.md) and build workspace context block."
-      requires: [council-type]
-      produces: [workspace-context]
-      condition: in-workspace
     - id: agent-1
       role: dynamic
-      intent: "Analyze the question from specialized perspective. State position with concrete arguments."
-      requires: [user-question, council-type, workspace-context]
+      intent: "Analyze the question from specialized perspective. State position with concrete arguments. Spawn via Agent tool IN PARALLEL with agent-2 and agent-3."
+      requires: [user-question, council-type]
       produces: [perspective-1]
       model-tier: reasoning
-      parallel: [agent-2, agent-3]
     - id: agent-2
       role: dynamic
       intent: "Analyze the question from specialized perspective. State position with concrete arguments."
-      requires: [user-question, council-type, workspace-context]
+      requires: [user-question, council-type]
       produces: [perspective-2]
       model-tier: reasoning
-      parallel: [agent-1, agent-3]
     - id: agent-3
       role: dynamic
       intent: "Analyze the question from specialized perspective. State position with concrete arguments."
-      requires: [user-question, council-type, workspace-context]
+      requires: [user-question, council-type]
       produces: [perspective-3]
       model-tier: reasoning
-      parallel: [agent-1, agent-2]
     - id: synthesize
       role: system
       intent: "Synthesize debate: points of agreement, disagreement, risks. Present options to user."
@@ -49,7 +40,6 @@ workflow:
       intent: "After user decides, write spec document to docs/specs/."
       requires: [synthesis, user-decision]
       produces: [spec-document]
-      condition: user-wants-spec
       gate: true
 ---
 

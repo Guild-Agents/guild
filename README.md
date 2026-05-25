@@ -62,12 +62,11 @@ Five phases: **evaluate**, **design**, **implement**, **review**, **validate**. 
 
 ## Skills Reference
 
-All 13 skills, grouped by function:
+All 10 skills, grouped by function:
 
 | Skill | Group | Description |
 | --- | --- | --- |
 | `/build-feature` | Pipeline | Full pipeline: evaluate, spec, implement, review, QA |
-| `/new-feature` | Pipeline | Create branch and scaffold for a new feature |
 | `/create-pr` | Pipeline | Create a structured pull request from current branch |
 | `/council` | Decision | Multi-perspective deliberation on a decision or feature |
 | `/qa-cycle` | Quality | QA and bugfix loop until clean |
@@ -75,10 +74,8 @@ All 13 skills, grouped by function:
 | `/debug` | Discipline | Systematic 4-phase debugging |
 | `/guild-specialize` | Context | Explore codebase, enrich CLAUDE.md with real conventions |
 | `/re-specialize` | Context | Incremental update of auto-generated CLAUDE.md zones |
-| `/session-start` | Context | Load context and resume work |
-| `/session-end` | Context | Save state to SESSION.md |
-| `/status` | Context | Project and session state overview |
-| `/dev-flow` | Context | Show current pipeline phase and next step |
+| `/session-start` | Context | Load context and resume work from SESSION.md + Claude Code memory |
+| `/session-end` | Context | Save state to SESSION.md + durable learnings to memory |
 
 ## CLI Commands
 

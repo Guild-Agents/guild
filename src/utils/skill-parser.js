@@ -38,14 +38,7 @@ function normalizeStep(raw) {
     requires: raw.requires || [],
     produces: raw.produces || [],
     modelTier: raw['model-tier'] || undefined,
-    blocking: raw.blocking !== undefined ? raw.blocking : true,
-    onFailure: raw['on-failure'] || 'abort',
     gate: raw.gate || false,
-    retry: raw.retry || undefined,
-    condition: raw.condition || undefined,
-    parallel: raw.parallel || undefined,
-    commands: raw.commands || undefined,
-    delegatesTo: raw['delegates-to'] || undefined,
   };
 }
 

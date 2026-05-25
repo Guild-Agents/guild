@@ -24,7 +24,7 @@ src/
     __tests__/                        #   Co-located tests
   templates/                          # Scaffolding templates copied to user projects
     agents/*.md                       #   Agent definitions (7 agents)
-    skills/*/SKILL.md                 #   Skill definitions (13 skills)
+    skills/*/SKILL.md                 #   Skill definitions (10 skills)
 CLAUDE.md                             # Project instructions (enriched by guild-specialize)
 PROJECT.md                            # Project identity and stack
 SESSION.md                            # Session state — persists across conversations
@@ -104,14 +104,12 @@ SESSION.md                            # Session state — persists across conver
 ## Available skills
 - /guild-specialize  — enrich CLAUDE.md by exploring the actual project
 - /build-feature     — full development pipeline
-- /new-feature       — create branch and scaffold for a feature
 - /create-pr         — create a structured pull request from current branch
 - /council           — debate decisions with multiple agents
 - /qa-cycle          — QA + bugfix cycle
-- /status            — view project status
-- /dev-flow          — view current pipeline phase
 - /session-start     — load context and resume work
 - /session-end       — save state to SESSION.md
 - /tdd               — TDD red-green-refactor discipline
 - /debug             — systematic 4-phase debugging
+- /guild-specialize  — enrich CLAUDE.md by exploring the actual project
 - /re-specialize     — incremental re-specialization of auto-generated zones
