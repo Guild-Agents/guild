@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>I Built 12,000 Lines of Agent Orchestration. Then I Deleted Them. — Guild Blog</title>
+  <meta name="description" content="How Guild went from a multi-agent runtime to a template library — and why the code you delete matters more than the code you keep.">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="canonical" href="https://guildagents.dev/blog/i-built-12000-lines-then-deleted-them.html">
+
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="I Built 12,000 Lines of Agent Orchestration. Then I Deleted Them.">
+  <meta property="og:description" content="How Guild went from a multi-agent runtime to a template library — and why the code you delete matters more than the code you keep.">
+  <meta property="og:url" content="https://guildagents.dev/blog/i-built-12000-lines-then-deleted-them.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0f;
+      --bg-card: #1a1a2e;
+      --text: #e8e6e3;
+      --text-secondary: #9d9b97;
+      --text-muted: #5a5856;
+      --gold: #c9a84c;
+      --green: #4ade80;
+      --green-dim: rgba(74, 222, 128, 0.1);
+      --border: rgba(201, 168, 76, 0.12);
+    }
+
+    html { -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.8;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Nav */
+    nav {
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    nav a {
+      color: var(--gold);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    nav .back {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    /* Article */
+    article { padding: 64px 0 100px; }
+
+    .meta {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 40px;
+      letter-spacing: 0.02em;
+    }
+
+    h1 {
+      font-size: clamp(1.75rem, 4vw, 2.25rem);
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      margin-bottom: 48px;
+      line-height: 1.6;
+    }
+
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin-top: 48px;
+      margin-bottom: 16px;
+      color: var(--gold);
+    }
+
+    p { margin-bottom: 20px; color: var(--text-secondary); }
+
+    strong { color: var(--text); font-weight: 600; }
+
+    a { color: var(--gold); }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      background: var(--bg-card);
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: var(--green);
+    }
+
+    pre {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin: 24px 0;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: var(--text-secondary);
+    }
+
+    blockquote {
+      border-left: 3px solid var(--gold);
+      padding-left: 20px;
+      margin: 24px 0;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    ul, ol {
+      margin: 16px 0;
+      padding-left: 24px;
+      color: var(--text-secondary);
+    }
+    li { margin-bottom: 8px; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 32px 0;
+    }
+    .stat {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gold);
+      display: block;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* CTA */
+    .cta {
+      margin-top: 48px;
+      padding: 32px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-align: center;
+    }
+    .cta p { color: var(--text); margin-bottom: 16px; }
+    .cta code { font-size: 1rem; padding: 8px 16px; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 600px) {
+      .stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="container">
+      <a href="/">GUILD</a>
+      <a href="/" class="back">Back to home</a>
+    </div>
+  </nav>
+
+  <article>
+    <div class="container">
+      <p class="meta">May 25, 2026</p>
+
+      <h1>I Built 12,000 Lines of Agent Orchestration. Then I Deleted Them.</h1>
+
+      <p class="subtitle">
+        How Guild went from a multi-agent runtime competing with Claude Code to a template library that works with it — and why the code you delete matters more than the code you keep.
+      </p>
+
+      <h2>The Beginning</h2>
+
+      <p>When I started Guild in February 2026, Claude Code was powerful but raw. It had no structured workflows, no agent roles, no session persistence. Ask it to build a feature and it would start writing code immediately — no evaluation, no design phase, no review gate.</p>
+
+      <p>So I built what seemed obvious: <strong>an orchestration runtime</strong>. A workflow engine that would parse YAML step definitions, dispatch agent tasks, manage state transitions, handle retries and failure routing, track token usage, and record execution traces.</p>
+
+      <p>By v1.4.0, Guild had 12,000+ lines of JavaScript: an orchestrator with a pure state machine, an executor with parallel dispatch and recursive delegation, a dispatch protocol with model tier resolution and fallback chains, a trace system, a learnings engine, and a provider layer that spawned Claude CLI subprocesses.</p>
+
+      <p>It was well-architected. Thoroughly tested (626 tests). The orchestrator was the crown jewel — zero I/O, pure functions, clean state transitions.</p>
+
+      <p><strong>And nobody used it.</strong></p>
+
+      <h2>The Realization</h2>
+
+      <p>Here's what actually happened when someone typed <code>/build-feature</code> in Claude Code:</p>
+
+      <ol>
+        <li>Claude Code loaded the SKILL.md file</li>
+        <li>The LLM read the workflow steps as prose instructions</li>
+        <li>Claude Code followed the phases using its native Agent tool</li>
+      </ol>
+
+      <p>The YAML workflow? The LLM read it as structured documentation. The executor? Never touched. The orchestrator? Completely bypassed. Users were getting value from <strong>the templates</strong> — the agent role definitions and skill workflows. The runtime was a parallel universe no one visited.</p>
+
+      <p>Meanwhile, Claude Code had evolved. It now had native parallel agent execution, worktree isolation, background mode, a memory system, plan mode, task tracking. Every feature I'd built in the executor, Claude Code did natively — and better, because it had conversation context that my subprocess-spawning executor didn't.</p>
+
+      <h2>The Decision</h2>
+
+      <p>I sat down and listed what Guild actually provided that Claude Code didn't:</p>
+
+      <ul>
+        <li><strong>Agent role templates</strong> — well-crafted .md files with identity, responsibilities, and boundaries</li>
+        <li><strong>Skill workflows</strong> — structured slash commands that enforce evaluation, design, and review phases</li>
+        <li><strong>The eval system</strong> — structural assertions, trigger accuracy tests, semantic matching, regression detection</li>
+        <li><strong>Session continuity</strong> — SESSION.md for ephemeral state, complementing Claude Code's long-term memory</li>
+      </ul>
+
+      <p>And what Guild had that was redundant:</p>
+
+      <ul>
+        <li>An executor competing with Claude Code's Agent tool</li>
+        <li>An orchestrator competing with how the LLM naturally follows instructions</li>
+        <li>A dispatch system competing with Claude Code's model selection</li>
+        <li>A trace system, accounting, pricing — infrastructure for a runtime nobody ran</li>
+      </ul>
+
+      <h2>The Delete</h2>
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-number">-10,700</span>
+          <span class="stat-label">lines deleted</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">86</span>
+          <span class="stat-label">files removed</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">4,500</span>
+          <span class="stat-label">lines remaining</span>
+        </div>
+      </div>
+
+      <p>In one session, I deleted the executor, orchestrator, dispatch protocol, trace system, accounting, pricing, learnings engine, provider layer, and four CLI commands. 86 files. 10,700 lines. Gone.</p>
+
+      <p>What remained was exactly what provided value: 6 role definitions, 10 skill workflows, the eval system, and a CLI for setup and validation.</p>
+
+      <h2>What I Learned</h2>
+
+      <p><strong>Build for the platform, not against it.</strong> When I started, Claude Code couldn't orchestrate multi-step workflows. Building a runtime made sense. But platforms evolve, and what was a gap becomes a feature. The right move is to <strong>complement</strong> the platform, not compete with it.</p>
+
+      <p><strong>Content beats infrastructure.</strong> Users didn't care about my elegant state machine. They cared that <code>/build-feature</code> made Claude Code evaluate their idea before writing code. The value was in the 50 lines of a well-written SKILL.md, not the 500 lines of executor that loaded it.</p>
+
+      <p><strong>Measure what matters.</strong> The eval system — the part I almost considered secondary — turned out to be Guild's most unique contribution. No other framework measures whether its own skills actually work correctly. That's the kind of differentiation that survives platform evolution.</p>
+
+      <p><strong>Session continuity fills a real gap.</strong> Claude Code's memory system stores long-term knowledge but explicitly excludes ephemeral work state. SESSION.md captures where you stopped — what branch, what phase, what's next. The combination of both gives you something neither provides alone.</p>
+
+      <h2>Guild Today</h2>
+
+      <p>Guild v2 is a <strong>Claude Code plugin</strong>. Install with <code>/plugin install Guild-Agents/guild</code> and you get 10 skill workflows and 6 role definitions. No npm install, no init command, no configuration. Claude Code reads the templates natively.</p>
+
+      <p>The eval CLI is still there for anyone who wants to validate skill quality. But the core product is the content — the structured workflows that make Claude Code think before it builds.</p>
+
+      <p>Sometimes the best engineering decision is knowing what to delete.</p>
+
+      <div class="cta">
+        <p><strong>Try Guild</strong></p>
+        <code>/plugin install Guild-Agents/guild</code>
+      </div>
+    </div>
+  </article>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 Guild Agents &middot; <a href="https://github.com/Guild-Agents/guild">GitHub</a> &middot; MIT</p>
+    </div>
+  </footer>
+
+</body>
+</html>
