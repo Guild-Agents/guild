@@ -126,13 +126,10 @@ Invoke the Tech Lead agent using Task tool with `model: "sonnet"` (execution tie
 
 - **advisor.md**: real project domain, target users
 - **tech-lead.md**: specific stack, detected patterns, architecture decisions
-- **product-owner.md**: existing functionality, visible backlog
 - **developer.md**: code conventions, main framework, file structure
 - **code-reviewer.md**: lint rules, project patterns, anti-patterns to watch
 - **qa.md**: testing framework, commands to run tests, current coverage
 - **bugfix.md**: debugging stack, logs, available tools
-- **db-migration.md**: ORM, migration tool, current schema (if applicable)
-- **platform-expert.md**: Claude Code version, known permission bugs, hook configuration
 
 When specializing agents, append a zone at the bottom of each agent file:
 
@@ -204,7 +201,6 @@ Tech Lead (sonnet) — Specializing agents...
 Agents updated:
 - developer.md: Specialized for Next.js + TypeScript
 - qa.md: Configured for Vitest + Playwright
-- db-migration.md: Configured for Prisma
 
 Run /status to see the full state.
 ```

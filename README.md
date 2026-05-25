@@ -58,7 +58,7 @@ You ──> /council "Add JWT auth"
                                    └──────────┘└──────────┘
 ```
 
-Six phases: **evaluate**, **specify**, **plan**, **implement**, **review**, **validate**. Phases 1-3 happen before any code is written.
+Five phases: **evaluate**, **design**, **implement**, **review**, **validate**. Phases 1-2 happen before any code is written.
 
 ## Skills Reference
 
@@ -116,19 +116,16 @@ Every trigger run automatically records results to `benchmarks/benchmark.json` (
 
 ## Under the Hood
 
-Guild coordinates 10 specialized agents through the pipeline. Each agent handles one phase.
+Guild coordinates 7 specialized agents through the pipeline. Each agent handles one phase.
 
 | Agent | Role |
 | --- | --- |
 | advisor | Evaluates ideas and provides strategic direction |
-| product-owner | Turns approved ideas into concrete tasks |
-| tech-lead | Defines technical approach and architecture |
+| tech-lead | Defines technical approach, tasks, and architecture |
 | developer | Implements features following project conventions |
 | code-reviewer | Reviews quality, patterns, and technical debt |
 | qa | Testing, edge cases, regression validation |
 | bugfix | Bug diagnosis and resolution |
-| db-migration | Schema changes and safe migrations |
-| platform-expert | Diagnoses Claude Code integration issues |
 | learnings-extractor | Extracts compound learnings from pipeline executions |
 
 Agents are flat `.md` files with identity and expertise. Skills orchestrate agents through structured pipelines. Everything lives in `.claude/`, readable by humans, tracked by git.

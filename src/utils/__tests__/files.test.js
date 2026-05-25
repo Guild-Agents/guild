@@ -14,16 +14,13 @@ describe('getAgentNames', () => {
   it('reads agent names from the templates directory', () => {
     const names = getAgentNames();
     // Should match the .md files in src/templates/agents/
-    expect(names).toHaveLength(10);
+    expect(names).toHaveLength(7);
     expect(names).toContain('advisor');
-    expect(names).toContain('product-owner');
     expect(names).toContain('tech-lead');
     expect(names).toContain('developer');
     expect(names).toContain('code-reviewer');
     expect(names).toContain('qa');
     expect(names).toContain('bugfix');
-    expect(names).toContain('db-migration');
-    expect(names).toContain('platform-expert');
     expect(names).toContain('learnings-extractor');
   });
 
@@ -84,13 +81,13 @@ describe('copyTemplates', () => {
     if (existsSync(TEST_DIR)) rmSync(TEST_DIR, { recursive: true });
   });
 
-  it('creates .claude/agents/ with 10 flat .md files', async () => {
+  it('creates .claude/agents/ with 7 flat .md files', async () => {
     await copyTemplates();
     const agentsDir = join('.claude', 'agents');
     expect(existsSync(agentsDir)).toBe(true);
 
     const files = readdirSync(agentsDir);
-    expect(files).toHaveLength(10);
+    expect(files).toHaveLength(7);
     for (const name of getAgentNames()) {
       expect(files).toContain(`${name}.md`);
     }
@@ -153,7 +150,7 @@ describe('agent template frontmatter', () => {
   });
 
   it('analysis agents use plan permission mode', () => {
-    const analysisAgents = ['advisor', 'product-owner', 'tech-lead', 'code-reviewer'];
+    const analysisAgents = ['advisor', 'tech-lead', 'code-reviewer'];
 
     for (const agentName of analysisAgents) {
       const filePath = join(TEMPLATES_AGENTS_DIR, `${agentName}.md`);
@@ -166,7 +163,7 @@ describe('agent template frontmatter', () => {
   });
 
   it('implementation agents use bypassPermissions mode', () => {
-    const implAgents = ['developer', 'bugfix', 'qa', 'db-migration', 'platform-expert'];
+    const implAgents = ['developer', 'bugfix', 'qa'];
 
     for (const agentName of implAgents) {
       const filePath = join(TEMPLATES_AGENTS_DIR, `${agentName}.md`);

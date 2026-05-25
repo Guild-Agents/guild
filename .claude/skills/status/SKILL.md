@@ -94,7 +94,7 @@ Session: 2026-02-23
 Task: Implementing user preferences
 State: Phase 4 — Developer implementing
 
-Agents: advisor, product-owner, tech-lead, developer, code-reviewer, qa, bugfix, db-migration, platform-expert
+Agents: advisor, tech-lead, developer, code-reviewer, qa, bugfix, learnings-extractor
 Skills: guild-specialize, build-feature, new-feature, council, qa-cycle, review, dev-flow,
   status, session-start, session-end
 ```

@@ -34,14 +34,11 @@ export const DEFAULT_FAILURE_STRATEGY = 'abort';
  */
 export const DEFAULT_AGENT_TIERS = {
   'advisor': 'reasoning',
-  'product-owner': 'reasoning',
   'tech-lead': 'reasoning',
   'code-reviewer': 'reasoning',
   'developer': 'execution',
   'bugfix': 'execution',
-  'db-migration': 'execution',
   'qa': 'execution',
-  'platform-expert': 'execution',
   'learnings-extractor': 'routine',
 };
 

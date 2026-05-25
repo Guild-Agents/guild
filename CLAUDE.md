@@ -23,7 +23,7 @@ src/
     github.js                         #   GitHub CLI (gh) integration
     __tests__/                        #   Co-located tests
   templates/                          # Scaffolding templates copied to user projects
-    agents/*.md                       #   Agent definitions (9 agents)
+    agents/*.md                       #   Agent definitions (7 agents)
     skills/*/SKILL.md                 #   Skill definitions (11 skills)
 CLAUDE.md                             # Project instructions (enriched by guild-specialize)
 PROJECT.md                            # Project identity and stack
