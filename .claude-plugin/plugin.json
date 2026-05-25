@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "guild",
+  "displayName": "Guild",
+  "version": "2.0.0",
+  "description": "Spec-first workflows and specialized agent roles for Claude Code. Design docs before code, structured deliberation, session continuity.",
+  "author": {
+    "name": "Guild Agents",
+    "url": "https://github.com/Guild-Agents"
+  },
+  "homepage": "https://guildagents.dev",
+  "repository": "https://github.com/Guild-Agents/guild",
+  "license": "MIT",
+  "keywords": [
+    "agents",
+    "skills",
+    "spec-driven",
+    "workflows",
+    "council",
+    "tdd",
+    "debugging",
+    "code-review",
+    "session"
+  ],
+  "skills": "./src/templates/skills/"
+}
