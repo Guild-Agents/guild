@@ -7,9 +7,9 @@ workflow:
   steps:
     - id: load-context
       role: system
-      intent: "Read CLAUDE.md, SESSION.md, and PROJECT.md to load project context."
+      intent: "Read CLAUDE.md, SESSION.md, PROJECT.md, and Claude Code memory (MEMORY.md index + relevant memory files)."
       commands: [cat CLAUDE.md, cat SESSION.md, cat PROJECT.md]
-      produces: [claude-md, session-md, project-md]
+      produces: [claude-md, session-md, project-md, memory-context]
     - id: detect-resumable
       role: system
       intent: "Check for wip: checkpoint commits on feature and fix branches."
@@ -18,13 +18,13 @@ workflow:
       produces: [resumable-branches, last-phase]
     - id: present-state
       role: system
-      intent: "Display previous session summary: date, task, state, decisions, next steps, resumable pipelines."
-      requires: [session-md, resumable-branches]
+      intent: "Display unified summary: ephemeral state from SESSION.md + durable context from memory."
+      requires: [session-md, memory-context, resumable-branches]
       produces: [state-display]
       gate: true
     - id: suggest-continuation
       role: system
-      intent: "Suggest appropriate skill to continue based on current state."
+      intent: "Suggest appropriate skill to continue based on current state and memory context."
       requires: [state-display]
       produces: [suggested-action]
       gate: true
@@ -38,7 +38,7 @@ workflow:
 
 # Session Start
 
-Loads the project context and resumes work from where it was left off in the previous session. This is the first skill you should run when starting a work session.
+Loads project context from two sources — SESSION.md (ephemeral work state) and Claude Code memory (durable learnings) — to resume where you left off. This is the first skill you should run when starting a work session.
 
 ## When to use
 
@@ -49,15 +49,35 @@ Loads the project context and resumes work from where it was left off in the pre
 
 `/session-start`
 
+## Two context sources
+
+| Source | What it provides | Example |
+| --- | --- | --- |
+| **SESSION.md** | Where you stopped: task, branch, phase, next steps | "Implementing executor v1.2, branch feature/executor, tests passing, next: write delegation tests" |
+| **Claude Code Memory** | What you know: decisions, lessons, references | "Chose recursive execution for delegation because plan-expansion breaks retry semantics" |
+
+Both are read and combined into a unified summary.
+
 ## Process
 
 ### Step 1 — Load context
 
-Read the Guild state files:
+Read from both persistence layers:
+
+**Ephemeral state (SESSION.md):**
 
 - `CLAUDE.md` — project instructions, conventions, and rules
 - `SESSION.md` — last session state, task in progress, next steps
 - `PROJECT.md` — project identity, stack, configured agents
+
+**Durable context (Claude Code memory):**
+
+- Read `MEMORY.md` index from the project's memory directory
+- Load relevant memory files, especially:
+  - `project` type — active decisions, ongoing initiatives
+  - `feedback` type — lessons learned, corrections, validated approaches
+
+If either source is missing (no SESSION.md or no memory files), work with what's available.
 
 ### Step 2 — Detect resumable work
 
@@ -71,16 +91,23 @@ done
 
 If `wip:` commits are found, present them to the user with the phase they were in when interrupted.
 
-### Step 3 — Present state
+### Step 3 — Present unified state
 
-Show a summary of the previous session:
+Show a combined summary from both sources:
+
+**From SESSION.md (where you stopped):**
 
 - Date of the last session
 - Task in progress (if any)
-- State where the work left off
-- Decisions made previously
+- Branch and pipeline phase
 - Recorded next steps
-- **Resumable pipelines** (if wip: commits detected)
+- Resumable pipelines (if wip: commits detected)
+
+**From memory (what you know):**
+
+- Recent project decisions that affect current work
+- Relevant lessons or corrections from past sessions
+- References to external systems or resources
 
 ### Step 4 — Suggest how to continue
 
@@ -89,6 +116,7 @@ If there is a task in progress:
 - Show the task state
 - Suggest continuing with the appropriate skill (e.g., `/build-feature` if in implementation)
 - Show the next steps recorded in SESSION.md
+- Flag any memory entries that are relevant to the current task
 
 If there is no task in progress, suggest options:
 
@@ -107,9 +135,16 @@ Update SESSION.md with the current date to record that the session has started.
 User: /session-start
 
 Loading context...
-Last session: 2026-02-22
-Task in progress: user-preferences (Phase 4 — Implementation)
-Resumable: feature/user-preferences (wip: phase 3 complete)
 
-Suggested: Continue with /build-feature to resume implementation.
+SESSION.md: Last session 2026-05-25
+  Task: executor-v1.2 (complete)
+  Branch: main (clean)
+  Next steps: 1. MCP server  2. Agent Teams v2
+
+Memory: 3 entries loaded
+  - project: "v1.5.0 shipped — 7 agents, 5-phase pipeline"
+  - feedback: "Recursive execution for delegation > plan-expansion"
+  - feedback: "npm audit fix resolves transitive vulns"
+
+Suggested: Pick a backlog item — /build-feature or /council to decide.
 ```
