@@ -89,7 +89,7 @@ SESSION.md                            # Session state — persists across conver
 - `NODE_ENV`
 
 ## Global rules
-- Do not implement without an approved plan
+- Do not implement without an approved plan — use /build-feature (evaluation + spec phases) or /council to produce one. Claude Code Plan mode alone does not qualify.
 - Update SESSION.md at the end of each session
 - ESModules throughout the codebase
 - Always use path.join() to build paths
