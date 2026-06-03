@@ -5,7 +5,9 @@
   "type": "module",
   "files": [
     "bin/",
+    "hooks/",
     "src/commands/",
+    "src/hooks/",
     "src/templates/",
     "src/utils/",
     "!src/**/__tests__/"
