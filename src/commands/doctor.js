@@ -76,14 +76,6 @@ export async function runDoctor() {
     healthy = false;
   }
 
-  // Check SESSION.md
-  if (existsSync('SESSION.md')) {
-    checks.push({ name: 'SESSION.md', pass: true });
-  } else {
-    checks.push({ name: 'SESSION.md', pass: false, fix: 'Run: guild init (creates SESSION.md for session tracking)' });
-    healthy = false;
-  }
-
   // Check workflow validation in skills
   if (existsSync(skillsDir)) {
     const skillDirs = readdirSync(skillsDir, { withFileTypes: true })

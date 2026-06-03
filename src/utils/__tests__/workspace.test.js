@@ -249,7 +249,6 @@ describe('collectMemberContext', () => {
 
     writeFileSync(join(frontendDir, 'PROJECT.md'), '# PROJECT.md\n## Project\n- **Stack:** React, Vite, TypeScript\n');
     writeFileSync(join(frontendDir, 'CLAUDE.md'), '# CLAUDE.md\n## Project structure\nsrc/components/, src/api/\n## Other\nstuff\n');
-    writeFileSync(join(frontendDir, 'SESSION.md'), '# SESSION.md\n## Active session\n- **Current task:** migrating to React 19\n');
 
     const workspace = loadWorkspace(tempDir);
     const result = collectMemberContext(workspace, 'backend');
@@ -260,7 +259,7 @@ describe('collectMemberContext', () => {
     expect(result).toContain(frontendDir);
     expect(result).toContain('**Stack:** React, Vite, TypeScript');
     expect(result).toContain('**Structure:** src/components/, src/api/');
-    expect(result).toContain('**Current task:** migrating to React 19');
+    expect(result).not.toContain('**Current task:**');
     expect(result).toContain('You can read any file under');
     expect(result).not.toContain('### backend');
   });
