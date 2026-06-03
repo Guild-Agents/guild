@@ -4,8 +4,9 @@
  * ALWAYS exits 0. NEVER throws out of main(). Read-only, no network/writes.
  */
 
-import { readdirSync, statSync, readFileSync } from 'fs';
+import { readdirSync, statSync, openSync, readSync, closeSync, realpathSync } from 'fs';
 import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { parseLine, buildRecap } from './transcript-recap.mjs';
 
 /**
@@ -27,9 +28,14 @@ export function pickPreviousTranscript(dirEntries, currentSessionId) {
   return best;
 }
 
+/** Maximum bytes to read from the tail of a transcript file (256 KB). */
+const MAX_TAIL_BYTES = 256 * 1024;
+
 /**
  * Reads the previous transcript in projectDir and builds a recap string.
  * Returns null when nothing useful found.
+ * Reading is bounded to the last MAX_TAIL_BYTES so cost is O(constant)
+ * regardless of transcript file size.
  */
 export async function recapForProject({ projectDir, currentSessionId, now }) {
   const entries = [];
@@ -54,7 +60,22 @@ export async function recapForProject({ projectDir, currentSessionId, now }) {
 
   let rawLines;
   try {
-    rawLines = readFileSync(prev.path, 'utf8').split('\n');
+    const st = statSync(prev.path);
+    const fileSize = st.size;
+    const readLen = Math.min(fileSize, MAX_TAIL_BYTES);
+    const position = fileSize - readLen;
+    const buf = Buffer.allocUnsafe(readLen);
+    const fd = openSync(prev.path, 'r');
+    try {
+      readSync(fd, buf, 0, readLen, position);
+    } finally {
+      closeSync(fd);
+    }
+    rawLines = buf.toString('utf8').split('\n');
+    // If we didn't start at byte 0, the first entry may be a partial line — discard it
+    if (position > 0) {
+      rawLines = rawLines.slice(1);
+    }
   } catch {
     return null;
   }
@@ -89,14 +110,12 @@ async function main() {
       process.exit(0);
     }
 
-    // Resolve project transcript directory from transcript_path
-    let projectDir;
-    if (data.transcript_path) {
-      projectDir = dirname(data.transcript_path);
-    } else {
-      // Fallback: use cwd encoded in stdin or process.cwd()
-      projectDir = process.cwd();
+    // Resolve project transcript directory from transcript_path.
+    // Without transcript_path there is no reliable way to find the right dir — exit cleanly.
+    if (!data.transcript_path) {
+      process.exit(0);
     }
+    const projectDir = dirname(data.transcript_path);
 
     const currentSessionId = data.session_id || null;
     const recap = await recapForProject({ projectDir, currentSessionId, now: Date.now() });
@@ -110,7 +129,16 @@ async function main() {
   }
 }
 
-// Only run main() when this file is executed directly
-if (process.argv[1] && (process.argv[1].endsWith('session-recap.mjs') || import.meta.url === `file://${process.argv[1]}`)) {
-  main();
+// Only run main() when this file is executed directly (robust against symlinks)
+try {
+  const thisFile = fileURLToPath(import.meta.url);
+  const argv1 = process.argv[1] ? realpathSync(process.argv[1]) : null;
+  if (argv1 && realpathSync(thisFile) === argv1) {
+    main();
+  }
+} catch {
+  // If realpathSync fails (e.g. argv[1] doesn't exist yet), fall back gracefully
+  if (process.argv[1] && (process.argv[1].endsWith('session-recap.mjs') || import.meta.url === `file://${process.argv[1]}`)) {
+    main();
+  }
 }

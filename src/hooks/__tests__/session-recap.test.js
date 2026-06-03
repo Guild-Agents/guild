@@ -145,6 +145,77 @@ describe('recapForProject', () => {
 });
 
 // ────────────────────────────────────────────────────────────────────────────
+// W1 — Bounded tail read: large transcripts handled in O(constant) time
+// ────────────────────────────────────────────────────────────────────────────
+
+describe('recapForProject — W1 bounded tail read', () => {
+  it('returns correct recap from tail of a large transcript file', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'guild-recap-large-'));
+    try {
+      const NOW = Date.now();
+      // Build a "filler" section: 5000 lines of old irrelevant user messages
+      const fillerLine = JSON.stringify({
+        type: 'user',
+        gitBranch: 'old-branch',
+        timestamp: NOW - 10 * 3600 * 1000,
+        message: { content: 'filler message that should not appear in recap' },
+      });
+      // Each line is ~200 bytes; 5000 lines ≈ 1 MB — well above MAX_TAIL_BYTES (256 KB)
+      // so the tail read will skip the filler entirely
+      const filler = Array(5000).fill(fillerLine).join('\n') + '\n';
+
+      // The meaningful lines at the tail (within the last 256 KB)
+      const tailLine = JSON.stringify({
+        type: 'user',
+        gitBranch: 'feature/large-file-test',
+        timestamp: NOW - 1000,
+        message: { content: 'the real last prompt in large transcript' },
+      });
+      const content = filler + tailLine + '\n';
+
+      writeFileSync(join(dir, 'large-session.jsonl'), content);
+
+      const start = Date.now();
+      const result = await recapForProject({
+        projectDir: dir,
+        currentSessionId: 'other-session',
+        now: NOW,
+      });
+      const elapsed = Date.now() - start;
+
+      // (a) Returns a valid recap built from the tail
+      expect(result).not.toBeNull();
+      expect(result).toContain('feature/large-file-test');
+      expect(result).toContain('the real last prompt in large transcript');
+
+      // (b) Completes quickly (well under 1s even in CI)
+      expect(elapsed).toBeLessThan(1000);
+
+      // (c) No throw (implicit — we reached this line without error)
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('returns null for non-existent transcript file without throwing', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'guild-recap-miss-'));
+    try {
+      // Write a .jsonl entry in the directory listing but then make recapForProject
+      // fail gracefully when the file disappears between readdir and read
+      // (simulate by pointing to a dir that has no valid .jsonl at all)
+      const result = await recapForProject({
+        projectDir: dir,
+        currentSessionId: null,
+        now: Date.now(),
+      });
+      expect(result).toBeNull();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+// ────────────────────────────────────────────────────────────────────────────
 // AC2.1 — C3: spawned process never throws, always exits 0
 // Tests: malformed JSON, empty dir, only-current-session, source!=="startup"
 // ────────────────────────────────────────────────────────────────────────────
@@ -184,6 +255,13 @@ describe('session-recap.mjs spawned — AC2.1 C3 never-disrupt', () => {
 
   it('exits 0 and emits nothing for source:"resume" specifically (AC2.4)', () => {
     const result = spawnRecap({ source: 'resume', transcript_path: '/tmp/fake.jsonl' });
+    expect(result.status).toBe(0);
+    expect(result.stdout).toBe('');
+  });
+
+  it('exits 0 and emits nothing when source is startup but transcript_path absent (W2)', () => {
+    // Without transcript_path there is no reliable dir to scan — must exit 0 silently
+    const result = spawnRecap({ source: 'startup', session_id: 'some-session' });
     expect(result.status).toBe(0);
     expect(result.stdout).toBe('');
   });
