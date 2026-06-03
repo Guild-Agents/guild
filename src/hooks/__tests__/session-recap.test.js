@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, chmodSync } from 'fs';
+import { mkdtempSync, writeFileSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { spawnSync } from 'child_process';
@@ -72,13 +72,6 @@ describe('pickPreviousTranscript — AC2.2', () => {
 // ────────────────────────────────────────────────────────────────────────────
 
 describe('recapForProject', () => {
-  let tempDir;
-
-  beforeEach_setup: {
-    // No-op: beforeEach handled per test
-    break beforeEach_setup;
-  }
-
   it('returns null for empty directory', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'guild-recap-'));
     try {
