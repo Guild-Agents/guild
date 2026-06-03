@@ -7,8 +7,8 @@ workflow:
   steps:
     - id: read-base
       role: system
-      intent: "Read CLAUDE.md, PROJECT.md, and SESSION.md for current Guild configuration."
-      produces: [claude-md, project-md, session-md]
+      intent: "Read CLAUDE.md and PROJECT.md for current Guild configuration."
+      produces: [claude-md, project-md]
     - id: explore-project
       role: system
       intent: "Scan project structure, dependency files, configs, CI, and documentation to detect stack and architecture."
@@ -59,7 +59,6 @@ Read the Guild configuration files:
 
 - `CLAUDE.md` — current instructions (contains `[PENDING: guild-specialize]` placeholders)
 - `PROJECT.md` — identity and stack declared during init
-- `SESSION.md` — current session state
 
 ### Step 2 — Explore the real project
 
@@ -162,7 +161,7 @@ Architecture:
 Updated agents:
 - [list of agents with their applied specialization]
 
-Run /session-start to see the full state.
+Use /resume or /build-feature to continue work.
 ```
 
 ### Step 6 — Commit enrichment immediately
@@ -199,7 +198,7 @@ Agents updated:
 - developer.md: Specialized for Next.js + TypeScript
 - qa.md: Configured for Vitest + Playwright
 
-Run /session-start to see the full state.
+Use /resume or /build-feature to continue work.
 ```
 
 ## Important Notes
