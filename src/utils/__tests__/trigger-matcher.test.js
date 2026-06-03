@@ -42,7 +42,7 @@ describe('rankSkills', () => {
   const skills = [
     { name: 'create-pr', description: 'Create a pull request from the current branch with structured summary' },
     { name: 'review', description: 'Standalone code review on the current diff' },
-    { name: 'session-end', description: 'Save project state and durable learnings' },
+    { name: 'debug', description: 'Systematic debugging process for bugs and unexpected behavior' },
   ];
 
   it('ranks matching skill first', () => {
