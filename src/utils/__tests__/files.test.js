@@ -41,7 +41,7 @@ describe('getSkillNames', () => {
   it('reads skill names from the templates directory', () => {
     const names = getSkillNames();
     // Should match the directories in src/templates/skills/
-    expect(names).toHaveLength(10);
+    expect(names).toHaveLength(8);
     expect(names).toContain('build-feature');
     expect(names).toContain('council');
     expect(names).toContain('create-pr');
@@ -49,8 +49,8 @@ describe('getSkillNames', () => {
     expect(names).toContain('guild-specialize');
     expect(names).toContain('qa-cycle');
     expect(names).toContain('re-specialize');
-    expect(names).toContain('session-end');
-    expect(names).toContain('session-start');
+    expect(names).not.toContain('session-end');
+    expect(names).not.toContain('session-start');
     expect(names).toContain('tdd');
   });
 
@@ -87,18 +87,21 @@ describe('copyTemplates', () => {
     }
   });
 
-  it('creates .claude/skills/ with 11 skill directories', async () => {
+  it('creates .claude/skills/ with 8 skill directories', async () => {
     await copyTemplates();
     const skillsDir = join('.claude', 'skills');
     expect(existsSync(skillsDir)).toBe(true);
 
     const expectedSkills = [
       'guild-specialize', 'build-feature', 'council', 'create-pr',
-      'qa-cycle', 'session-start', 'session-end',
+      'qa-cycle', 'tdd', 'debug', 're-specialize',
     ];
     for (const skill of expectedSkills) {
       expect(existsSync(join(skillsDir, skill, 'SKILL.md'))).toBe(true);
     }
+    // session-start and session-end are removed
+    expect(existsSync(join(skillsDir, 'session-start', 'SKILL.md'))).toBe(false);
+    expect(existsSync(join(skillsDir, 'session-end', 'SKILL.md'))).toBe(false);
   });
 
   it('creates docs/specs/ directory with .gitkeep', async () => {
