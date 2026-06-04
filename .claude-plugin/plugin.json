@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "guild",
   "displayName": "Guild",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "description": "Spec-first workflows and specialized agent roles for Claude Code. Design docs before code, structured deliberation, automatic previous-session recap on startup.",
   "author": {
     "name": "Guild Agents",

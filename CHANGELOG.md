@@ -7,7 +7,9 @@ and versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [Unreleased] - 2026-06-03
+## [Unreleased]
+
+## [3.0.0] - 2026-06-03
 
 ### BREAKING CHANGE — Session continuity replaced by automatic recap hook
 
