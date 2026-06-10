@@ -58,10 +58,10 @@ Before invoking the QA agent, run the project verification commands. The specifi
 Invoke the QA agent using Task tool with `model: "sonnet"` (execution tier):
 
 1. Read `.claude/agents/qa.md` to assume the QA role
-2. Read CLAUDE.md and SESSION.md for context
+2. Read CLAUDE.md for context
 3. Receive the test and lint results from Step 1
 4. If tests or lint failed, include them as Blocker bugs in the report
-5. Review the acceptance criteria for the current task (if they exist in SESSION.md)
+5. Review the acceptance criteria for the current task (if provided)
 6. Validate edge cases and error scenarios
 7. Report results
 
@@ -88,8 +88,6 @@ Present the result:
 - **Approved**: All criteria pass, no pending bugs
 - **With warnings**: Passes but there are minor warnings
 - **Rejected**: There are critical bugs that could not be resolved — escalate to the Tech Lead
-
-Update SESSION.md with the QA cycle result.
 
 ## Example Session
 

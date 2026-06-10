@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdirSync, rmSync, existsSync, readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { copyTemplates, getAgentNames } from '../../utils/files.js';
-import { generateClaudeMd, generateProjectMd, generateSessionMd } from '../../utils/generators.js';
+import { generateClaudeMd, generateProjectMd } from '../../utils/generators.js';
 
 const TEST_DIR = join(import.meta.dirname, '__tmp_init_e2e__');
 
@@ -37,11 +37,9 @@ describe('guild init — E2E', () => {
     await copyTemplates();
     await generateClaudeMd(data);
     await generateProjectMd(data);
-    await generateSessionMd();
 
     expect(existsSync('CLAUDE.md')).toBe(true);
     expect(existsSync('PROJECT.md')).toBe(true);
-    expect(existsSync('SESSION.md')).toBe(true);
     expect(existsSync(join('.claude', 'agents'))).toBe(true);
     expect(existsSync(join('.claude', 'skills'))).toBe(true);
   });
@@ -67,7 +65,7 @@ describe('guild init — E2E', () => {
       .filter(d => d.isDirectory())
       .map(d => d.name);
 
-    expect(skills.length).toBeGreaterThanOrEqual(10);
+    expect(skills.length).toBeGreaterThanOrEqual(8);
 
     for (const skill of skills) {
       expect(existsSync(join(skillsDir, skill, 'SKILL.md'))).toBe(true);
@@ -94,7 +92,7 @@ describe('guild init — E2E', () => {
     // Skills are listed
     expect(content).toContain('/build-feature');
     expect(content).toContain('/guild-specialize');
-    expect(content).toContain('/session-start');
+    expect(content).not.toContain('/session-start');
   });
 
   it('generates PROJECT.md with all metadata', async () => {
@@ -110,31 +108,25 @@ describe('guild init — E2E', () => {
     expect(content).toContain('**Existing code:** Yes');
   });
 
-  it('generates SESSION.md with current date and next steps', async () => {
-    await generateSessionMd();
-
-    const content = readFileSync('SESSION.md', 'utf8');
-    const today = new Date().toISOString().split('T')[0];
-
-    expect(content).toContain(`**Date:** ${today}`);
-    expect(content).toContain('/guild-specialize');
-    expect(content).toContain('/council');
-    expect(content).toContain('/build-feature');
+  it('does not generate SESSION.md (replaced by automatic recap hook)', async () => {
+    const data = makeProjectData();
+    await generateClaudeMd(data);
+    await generateProjectMd(data);
+    // SESSION.md is no longer generated — automatic startup hook handles session context
+    expect(existsSync('SESSION.md')).toBe(false);
   });
 
   it('full init simulation produces a valid Guild project', async () => {
     const data = makeProjectData({ name: 'full-sim', type: 'api', stack: 'Express, PostgreSQL' });
 
-    // Simulate the full init sequence
+    // Simulate the full init sequence (no SESSION.md generated anymore)
     await copyTemplates();
     await generateClaudeMd(data);
     await generateProjectMd(data);
-    await generateSessionMd();
 
     // Verify the project is structurally valid
     const claudeMd = readFileSync('CLAUDE.md', 'utf8');
     const projectMd = readFileSync('PROJECT.md', 'utf8');
-    const sessionMd = readFileSync('SESSION.md', 'utf8');
 
     // CLAUDE.md references the project name
     expect(claudeMd).toContain('# full-sim');
@@ -142,8 +134,8 @@ describe('guild init — E2E', () => {
     // PROJECT.md has the correct type
     expect(projectMd).toContain('**Type:** api');
 
-    // SESSION.md is valid
-    expect(sessionMd).toContain('## Active session');
+    // SESSION.md no longer generated
+    expect(existsSync('SESSION.md')).toBe(false);
 
     // Agent files are not empty
     const agentPath = join('.claude', 'agents', 'advisor.md');

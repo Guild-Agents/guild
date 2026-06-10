@@ -1,11 +1,13 @@
 {
   "name": "guild-agents",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "description": "Specification-driven development CLI for Claude Code — think before you build",
   "type": "module",
   "files": [
     "bin/",
+    "hooks/",
     "src/commands/",
+    "src/hooks/",
     "src/templates/",
     "src/utils/",
     "!src/**/__tests__/"

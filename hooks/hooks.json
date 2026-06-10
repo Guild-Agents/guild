@@ -1,0 +1,12 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/src/hooks/session-recap.mjs\"", "timeout": 10 }
+        ]
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdirSync, readFileSync, writeFileSync, rmSync, existsSync } from 'fs';
 import { join } from 'path';
-import { generateProjectMd, generateSessionMd, generateClaudeMd, inferCodeConventions, inferEnvVars } from '../generators.js';
+import { generateProjectMd, generateClaudeMd, inferCodeConventions, inferEnvVars } from '../generators.js';
 
 const TEST_DIR = join(import.meta.dirname, '__tmp_generators__');
 
@@ -99,7 +99,7 @@ describe('generateClaudeMd', () => {
     await generateClaudeMd(makeProjectData());
     const content = readFileSync('CLAUDE.md', 'utf8');
     expect(content).toContain('Guild');
-    expect(content).toContain('SESSION.md');
+    expect(content).toContain('Previous session');
   });
 
   it('wraps auto-generated sections with guild zone markers', async () => {
@@ -129,8 +129,8 @@ describe('generateClaudeMd', () => {
     expect(content).toContain('/build-feature');
     expect(content).toContain('/council');
     expect(content).toContain('/guild-specialize');
-    expect(content).toContain('/session-start');
-    expect(content).toContain('/session-end');
+    expect(content).not.toContain('/session-start');
+    expect(content).not.toContain('/session-end');
   });
 
   it('does not reference v0 concepts', async () => {
@@ -290,50 +290,3 @@ describe('inferEnvVars', () => {
   });
 });
 
-describe('generateSessionMd', () => {
-  let originalCwd;
-
-  beforeEach(() => {
-    originalCwd = process.cwd();
-    mkdirSync(TEST_DIR, { recursive: true });
-    setup();
-  });
-
-  afterEach(() => {
-    process.chdir(originalCwd);
-    if (existsSync(TEST_DIR)) rmSync(TEST_DIR, { recursive: true });
-  });
-
-  it('generates SESSION.md with correct structure', async () => {
-    await generateSessionMd();
-    const content = readFileSync('SESSION.md', 'utf8');
-    expect(content).toContain('# SESSION.md');
-    expect(content).toContain('## Active session');
-    expect(content).toContain('**Current task:**');
-  });
-
-  it('includes current date', async () => {
-    await generateSessionMd();
-    const content = readFileSync('SESSION.md', 'utf8');
-    const today = new Date().toISOString().split('T')[0];
-    expect(content).toContain(`**Date:** ${today}`);
-  });
-
-  it('references guild-specialize as next step', async () => {
-    await generateSessionMd();
-    const content = readFileSync('SESSION.md', 'utf8');
-    expect(content).toContain('/guild-specialize');
-  });
-
-  it('references council as next step', async () => {
-    await generateSessionMd();
-    const content = readFileSync('SESSION.md', 'utf8');
-    expect(content).toContain('/council');
-  });
-
-  it('does not reference v0 tasks directory', async () => {
-    await generateSessionMd();
-    const content = readFileSync('SESSION.md', 'utf8');
-    expect(content).not.toContain('tasks/');
-  });
-});

@@ -118,15 +118,6 @@ export function readProjectMd() {
 }
 
 /**
- * Reads the contents of SESSION.md if it exists.
- */
-export function readSessionMd() {
-  const path = 'SESSION.md';
-  if (!existsSync(path)) return null;
-  return readFileSync(path, 'utf8');
-}
-
-/**
  * Resolves the Guild project root by walking up from startDir.
  * Looks for .claude/ or PROJECT.md as markers of a Guild project.
  * Returns the absolute path to the project or null if not found.

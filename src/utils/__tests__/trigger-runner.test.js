@@ -61,7 +61,7 @@ describe('runTriggerTests', () => {
 
     const allSkills = [
       { name: 'test-skill', description: 'Create a pull request from the current branch' },
-      { name: 'other-skill', description: 'Saves current state to SESSION.md' },
+      { name: 'other-skill', description: 'Save project state and durable learnings' },
     ];
 
     const results = await runTriggerTests(triggers, allSkills);
@@ -86,7 +86,7 @@ describe('runTriggerTests', () => {
 
     const allSkills = [
       { name: 'test-skill', description: 'Create a pull request from the current branch' },
-      { name: 'other-skill', description: 'Saves current state to SESSION.md' },
+      { name: 'other-skill', description: 'Save project state and durable learnings' },
     ];
 
     const results = await runTriggerTests(triggers, allSkills);
@@ -138,7 +138,7 @@ describe('runTriggerTests with semantic option', () => {
 
     const allSkills = [
       { name: 'test-skill', description: 'Create a pull request from the current branch' },
-      { name: 'other-skill', description: 'Saves current state to SESSION.md' },
+      { name: 'other-skill', description: 'Save project state and durable learnings' },
     ];
 
     const results = await runTriggerTests(triggers, allSkills, { semantic: false });

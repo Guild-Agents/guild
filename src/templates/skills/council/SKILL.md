@@ -114,7 +114,7 @@ Analyze the user's question and determine which council type applies:
 
 1. Look for a `guild-workspace.json` file by searching upward from the project root
 2. If found, load the workspace config and identify which member this project is
-3. Read CLAUDE.md, PROJECT.md, and SESSION.md from each sibling member repo
+3. Read CLAUDE.md and PROJECT.md from each sibling member repo
 4. Build a workspace context block with:
    - Workspace name
    - Each sibling's stack, structure summary, and current task
@@ -123,7 +123,7 @@ Analyze the user's question and determine which council type applies:
 Invoke the 3 corresponding agents IN PARALLEL using Task tool with `model: "opus"` (all council agents use reasoning tier). Each agent:
 
 1. Reads their `.claude/agents/[name].md` file to assume their role
-2. Reads `CLAUDE.md` and `SESSION.md` for project context
+2. Reads `CLAUDE.md` for project context
 3. **If in a workspace:** receives the workspace context block and considers cross-repo impact as part of their analysis. They may read files from sibling repos using the provided paths.
 4. Analyzes the question from their specialized perspective
 5. States their position with concrete arguments
@@ -159,7 +159,7 @@ Present clear options to the user based on the debate:
 - Option B: [summary of another position]
 - Option C: [compromise or alternative]
 
-Ask the user to decide. If the user decides, document the decision in SESSION.md.
+Ask the user to decide.
 
 ### Step 5 — Write Spec Document
 
@@ -186,7 +186,7 @@ After the user makes their decision in Step 4, offer to write a spec document to
    - **Points of Dissent**: Where agents disagreed and how it was resolved, or "None — consensus reached"
 5. **Write the file**: Use the Write tool to create the spec at `docs/specs/<filename>.md`.
 6. **Report**: Tell the user the file path of the written spec.
-7. **Trivial decisions**: For trivial or low-impact decisions, offer SESSION.md-only logging instead of a full spec document.
+7. **Trivial decisions**: For trivial or low-impact decisions, skip the full spec document and just summarize the decision in the chat.
 
 ## Subagent Configuration
 
@@ -229,5 +229,5 @@ Consensus: Incremental adoption. New endpoints in GraphQL, existing stay REST.
 - If all 3 agents agree, indicate consensus and suggest taking action
 - After the user decides, always offer to write the spec to `docs/specs/`
 - The spec document is the primary output of `/council` — it captures the debate, decision, and rationale
-- If the user declines the spec, log the decision to SESSION.md as before
+- If the user declines the spec, summarize the decision in chat
 - In v1.x, `parallel` execution is best-effort — the orchestrator may run parallel steps sequentially if concurrent agent execution is unavailable

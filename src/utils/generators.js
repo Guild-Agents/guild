@@ -104,7 +104,7 @@ export async function generateClaudeMd(data, workspace = null, currentMemberName
   const content = `# ${data.name}
 
 ## Framework
-This project uses Guild. Read SESSION.md at the start of each session.
+This project uses Guild. Previous session context is provided automatically on startup.
 
 ## Stack
 ${data.stack}
@@ -123,14 +123,13 @@ ${wrapZone('env-vars', inferEnvVars(data.type, data.stack))}
 ${workspaceSection}
 ## Global rules
 - Do not implement without an approved plan — use /build-feature (evaluation + spec phases) or /council to produce one. Claude Code Plan mode alone does not qualify.
-- Update SESSION.md at the end of each session
 - ESModules throughout the codebase
 - Always use path.join() to build paths
 
 ## Subagent rules
 - Guild agent roles (advisor, developer, tech-lead, etc.) are NOT Claude Code subagent_types
 - Always use \`subagent_type: "general-purpose"\` when spawning agents via Task tool
-- CLAUDE.md and SESSION.md changes must be committed separately from feature code
+- CLAUDE.md changes must be committed separately from feature code
 - No \`git stash\` in automated pipelines — use \`wip:\` commits instead
 - Parallel agents must use git worktrees for isolation
 
@@ -140,8 +139,6 @@ ${workspaceSection}
 - /create-pr         — create a structured pull request from current branch
 - /council           — debate decisions with multiple agents
 - /qa-cycle          — QA + bugfix cycle
-- /session-start     — load context and resume work
-- /session-end       — save state to SESSION.md
 - /tdd               — TDD red-green-refactor discipline
 - /debug             — systematic 4-phase debugging
 - /re-specialize     — incremental re-specialization of auto-generated zones
@@ -150,29 +147,3 @@ ${workspaceSection}
   writeFileSync('CLAUDE.md', content, 'utf8');
 }
 
-/**
- * Generates initial SESSION.md.
- */
-export async function generateSessionMd() {
-  const date = new Date().toISOString().split('T')[0];
-
-  const content = `# SESSION.md
-
-## Active session
-- **Date:** ${date}
-- **Current task:** —
-- **Active agent:** —
-- **Status:** Project just initialized with Guild v1
-
-## Relevant context
-- Onboarding completed. See PROJECT.md for project data.
-- CLAUDE.md has placeholders — run /guild-specialize to enrich.
-
-## Next steps
-1. Run /guild-specialize to analyze your codebase
-2. Spec your first feature with /council
-3. Build it with /build-feature
-`;
-
-  writeFileSync('SESSION.md', content, 'utf8');
-}

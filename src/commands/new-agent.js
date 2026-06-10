@@ -70,7 +70,7 @@ You are ${agentName} of [PROJECT].
 [Define with /guild-specialize]
 
 ## Behavioral rules
-- Always read CLAUDE.md and SESSION.md at the start of the session
+- Always read CLAUDE.md at the start of the session
 `;
 
     writeFileSync(agentPath, content, 'utf8');

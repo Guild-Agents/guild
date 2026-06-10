@@ -59,9 +59,9 @@ workflow:
       produces: [final-gate-result]
     - id: completion
       role: system
-      intent: "Update SESSION.md. Present summary to user."
+      intent: "Present pipeline summary to user."
       requires: [final-gate-result, review-report, qa-report]
-      produces: [session-update]
+      produces: [pipeline-summary]
       gate: true
 ---
 
@@ -78,7 +78,7 @@ Full pipeline to build a feature end-to-end with all team agents. Each phase inv
 ## When NOT to use
 
 - Typo fixes, config tweaks, dependency bumps — changes with no behavioral spec
-- CLAUDE.md or SESSION.md updates
+- CLAUDE.md updates
 - When the user explicitly says "do this without guild" or "just do it"
 
 ## Usage
@@ -242,12 +242,6 @@ Pattern for each phase:
 - After Phase 4: `wip: [feature] phase 4 — review passed`
 - After Phase 5: `wip: [feature] phase 5 — QA passed`
 
-Also update SESSION.md at each phase transition:
-
-```text
-- [timestamp] | build-feature | Phase N ([phase-name]) complete for [feature]
-```
-
 ## Pipeline Trace
 
 After pipeline completion, append a `## Pipeline Trace` section to the feature's spec file in `docs/specs/`. This provides a structured record of what happened in each phase.
@@ -374,12 +368,7 @@ Upon successfully completing all phases and the final gate:
    - Review issues resolved
    - Final QA result
 
-3. Update `SESSION.md` with:
-   - Feature completed
-   - Decisions made during the pipeline
-   - Next steps if any
-
-4. Close the GitHub Issue (if applicable):
+3. Close the GitHub Issue (if applicable):
    - Do NOT use `Closes #N` in PR description (only works when merging to default branch)
    - After the PR is merged, run: `gh issue close N --comment "Resolved in PR #X"`
 

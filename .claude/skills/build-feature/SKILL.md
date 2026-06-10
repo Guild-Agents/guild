@@ -59,9 +59,9 @@ workflow:
       produces: [final-gate-result]
     - id: completion
       role: system
-      intent: "Update SESSION.md. Present summary to user."
+      intent: "Present pipeline summary to user."
       requires: [final-gate-result, review-report, qa-report]
-      produces: [session-update]
+      produces: [pipeline-summary]
       gate: true
 ---
 
@@ -71,8 +71,15 @@ Full pipeline to build a feature end-to-end with all team agents. Each phase inv
 
 ## When to use
 
-- To implement a new feature that requires the complete cycle
-- When you want the feature to go through evaluation, specification, implementation, review, and QA
+- ANY code change with acceptance criteria or a spec — regardless of perceived size
+- New features, enhancements, bug fixes with defined requirements
+- Even "small" changes: if the user described what it should do, it goes through the pipeline
+
+## When NOT to use
+
+- Typo fixes, config tweaks, dependency bumps — changes with no behavioral spec
+- CLAUDE.md updates
+- When the user explicitly says "do this without guild" or "just do it"
 
 ## Usage
 
@@ -235,12 +242,6 @@ Pattern for each phase:
 - After Phase 4: `wip: [feature] phase 4 — review passed`
 - After Phase 5: `wip: [feature] phase 5 — QA passed`
 
-Also update SESSION.md at each phase transition:
-
-```text
-- [timestamp] | build-feature | Phase N ([phase-name]) complete for [feature]
-```
-
 ## Pipeline Trace
 
 After pipeline completion, append a `## Pipeline Trace` section to the feature's spec file in `docs/specs/`. This provides a structured record of what happened in each phase.
@@ -367,12 +368,7 @@ Upon successfully completing all phases and the final gate:
    - Review issues resolved
    - Final QA result
 
-3. Update `SESSION.md` with:
-   - Feature completed
-   - Decisions made during the pipeline
-   - Next steps if any
-
-4. Close the GitHub Issue (if applicable):
+3. Close the GitHub Issue (if applicable):
    - Do NOT use `Closes #N` in PR description (only works when merging to default branch)
    - After the PR is merged, run: `gh issue close N --comment "Resolved in PR #X"`
 
@@ -446,7 +442,7 @@ In this example, opus was unavailable during Phase 2 so the Tech Lead fell back 
 
 ## Notes
 
-- If the user wants to skip phases (e.g., "already evaluated, implement directly"), allow skipping to Phase 3 but warn that validation is lost. Verification gates (pre-Review and final) are NEVER skipped
+- Phase skipping is ONLY allowed when the user explicitly requests it (e.g., "skip eval, go straight to implementation"). The agent must NEVER decide on its own that a task is "simple enough" to skip phases. If in doubt, run the full pipeline. Verification gates (pre-Review and final) are NEVER skipped
 - The pipeline is sequential: each phase depends on the output of the previous one
 - Review/QA loops have limits to prevent infinite cycles
 - In v1.x, parallel pipeline execution (multiple build-features via worktrees) is best-effort and depends on the host environment supporting concurrent agents
