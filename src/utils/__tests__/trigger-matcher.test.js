@@ -13,7 +13,7 @@ describe('scoreMatch', () => {
   it('scores low when prompt is unrelated to description', () => {
     const score = scoreMatch(
       'deploy to production',
-      'Saves current state to SESSION.md'
+      'Save project state and durable learnings'
     );
     expect(score).toBeLessThan(0.2);
   });
@@ -42,7 +42,7 @@ describe('rankSkills', () => {
   const skills = [
     { name: 'create-pr', description: 'Create a pull request from the current branch with structured summary' },
     { name: 'review', description: 'Standalone code review on the current diff' },
-    { name: 'session-end', description: 'Saves current state to SESSION.md' },
+    { name: 'debug', description: 'Systematic debugging process for bugs and unexpected behavior' },
   ];
 
   it('ranks matching skill first', () => {

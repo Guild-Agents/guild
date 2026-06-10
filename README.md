@@ -29,7 +29,7 @@ Guild installs **spec-first workflows** and **specialized role definitions** as 
 - **`/guild:council`** — 3 agents analyze your idea in parallel with different perspectives, then synthesize into a decision with a spec document.
 - **`/guild:tdd`** — No production code without a failing test first. Enforces red-green-refactor.
 - **`/guild:debug`** — No fixes without root cause investigation. Systematic 4-phase process.
-- **`/guild:session-start`** / **`/guild:session-end`** — SESSION.md captures where you stopped. Claude Code memory captures what you learned. You resume with full context.
+- **Automatic session recap** — A hook fires on every startup and injects a brief recap of your previous session (branch, last prompt, relative time) from Claude Code's transcript files. No manual skill invocation needed.
 
 ## Quality You Can Measure
 
@@ -73,7 +73,7 @@ Five phases. Phases 1-2 happen before any code is written. Gates between phases 
 /plugin install guild
 ```
 
-All 10 skills and 6 roles are available immediately as `/guild:*` commands.
+All 8 skills and 6 roles are available immediately as `/guild:*` commands.
 
 **As an npm package** (for the eval CLI):
 
@@ -94,8 +94,6 @@ guild init
 | `/guild:debug` | Systematic 4-phase debugging — no fixes without root cause |
 | `/guild:guild-specialize` | Explore your codebase, enrich CLAUDE.md with real conventions |
 | `/guild:re-specialize` | Incremental update when your stack changes |
-| `/guild:session-start` | Resume from SESSION.md + Claude Code memory |
-| `/guild:session-end` | Save state + durable learnings to memory |
 
 ## Roles
 
@@ -114,13 +112,9 @@ Each role is a `.md` file with identity, responsibilities, and boundaries. Claud
 
 ## Session Continuity
 
-Claude Code's memory system stores long-term knowledge (who you are, lessons learned). But it explicitly excludes ephemeral work state — what you were building, which branch, what phase. That's the gap Guild fills.
+Guild installs a `SessionStart` hook that automatically injects a brief recap of your previous session when Claude Code starts. It reads directly from Claude Code's transcript files — no manual commands needed. The recap shows the branch, your last real request, and how long ago it was.
 
-`/guild:session-end` writes to **both layers**:
-- **SESSION.md** — where you stopped: task, branch, phase, next steps (overwritten each session)
-- **Claude Code memory** — what you learned: decisions, lessons, references (persists across sessions)
-
-`/guild:session-start` reads from **both** and presents a unified summary.
+For deep recovery of a specific past session, use `/resume` (Claude Code native).
 
 ## When NOT to Use Guild
 

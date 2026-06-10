@@ -4,7 +4,7 @@
  * Flow:
  * 1. Verify that a Guild installation does not already exist
  * 2. Collect: name, type, stack, GitHub, existing code
- * 3. Generate PROJECT.md, CLAUDE.md, SESSION.md
+ * 3. Generate PROJECT.md, CLAUDE.md
  * 4. Copy agents and skills
  * 5. Instructions for /guild-specialize
  */
@@ -12,7 +12,7 @@
 import * as p from '@clack/prompts';
 import chalk from 'chalk';
 import { existsSync } from 'fs';
-import { generateProjectMd, generateSessionMd, generateClaudeMd } from '../utils/generators.js';
+import { generateProjectMd, generateClaudeMd } from '../utils/generators.js';
 import { copyTemplates, getAgentNames, getSkillNames } from '../utils/files.js';
 import { loadWorkspace } from '../utils/workspace.js';
 
@@ -119,9 +119,6 @@ export async function runInit() {
     spinner.message('Generating PROJECT.md...');
     await generateProjectMd(projectData);
 
-    spinner.message('Generating SESSION.md...');
-    await generateSessionMd();
-
     spinner.stop('Structure created.');
   } catch (error) {
     spinner.stop('Error during initialization.');
@@ -131,7 +128,7 @@ export async function runInit() {
   // ─── Summary ──────────────────────────────────────────────────────────────
   const agentCount = getAgentNames().length;
   const skillCount = getSkillNames().length;
-  p.log.success(`Created: CLAUDE.md, PROJECT.md, SESSION.md, ${agentCount} agents, ${skillCount} skills`);
+  p.log.success(`Created: CLAUDE.md, PROJECT.md, ${agentCount} agents, ${skillCount} skills`);
 
   const relevantSkills = projectData.hasExistingCode
     ? ['/guild-specialize', '/council', '/build-feature']

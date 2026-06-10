@@ -117,15 +117,6 @@ export function collectMemberContext(workspace, currentMemberName) {
       }
     }
 
-    const sessionMdPath = join(member.absolutePath, 'SESSION.md');
-    if (existsSync(sessionMdPath)) {
-      const content = readFileSync(sessionMdPath, 'utf8');
-      const taskMatch = content.match(/\*\*Current task:\*\*\s*(.+)/);
-      if (taskMatch) {
-        lines.push(`- **Current task:** ${taskMatch[1].trim()}`);
-      }
-    }
-
     lines.push(`You can read any file under ${member.absolutePath}/ for deeper analysis.`);
     lines.push('');
   }

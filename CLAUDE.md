@@ -1,7 +1,7 @@
 # guild
 
 ## Framework
-This project uses Guild. Read SESSION.md at the start of each session.
+This project uses Guild. A SessionStart hook injects a brief recap of the previous session automatically — no manual session file. Use `/resume` or `claude --continue` to reopen a prior conversation in full.
 
 ## Stack
 npm, chalk, clack, claude code, node, javascript
@@ -19,15 +19,18 @@ src/
     __tests__/                        #   Co-located tests (*.test.js)
   utils/                              # Shared utilities
     files.js                          #   File I/O, template copying, frontmatter parsing
-    generators.js                     #   Generates CLAUDE.md, PROJECT.md, SESSION.md
+    generators.js                     #   Generates CLAUDE.md, PROJECT.md
     github.js                         #   GitHub CLI (gh) integration
     __tests__/                        #   Co-located tests
+  hooks/                              # SessionStart recap hook (shipped in the plugin)
+    transcript-recap.mjs              #   Pure: transcript lines -> recap string
+    session-recap.mjs                 #   IO shell: stdin -> previous transcript -> stdout
   templates/                          # Scaffolding templates copied to user projects
     agents/*.md                       #   Agent definitions (6 agents)
-    skills/*/SKILL.md                 #   Skill definitions (10 skills)
+    skills/*/SKILL.md                 #   Skill definitions (8 skills)
+hooks/hooks.json                      # Plugin hook manifest (SessionStart)
 CLAUDE.md                             # Project instructions (enriched by guild-specialize)
 PROJECT.md                            # Project identity and stack
-SESSION.md                            # Session state — persists across conversations
 .claude/agents/*.md                   # Active agent definitions
 .claude/skills/*/SKILL.md             # Active skill definitions
 .github/workflows/ci.yml              # CI: lint + test on Node 20.x, 22.x
@@ -90,14 +93,13 @@ SESSION.md                            # Session state — persists across conver
 
 ## Global rules
 - Do not implement without an approved plan
-- Update SESSION.md at the end of each session
 - ESModules throughout the codebase
 - Always use path.join() to build paths
 
 ## Subagent rules
 - Guild agent roles (advisor, developer, tech-lead, etc.) are NOT Claude Code subagent_types
 - Always use `subagent_type: "general-purpose"` when spawning agents via Task tool
-- CLAUDE.md and SESSION.md changes must be committed separately from feature code
+- CLAUDE.md changes must be committed separately from feature code
 - No `git stash` in automated pipelines — use `wip:` commits instead
 - Parallel agents must use git worktrees for isolation
 
@@ -107,8 +109,6 @@ SESSION.md                            # Session state — persists across conver
 - /create-pr         — create a structured pull request from current branch
 - /council           — debate decisions with multiple agents
 - /qa-cycle          — QA + bugfix cycle
-- /session-start     — load context and resume work
-- /session-end       — save state to SESSION.md
 - /tdd               — TDD red-green-refactor discipline
 - /debug             — systematic 4-phase debugging
 - /re-specialize     — incremental re-specialization of auto-generated zones

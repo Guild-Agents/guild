@@ -63,14 +63,13 @@ describe('runDoctor', () => {
   });
 
   it('should pass all checks for a healthy project', async () => {
-    // Setup a complete Guild project
+    // Setup a complete Guild project (SESSION.md no longer required)
     mkdirSync(join(tempDir, '.claude', 'agents'), { recursive: true });
     mkdirSync(join(tempDir, '.claude', 'skills', 'build-feature'), { recursive: true });
     writeFileSync(join(tempDir, '.claude', 'agents', 'advisor.md'), '---\nname: advisor\n---');
     writeFileSync(join(tempDir, '.claude', 'skills', 'build-feature', 'SKILL.md'), '---\nname: build-feature\n---');
     writeFileSync(join(tempDir, 'CLAUDE.md'), '# CLAUDE');
     writeFileSync(join(tempDir, 'PROJECT.md'), '# PROJECT');
-    writeFileSync(join(tempDir, 'SESSION.md'), '# SESSION');
 
     process.chdir(tempDir);
     const { runDoctor } = await import('../doctor.js');
@@ -81,7 +80,6 @@ describe('runDoctor', () => {
   it('should throw when .claude directory is missing', async () => {
     writeFileSync(join(tempDir, 'CLAUDE.md'), '# CLAUDE');
     writeFileSync(join(tempDir, 'PROJECT.md'), '# PROJECT');
-    writeFileSync(join(tempDir, 'SESSION.md'), '# SESSION');
 
     process.chdir(tempDir);
     const { runDoctor } = await import('../doctor.js');
@@ -94,7 +92,6 @@ describe('runDoctor', () => {
     writeFileSync(join(tempDir, '.claude', 'skills', 'test-skill', 'SKILL.md'), '---\nname: test\n---');
     writeFileSync(join(tempDir, 'CLAUDE.md'), '# CLAUDE');
     writeFileSync(join(tempDir, 'PROJECT.md'), '# PROJECT');
-    writeFileSync(join(tempDir, 'SESSION.md'), '# SESSION');
 
     process.chdir(tempDir);
     const { runDoctor } = await import('../doctor.js');
@@ -107,7 +104,6 @@ describe('runDoctor', () => {
     writeFileSync(join(tempDir, '.claude', 'agents', 'advisor.md'), '---\nname: advisor\n---');
     writeFileSync(join(tempDir, '.claude', 'skills', 'test-skill', 'SKILL.md'), '---\nname: test\n---');
     writeFileSync(join(tempDir, 'PROJECT.md'), '# PROJECT');
-    writeFileSync(join(tempDir, 'SESSION.md'), '# SESSION');
 
     process.chdir(tempDir);
     const { runDoctor } = await import('../doctor.js');
@@ -120,7 +116,6 @@ describe('runDoctor', () => {
     writeFileSync(join(tempDir, '.claude', 'agents', 'advisor.md'), '---\nname: advisor\n---');
     writeFileSync(join(tempDir, '.claude', 'skills', 'test-skill', 'SKILL.md'), '---\nname: test\n---');
     writeFileSync(join(tempDir, 'CLAUDE.md'), '# CLAUDE');
-    writeFileSync(join(tempDir, 'SESSION.md'), '# SESSION');
 
     process.chdir(tempDir);
     const { runDoctor } = await import('../doctor.js');
